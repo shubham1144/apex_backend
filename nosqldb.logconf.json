@@ -1,0 +1,6 @@
+{
+    "logLevel": 0,
+    "logToFile": true,
+    "logFile": "nosqldb-oraclejs.log",
+    "logToConsole": false
+}
