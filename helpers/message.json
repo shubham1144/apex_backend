@@ -1,0 +1,12 @@
+{
+  "success" : {
+      "database" : {
+          "connected" : "Connection to Primary Database is Currently Active"
+      }
+  },
+  "error": {
+      "database" : {
+          "connection_error" : "Primary Database Not Connected"
+      }
+  }
+}
