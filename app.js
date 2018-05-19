@@ -3,9 +3,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+var jwt = require('express-jwt');
 var indexRouter = require('./routes/index');
-var authorizationRouter = require('./routes/access-control/authorization-route.js')
+var authorizationRouter = require('./routes/access-control/authorization-route.js');
+var constant = require('./helpers/constant.js');
 var app = express();
 
 // view engine setup
@@ -18,7 +19,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter, authorizationRouter);
+app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', { url : '/login', methods : ['POST']}]}));
+
+app.all('*', indexRouter, authorizationRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -27,6 +30,10 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).send('invalid token...');
+  }
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

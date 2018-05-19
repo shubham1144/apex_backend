@@ -87,5 +87,17 @@ router.post('/login', function(req, res) {
 
 });
 
+/**
+* API Interface to logout a user from the system
+*/
+router.post('/login/logout', function(req, res){
+
+      util.formatSuccessResponse({
+                logout: 'success'
+            }, function(result){
+                res.json(result);
+     })
+
+});
 
 module.exports = router;
