@@ -6,6 +6,7 @@ module.exports = [
         uID INTEGER,
         uName STRING,
         uEmail STRING,
+        uPassword STRING,
         uISActive BOOLEAN,
         uIsValidated BOOLEAN,
         UParentID INTEGER,
@@ -16,9 +17,10 @@ module.exports = [
         uLastName STRING,
         uLastLogin INTEGER,
         uLastLoginIP STRING,
-        PRIMARY KEY (uID)
+        PRIMARY KEY (uEmail)
     )
 `,
+` CREATE INDEX uID on Users(uID)`,
 `
     CREATE TABLE Users.UserAttributes (
         uaID INTEGER,

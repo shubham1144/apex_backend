@@ -32,7 +32,7 @@ store.on('open', function () {
 
   console.log("Local Database Connection has been established successfully");
   console.log('Store opened.');
-//  runAllMigrations();
+  //runAllMigrations();
 
 }).on('close', function() {
 
@@ -67,10 +67,102 @@ exports.getData = function(table, primary_key, callback){
 };
 
 /**
-* @todo : Write a Function to fetch Details Along with Child tables associated
+* Function to fetch Details Along with Child tables associated
+* Need to pass the child table Primary key aswell in the table
 */
 exports.getDataWithChild = function(table, primary_key, child_tables, callback){
-    //In development
+
+      store.get(table, primary_key, function(err, result){
+            if(err) return callback(err);
+            async.each(child_tables, function(child_table_name, callback){
+                exports.getData(child_table_name,
+                primary_key, function(err, result){
+                    console.log("The data received from child table is : ", result);
+                    callback(null);
+                })
+            }, function(err){
+                callback(err, result.currentRow);
+            })
+        })
+};
+
+/**
+* Function to fetch Details associated With a table along with chilld tables associated
+*/
+exports.getDataWithChildByIteration = function(table, primary_key, child_tables, callback){
+
+        store.tableIterator('Users', primary_key, {
+            includedTables: child_tables
+        }, function(err, iterator){
+
+            if(err) return callback(err);
+            var result = {};
+            iterator.forEach(function(err, returnedRow){
+                if(err) return console.log("Error occured due to : ", err);
+                //console.log("The data retrieved is : ", returnedRow)
+                if(returnedRow.table === table){
+                    result = returnedRow.row;
+                    //console.log("The User Details Obtained are : ", JSON.stringify(returnedRow));
+                }
+                else if(Object.keys(result).length){
+                    result[returnedRow.table] = returnedRow.row;
+                }
+            })
+            callback(null, result);
+
+        })
+
+};
+
+/**
+ *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
+*/
+exports.getDataByIterationKeyCondition = function(table, key_condition, index, callback){
+
+       store.tableIterator(table, key_condition, {
+            fieldRange: new nosqldb.Types.FieldRange(index, 'test', true)
+       }, function(err, iterator){
+
+                if(err) return callback(err);
+                var result = {};
+                iterator.forEach(function(err, returnedRow){
+                    if(err) return console.log("Error occured due to : ", err);
+                    if(returnedRow.table === table){
+                        result = returnedRow.row;
+                        //console.log("The User Details Obtained are : ", JSON.stringify(returnedRow));
+                    }
+                })
+
+
+                callback(null, result);
+
+
+            })
+
+};
+
+/**
+ * Function to fetch Results from Database Using a index Search Criteria
+ * To search Based on a single index only(Limitation of the NOSQL Oracle Database)
+ * If need to search based on multiple keys, need to set them as primary keys
+*/
+exports.getDataByIterationWithFieldRange = function(table, key, index, condition, callback){
+
+       store.indexIterator(table, index, {
+            fieldRange: new nosqldb.Types.FieldRange(index, condition, true)
+       }, function(err, iterator){
+
+                if(err) return callback(err);
+                var result = [];
+                iterator.forEach(function(err, returnedRow){
+                    if(err) return console.log("Error occured due to : ", err);
+                    result.push(returnedRow.row);
+
+                })
+                callback(null, result);
+
+            })
+
 };
 
 /*
@@ -93,9 +185,12 @@ exports.putDataWithChild = function(table, primary_key, data, child_tables, call
     store.put(table, data, function(err){
         if(err) return callback(err)
         async.each(child_tables, function(table_details, callback){
-            exports.putData({
-               [primary_key] : data[primary_key]
-            }, table_details.table_name, table_details.data, callback)
+            var parent_details = {};
+            primary_key.forEach(function(single_primary_key){
+            console.log("Setting the Primary key as : ", single_primary_key);
+                 parent_details[single_primary_key] = data[single_primary_key]
+            })
+            exports.putData(parent_details, table_details.table_name, table_details.data, callback)
         }, function(err){
             callback(err);
         })

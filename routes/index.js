@@ -10,10 +10,13 @@ router.get('/', function(req, res, next) {
 /*API Interface to check connection associated with database*/
 router.get('/check_database_crud_connection', function(req, res){
 
-    dao.putDataWithChild('users', 'uID', {
-        uID : 1,
-        uName : 'Shubham Chodankar',
+    dao.putDataWithChild('Users', ['uEmail', 'uPassword'], {
+        uID : 1,//Over time use a sequence generator to associate for key
+        uName : 'Shubham Chodankar Updated',
         uEmail : 'shubham@tentwenty.me',
+        uPassword : 'testPassword',
+        uFirstName : 'Shubham',
+        uLastName : 'Chodankar',
         uIsActive : true,
         uIsValidated : true,
         uType : 'Admin'
@@ -27,18 +30,19 @@ router.get('/check_database_crud_connection', function(req, res){
         {
             table_name : 'Users.UserAttributes',
             data : {
-                uaID : 1
+                uaID : 1,
+                uaKey: 'contactNumber',
+                uaValue: '8975567457'
             }
         }
     ], function(err){
 
         if(err) return res.send("Database Error")
-        dao.getData('users', {
-            uID : 1
-        }, function(err, result){
-            //if(!err) res.send("Connection to Primary Database is Currently Active");
+        dao.getDataWithChildByIteration('Users', {
+            uEmail : 'shubham@tentwenty.me'
+        }, ['Users.UserDevices', 'Users.UserAttributes'], function(err, result){
              if(err) return res.send("Database Error")
-             res.send(result);
+             res.send("Notify.me Backend Server Health Status : Good");
         })
 
     })

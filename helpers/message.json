@@ -2,11 +2,21 @@
   "success" : {
       "database" : {
           "connected" : "Connection to Primary Database is Currently Active"
+      },
+      "login" : {
+        "success" : "Login Successful"
       }
   },
   "error": {
+      "bad_request" : "Bad Request",
       "database" : {
           "connection_error" : "Primary Database Not Connected"
+      },
+      "login" : {
+        "email_password_missing" : "Email address and password are required.",
+        "device_type_missing" : "Invalid device type",
+        "device_token_missing" : "Device token is missing",
+        "invalid_credentials" : "Invalid email address or password."
       }
   }
 }
