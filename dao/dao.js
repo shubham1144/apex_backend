@@ -88,6 +88,7 @@ exports.getDataWithChild = function(table, primary_key, child_tables, callback){
 
 /**
 * Function to fetch Details associated With a table along with chilld tables associated
+* @Note The below Function should be Used Ideally to fetch Children Elements along with Parent by using only Parent Primary Key
 */
 exports.getDataWithChildByIteration = function(table, primary_key, child_tables, callback){
 
@@ -116,10 +117,12 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
 
 /**
  *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
+ * @Note Only one fieldRange Can be used with Oracle Node.js Driver For now
 */
 exports.getDataByIterationKeyCondition = function(table, key_condition, index, callback){
 
        store.tableIterator(table, key_condition, {
+            //Currently, Just testing the Working with FieldRange as not yet used
             fieldRange: new nosqldb.Types.FieldRange(index, 'test', true)
        }, function(err, iterator){
 
