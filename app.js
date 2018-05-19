@@ -6,6 +6,7 @@ var logger = require('morgan');
 var jwt = require('express-jwt');
 var indexRouter = require('./routes/index');
 var authorizationRouter = require('./routes/access-control/authorization-route.js');
+var domainRouter = require('./routes/domain');
 var constant = require('./helpers/constant.js');
 var app = express();
 
@@ -21,7 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', { url : '/login', methods : ['POST']}]}));
 
-app.all('*', indexRouter, authorizationRouter);
+app.all('*', indexRouter, authorizationRouter, domainRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

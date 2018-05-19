@@ -8,6 +8,7 @@ var nosqldb = require('nosqldb-oraclejs'),
     environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
     config = require('./../config/config.js'),
     message = require('./../helpers/message.json'),
+    _ = require('lodash');
     configuration = new nosqldb.Configuration();
 
 //nosqldb.Logger.logLevel = nosqldb.LOG_LEVELS.DEBUG;
@@ -92,7 +93,7 @@ exports.getDataWithChild = function(table, primary_key, child_tables, callback){
 */
 exports.getDataWithChildByIteration = function(table, primary_key, child_tables, callback){
 
-        store.tableIterator('Users', primary_key, {
+        store.tableIterator(table, primary_key, {
             includedTables: child_tables
         }, function(err, iterator){
 
@@ -114,6 +115,43 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
         })
 
 };
+
+
+//@todo : work on fixing fetching to make the retrieval common to format content easily
+exports.getMultipleDataWithChildByIteration = function(table, primary_key, child_tables, callback){
+
+        var child_tables_to_fetch = [];
+        child_tables.forEach(function(child_table_details){
+            child_tables_to_fetch.push(child_table_details.table_name)
+        })
+
+        store.tableIterator(table, primary_key, {
+            includedTables: child_tables_to_fetch
+        }, function(err, iterator){
+
+            if(err) return callback(err);
+            var result = [], child_tables_to_process = {};
+
+            iterator.forEach(function(err, returnedRow){
+
+                if(err) return console.log("Error occured due to : ", err);
+                //console.log(returnedRow)
+                if(returnedRow.table == table){
+                    result.push(returnedRow.row);
+                }else{
+                console.log("Checking the value to use : ", returnedRow.table)
+                    result[result.length-1] = Object.assign(result[result.length-1], {
+                        'test' : returnedRow.row
+                    })
+                }
+
+            })
+            callback(null, result);
+
+        })
+
+};
+
 
 /**
  *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
