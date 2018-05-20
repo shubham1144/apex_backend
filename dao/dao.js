@@ -90,6 +90,7 @@ exports.getDataWithChild = function(table, primary_key, child_tables, callback){
 /**
 * Function to fetch Details associated With a table along with chilld tables associated
 * @Note The below Function should be Used Ideally to fetch Children Elements along with Parent by using only Parent Primary Key
+* @ Equivalent to findOne Query being Fired in a SQL Relational Database
 */
 exports.getDataWithChildByIteration = function(table, primary_key, child_tables, callback){
 
@@ -116,9 +117,11 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
 
 };
 
-
-//@todo : work on fixing fetching to make the retrieval common to format content easily
-exports.getMultipleDataWithChildByIteration = function(table, primary_key, child_tables, callback){
+/**
+* To be used when Fetching Data with Formatting Associated with the Data being fetched
+* @Note We can use the function below when fetching list of data with child tables and formatting of values for both the parent and the child tables
+*/
+exports.getMultipleDataWithChildByIteration = function(table, primary_key, customization, child_tables, callback){
 
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
@@ -135,14 +138,35 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, child
             iterator.forEach(function(err, returnedRow){
 
                 if(err) return console.log("Error occured due to : ", err);
-                //console.log(returnedRow)
-                if(returnedRow.table == table){
-                    result.push(returnedRow.row);
-                }else{
-                console.log("Checking the value to use : ", returnedRow.table)
-                    result[result.length-1] = Object.assign(result[result.length-1], {
-                        'test' : returnedRow.row
-                    })
+                switch(returnedRow.table){
+                    case table: if(customization && customization.values){
+                                    var formatted_result = {};
+                                    customization.values.forEach(function(key){
+                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || null;
+                                        else formatted_result[key] = returnedRow.row[key] || null;
+                                    })
+                                    result.push(formatted_result)
+                                }else result.push(returnedRow.row);
+                                break;
+                    default:    var child_table = _.filter(child_tables, {
+                                    table_name : returnedRow.table
+                                })[0], formatted_child_result={};
+                                if(child_table && child_table.values){
+                                    var formatted_child_result = {};
+                                    child_table.values.forEach(function(key){
+                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || null;
+                                        else formatted_child_result[key] = returnedRow.row[key] || null;
+                                    })
+                                }else {
+                                    formatted_child_result = returnedRow.row;
+                                }
+
+                                if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
+                                    result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                }else{
+                                    result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                }
+                                break;
                 }
 
             })
@@ -151,7 +175,6 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, child
         })
 
 };
-
 
 /**
  *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
