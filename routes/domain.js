@@ -39,7 +39,7 @@ router.get('/domains', function(req, res) {
 router.post('/domains', function(req, res){
 
      /*Currently Adding mock Data in the System Till the functionality is Ready and Working*/
-     dao.putDataWithChild('Domains', ['dID', 'dCreatedByUID'], {
+     dao.createDataWithChild('Domains', ['dID', 'dCreatedByUID'], {
         dID : 3,
         dCreatedByUID : 1,
         dDisplayName : 'Test Domain 03',

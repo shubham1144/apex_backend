@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}]}));
+app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', '/check_database_crud_connection', { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}]}));
 
 app.all('*', indexRouter, authorizationRouter, domainRouter, userRouter, notificationRouter);
 

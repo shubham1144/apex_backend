@@ -46,9 +46,7 @@ router.post('/login', function(req, res) {
         if(!_.includes(device_types, req.body.deviceType)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
-        dao.getDataWithChildByIteration('Users', {
-            uEmail : req.body.uEmail
-        }, [], function(err, result){
+        dao.getOneIndexIterator('Users', 'uEmail', req.body.uEmail, [], null, function(err, result){
 
             if(err){
                 console.error("Error occured due to : ", err);

@@ -125,7 +125,8 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
                                                     result = formatted_result;
                                                 }else result = returnedRow.row;
                                                 break;
-                                    default :    var child_table = _.filter(child_tables, {
+                                    default :
+                                                var child_table = _.filter(child_tables, {
                                                     table_name : returnedRow.table
                                                 })[0], formatted_child_result={};
                                                 if(child_table && child_table.values){
@@ -151,7 +152,6 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
         })
 
 };
-
 
 /**
 * To be used when Fetching Data with Formatting Associated with the Data being fetched
@@ -266,55 +266,53 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
 };
 
 /**
- *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
- * @Note Only one fieldRange Can be used with Oracle Node.js Driver For now
-*/
-exports.getDataByIterationKeyCondition = function(table, key_condition, index, callback){
-
-       store.tableIterator(table, key_condition, {
-            //Currently, Just testing the Working with FieldRange as not yet used
-            fieldRange: new nosqldb.Types.FieldRange(index, 'test', true)
-       }, function(err, iterator){
-
-                if(err) return callback(err);
-                var result = {};
-                iterator.forEach(function(err, returnedRow){
-                    if(err) return console.log("Error occured due to : ", err);
-                    if(returnedRow.table === table){
-                        result = returnedRow.row;
-                        //console.log("The User Details Obtained are : ", JSON.stringify(returnedRow));
-                    }
-                })
-
-
-                callback(null, result);
-
-
-            })
-
-};
-
-/**
  * Function to fetch Results from Database Using a index Search Criteria
  * To search Based on a single index only(Limitation of the NOSQL Oracle Database)
  * If need to search based on multiple keys, need to set them as primary keys
 */
-exports.getDataByIterationWithFieldRange = function(table, key, index, condition, callback){
+exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
        store.indexIterator(table, index, {
-            fieldRange: new nosqldb.Types.FieldRange(index, condition, true)
+            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
        }, function(err, iterator){
+            if(err) return callback(err);
+            var result = {};
+            iterator.forEach(function(err, returnedRow){
+            if(err) return console.log("Error occured due to : ", err);
+            switch(returnedRow.table){
+                                case table: if(customization && customization.values){
+                                                var formatted_result = {};
+                                                customization.values.forEach(function(key){
+                                                    if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else formatted_result[key] = returnedRow.row[key] || 0;
+                                                })
+                                                result = formatted_result;
+                                            }else result = returnedRow.row;
+                                            break;
+                                default :
+                                            var child_table = _.filter(child_tables, {
+                                                table_name : returnedRow.table
+                                            })[0], formatted_child_result={};
+                                            if(child_table && child_table.values){
+                                                var formatted_child_result = {};
+                                                child_table.values.forEach(function(key){
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                })
+                                            }else {
+                                                formatted_child_result = returnedRow.row;
+                                            }
 
-                if(err) return callback(err);
-                var result = [];
-                iterator.forEach(function(err, returnedRow){
-                    if(err) return console.log("Error occured due to : ", err);
-                    result.push(returnedRow.row);
-
-                })
-                callback(null, result);
-
+                                            if(result[child_table && child_table.alias || returnedRow.table]){
+                                                result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                            }else{
+                                                result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                            }
+                                            break;
+                            }
             })
+            callback(null, result);
+        })
 
 };
 
@@ -333,7 +331,8 @@ exports.putData = function(primary_key, table, data, callback){
 /**
 * Function to make database entries in tables along with populating child Tables
 */
-exports.putDataWithChild = function(table, primary_key, data, child_tables, callback){
+exports.createDataWithChild = function(table, primary_key, data, child_tables, callback){
+
 
     store.put(table, data, function(err){
         if(err) return callback(err)
@@ -348,6 +347,37 @@ exports.putDataWithChild = function(table, primary_key, data, child_tables, call
             callback(err);
         })
     })
+
+};
+
+/**
+* Function to Perform Update Operations associated with the Database
+*/
+exports.updateDataWithChild = function(table, primary_key, data, child_tables, callback){
+
+    var child_tables_to_fetch = [];
+            child_tables.forEach(function(child_table_details){
+                child_tables_to_fetch.push(child_table_details.table_name)
+            })
+    exports.getDataWithChildByIteration(table, {
+        primary_key : data[primary_key]
+    }, child_tables_to_fetch, function(err, result){
+
+            store.put(table, Object.assign(result, data), function(err){
+                if(err) return callback(err)
+                async.each(child_tables, function(table_details, callback){
+                    var parent_details = {};
+                    primary_key.forEach(function(single_primary_key){
+                    console.log("Setting the Primary key as : ", single_primary_key);
+                         parent_details[single_primary_key] = data[single_primary_key]
+                    })
+                    exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name], table_details.data), callback)
+                }, function(err){
+                    callback(err);
+                })
+            })
+    })
+
 
 };
 
