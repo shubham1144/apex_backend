@@ -9,7 +9,7 @@ var util = require('./../helpers/util.js');
 * @todo: Fetch only the Domains that are accessible to the User making the Request associated with the Domain
 */
 router.get('/domains', function(req, res) {
-
+    console.log("The domain id received is : ", req.query.domain_id)
     var filter = req.query.domain_id ? {
         dID : parseInt(req.query.domain_id)
     } : {}
@@ -26,7 +26,7 @@ router.get('/domains', function(req, res) {
                 total_unread_notification_count: 0,
                 companies : result
             }, function(result){
-                res.json(result);
+                 res.json(result);
             })
     })
 
@@ -40,10 +40,10 @@ router.post('/domains', function(req, res){
 
      /*Currently Adding mock Data in the System Till the functionality is Ready and Working*/
      dao.putDataWithChild('Domains', ['dID', 'dCreatedByUID'], {
-        dID : 2,
+        dID : 3,
         dCreatedByUID : 1,
-        dDisplayName : 'Test Domain 02',
-        dKey : 'test12345678910',
+        dDisplayName : 'Test Domain 03',
+        dKey : 'test12345678911',
         dStatus : true,
         dVerified : true,
         dUrl : 'http://tentwenty.me',
@@ -52,8 +52,8 @@ router.post('/domains', function(req, res){
       [ {
           table_name : 'Domains.Forms',
           data : {
-             dfID : 2,
-             dfName : "Test Domain 02 - Form 02",
+             dfID : 3,
+             dfName : "Test Domain 03 - Form 03",
           }
         }
       ], function(err, callback){
