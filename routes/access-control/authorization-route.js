@@ -7,6 +7,8 @@ var express = require('express'),
     dao = require('./../../dao/dao.js'),
     token = require('./../../helpers/token.js')
     bcrypt = require('bcrypt'),
+    environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
+    config = require('./../../config/config.js'),
     _ = require('lodash');
 var device_types = ['android', 'ios'];
 
@@ -70,7 +72,7 @@ router.post('/login', function(req, res) {
                             last_name: result.uLastName,
                             first_name: result.uFirstName,
                             user_id: result.uID,
-                            avatar: "http://localhost/notify.me/files/avatars/1.jpg",//HardCoded for Now
+                            avatar: config[environment].static_file_path + result.uID + ".jpg",//HardCoded for Now
                         },
                         token: token
                     }, function(result){

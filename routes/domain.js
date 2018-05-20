@@ -1,15 +1,15 @@
-var express = require('express');
-var router = express.Router();
-var dao = require('./../dao/dao.js');
-var async = require('async');
-var util = require('./../helpers/util.js');
+var express = require('express'),
+    router = express.Router(),
+    dao = require('./../dao/dao.js'),
+    async = require('async'),
+    util = require('./../helpers/util.js');
 
 /**
 * API Interface to list all the domains associated with a User in the System
 * @todo: Fetch only the Domains that are accessible to the User making the Request associated with the Domain
 */
 router.get('/domains', function(req, res) {
-    console.log("The domain id received is : ", req.query.domain_id)
+
     var filter = req.query.domain_id ? {
         dID : parseInt(req.query.domain_id)
     } : {}

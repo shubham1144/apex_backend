@@ -68,26 +68,6 @@ exports.getData = function(table, primary_key, callback){
 };
 
 /**
-* Function to fetch Details Along with Child tables associated
-* Need to pass the child table Primary key aswell in the table
-*/
-exports.getDataWithChild = function(table, primary_key, child_tables, callback){
-
-      store.get(table, primary_key, function(err, result){
-            if(err) return callback(err);
-            async.each(child_tables, function(child_table_name, callback){
-                exports.getData(child_table_name,
-                primary_key, function(err, result){
-                    console.log("The data received from child table is : ", result);
-                    callback(null);
-                })
-            }, function(err){
-                callback(err, result.currentRow);
-            })
-        })
-};
-
-/**
 * Function to fetch Details associated With a table along with chilld tables associated
 * @Note The below Function should be Used Ideally to fetch Children Elements along with Parent by using only Parent Primary Key
 * @ Equivalent to findOne Query being Fired in a SQL Relational Database
@@ -116,6 +96,62 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
         })
 
 };
+
+/**
+* Custom function to fetch data associated with a table, along with child tables
+*/
+exports.getOneByIteration = function(table, primary_key, child_tables, customization, callback){
+
+        var child_tables_to_fetch = [];
+        child_tables.forEach(function(child_table_details){
+            child_tables_to_fetch.push(child_table_details.table_name)
+        })
+
+        store.tableIterator(table, primary_key, {
+            includedTables: child_tables_to_fetch
+        }, function(err, iterator){
+
+            if(err) return callback(err);
+            var result = {};
+            iterator.forEach(function(err, returnedRow){
+                if(err) return console.log("Error occured due to : ", err);
+                switch(returnedRow.table){
+                                    case table: if(customization && customization.values){
+                                                    var formatted_result = {};
+                                                    customization.values.forEach(function(key){
+                                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                        else formatted_result[key] = returnedRow.row[key] || 0;
+                                                    })
+                                                    result = formatted_result;
+                                                }else result = returnedRow.row;
+                                                break;
+                                    default :    var child_table = _.filter(child_tables, {
+                                                    table_name : returnedRow.table
+                                                })[0], formatted_child_result={};
+                                                if(child_table && child_table.values){
+                                                    var formatted_child_result = {};
+                                                    child_table.values.forEach(function(key){
+                                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                    })
+                                                }else {
+                                                    formatted_child_result = returnedRow.row;
+                                                }
+
+                                                if(result[child_table && child_table.alias || returnedRow.table]){
+                                                    result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                                }else{
+                                                    result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                }
+                                                break;
+                                }
+            })
+            callback(null, result);
+
+        })
+
+};
+
 
 /**
 * To be used when Fetching Data with Formatting Associated with the Data being fetched

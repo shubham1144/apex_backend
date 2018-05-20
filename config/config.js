@@ -10,7 +10,8 @@ module.exports = {
                 host : 'localhost:7010',
                 security_file_path : './../notify_me_database/security/client.security'
             }
-        }
+        },
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
     },
     development : {
 
