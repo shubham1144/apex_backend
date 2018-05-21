@@ -15,7 +15,7 @@ router.get('/check_database_crud_connection', function(req, res){
 
     bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
       // Store hash in your password DB.
-          dao.putDataWithChild('Users', ['uID'], {
+          dao.updateDataWithChild('Users', ['uID'], {
               uID : 1,//Over time use a sequence generator to associate for key
               uName : 'Shubham Chodankar',
               uEmail : 'shubham@tentwenty.me',
