@@ -4,6 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var jwt = require('express-jwt');
+var swaggerUi = require('swagger-ui-express');
+const swaggerDocumentV1 = require('./documentation/v1_swagger.json');
+var options = {
+  customCss: '.swagger-ui .topbar { display: none }'
+};
+
 
 var indexRouter = require('./routes/index');
 var authorizationRouter = require('./routes/access-control/authorization-route.js');
@@ -25,6 +31,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, options));
 
 app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', '/check_database_crud_connection', { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}]}));
 
@@ -49,6 +57,10 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+
+
 
 //Node.js Server Listening on a PORT
 app.listen(3000, function(port){
