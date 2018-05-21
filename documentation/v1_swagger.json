@@ -1,0 +1,83 @@
+{
+   "swagger": "2.0",
+   "info": {
+     "title": "Notify ME",
+     "description": "Api Documentation associated with Notify ME Application",
+     "version": "1.0"
+   },
+   "produces": ["application/json"],
+   "paths": {
+     "/login": {
+       "post": {
+         "tags": ["Authentication"],
+         "description": "Login Api Associated with Notify ME",
+         "parameters": [{
+           "name": "uEmail",
+           "in": "formData",
+           "type": "string"
+         },
+         {
+           "name": "uPassword",
+           "in": "formData",
+           "type": "string"
+         },
+           {
+             "name": "deviceType",
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "deviceToken",
+             "in": "formData",
+             "type": "string"
+           }
+      ],
+         "responses": {}
+       }
+     },
+     "/login/logout": {
+       "post": {
+         "tags": ["Authentication"],
+         "description": "Logout Api Associated with Notify ME",
+         "parameters": [{
+           "name": "Authorization",
+           "in": "header"
+         }],
+         "responses": {}
+       }
+     },
+     "/user": {
+       "get": {
+         "tags": ["User Profile"],
+         "description": "Api associated with Fetching Details associated with Logged in User",
+         "parameters": [{
+           "name": "Authorization",
+           "in": "header"
+         }],
+         "responses": {}
+       }
+     },
+     "/user/edit": {
+       "post": {
+         "tags": ["User Profile"],
+         "description": "Api to edit Details Associated with a User",
+         "parameters": [{
+           "name": "Authorization",
+           "in": "header"
+         }],
+         "responses": {}
+       }
+     },
+     "/domains": {
+       "get": {
+         "tags": ["Domains"],
+         "description": "Api associated with Fetching List of Domains Visible to the Logged in User",
+         "parameters": [{
+           "name": "Authorization",
+           "in": "header"
+         }],
+         "responses": {}
+       }
+     }
+   }
+}
