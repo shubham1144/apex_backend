@@ -15,7 +15,7 @@ var express = require('express'),
     constants = require('./../helpers/constant.js');
 
 
-function fetchUserDetails(user_id, mode, callback){
+function fetchUserDetails(user_id, callback){
 
     dao.getOneByIteration('Users', {
             'uID' : user_id
@@ -30,14 +30,18 @@ function fetchUserDetails(user_id, mode, callback){
 
         Object.assign(result, {
             avatar: config[environment].static_file_path + result.user_id + ".jpg?" + moment().unix(),
-            contact : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
-               _.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue'] : null,
+            contact : {
+                phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                               (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
+                country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                                                              (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
+            },
             is_notification: "0",
             total_unread_notification_count: 0,
         });
         delete result['Users.UserAttributes'];
 
-        util.formatSuccessResponse(mode === 'view'? result : { user : result }, function(result){
+        util.formatSuccessResponse({ user : result }, function(result){
              callback(result);
         })
 
@@ -46,11 +50,10 @@ function fetchUserDetails(user_id, mode, callback){
 }
 /**
 * API Interface to fetch Details associated with a User Profile
-* @todo Make Modification in the Response Format being sent out
 */
 router.get('/user', function(req, res){
 
-    fetchUserDetails(req.user.user_id, 'view', function(result){
+    fetchUserDetails(req.user.user_id, function(result){
         res.send(result)
     })
 
@@ -142,7 +145,7 @@ router.post('/user/edit', function(req, res){
                     res.send(err);
                 })
             }
-            fetchUserDetails(req.user.user_id, 'update', function(data){
+            fetchUserDetails(req.user.user_id, function(data){
                 res.send(data);
             })
 

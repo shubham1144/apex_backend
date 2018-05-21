@@ -445,12 +445,10 @@ function runAllMigrations(){
 
 function conditionValidator(conditions, value, callback){
 
-    console.log("The check received associated with the key is : ", conditions, value);
     var validated = true;
     for(var condition in conditions){
         switch(condition){
-            case '$contains' :  console.log("The associated Value Involved is : ", value, value.indexOf(conditions[condition]));
-                                if(value.indexOf(conditions[condition]) === -1){
+            case '$contains' :  if(value.indexOf(conditions[condition]) === -1){
                                     validated = false;
                                 }
                                 break;
