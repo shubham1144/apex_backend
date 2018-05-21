@@ -7,6 +7,8 @@ var jwt = require('express-jwt');
 
 var indexRouter = require('./routes/index');
 var authorizationRouter = require('./routes/access-control/authorization-route.js');
+var planRouter = require('./routes/plan');
+var subscriptionRouter = require('./routes/subscription');
 var domainRouter = require('./routes/domain');
 var userRouter = require('./routes/user');
 var notificationRouter = require('./routes/notification');
@@ -26,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', '/check_database_crud_connection', { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}]}));
 
-app.all('*', indexRouter, authorizationRouter, domainRouter, userRouter, notificationRouter);
+app.all('*', indexRouter, authorizationRouter, domainRouter, userRouter, notificationRouter, planRouter, subscriptionRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

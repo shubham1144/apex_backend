@@ -13,12 +13,19 @@ router.get('/domains', function(req, res) {
     var filter = req.query.domain_id ? {
         dID : parseInt(req.query.domain_id)
     } : {}
-    dao.getMultipleDataWithChildByIteration('Domains', filter, {
+    dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains', filter, {
         values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats']
     },
     [{
-        table_name : 'Domains.Forms',
+        table_name : 'Plans.Subscriptions.Domains.Forms',
         alias : 'forms',
+        join_fetch : true,
+        condition : {
+            'users' : {
+                '$contains' : req.user.user_id
+            }
+
+        },
         values : [['dID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications']
     }], function(err, result){
             if(err) return res.send("Database Error")
@@ -39,7 +46,9 @@ router.get('/domains', function(req, res) {
 router.post('/domains', function(req, res){
 
      /*Currently Adding mock Data in the System Till the functionality is Ready and Working*/
-     dao.createDataWithChild('Domains', ['dID', 'dCreatedByUID'], {
+     dao.createDataWithChild('Plans.Subscriptions.Domains', ['dID', 'dCreatedByUID'], {
+        pID : 1,
+        sID : 1,
         dID : 3,
         dCreatedByUID : 1,
         dDisplayName : 'Test Domain 03',
@@ -49,11 +58,16 @@ router.post('/domains', function(req, res){
         dUrl : 'http://tentwenty.me',
         disPingAllowed : true
       },
-      [ {
-          table_name : 'Domains.Forms',
+      [
+       {
+          table_name : 'Plans.Subscriptions.Domains.Forms',
           data : {
-             dfID : 3,
-             dfName : "Test Domain 03 - Form 03",
+            pID : 1,
+            sID : 1,
+            dID : 3,
+            dfID : 3,
+            dfName : "Test Domain 03 - Form 03",
+            users : [1]
           }
         }
       ], function(err, callback){

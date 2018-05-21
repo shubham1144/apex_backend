@@ -128,10 +128,7 @@ router.post('/user/edit', function(req, res){
             }
             }], function(err){
 
-                if(err) return callback({
-                    code : 0,
-                    message : 'Please enter a valid First Name'
-                });
+                if(err) return callback(err);
                 callback(null);
 
             })
@@ -139,9 +136,12 @@ router.post('/user/edit', function(req, res){
         }]
         }, function(err, result){
 
-            if(err) return util.formatErrorResponse(err.code || 0, err.message || 'Bad Request', function(err){
-                res.send(err);
-            })
+            if(err) {
+                console.error("Error occured due to : ", err);
+                return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+                    res.send(err);
+                })
+            }
             fetchUserDetails(parseInt(req.user.user_id), 'update', function(data){
                 res.send(data);
             })

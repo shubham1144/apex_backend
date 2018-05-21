@@ -170,12 +170,14 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
 
             if(err) return callback(err);
             var result = [], child_tables_to_process = {};
-
+            var parent_table_encountered = false;
             iterator.forEach(function(err, returnedRow){
 
                 if(err) return console.log("Error occured due to : ", err);
+
                 switch(returnedRow.table){
-                    case table: if(customization && customization.values){
+                    case table:     parent_table_encountered = true;
+                                    if(customization && customization.values){
                                     var formatted_result = {};
                                     customization.values.forEach(function(key){
                                         if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
@@ -183,7 +185,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                     })
                                     //Testing with Mock Being Sent out to the application
                                     //result.push(formatted_result);
-                                                                                                                        result.push(Object.assign(formatted_result, {
+                                    result.push(Object.assign(formatted_result, {
                                                                                                                         "enq_count_stats": {
                                                                                                                                                                      "month": "05",
                                                                                                                                                                      "days": [
@@ -237,9 +239,37 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                                                                                         }))
                                 }else result.push(returnedRow.row);
                                 break;
-                    default:    var child_table = _.filter(child_tables, {
+                    default:
+                                /*Check 1 : If parent Table has not been encountered, then return from child tables*/
+                                if(!parent_table_encountered) return;
+                                var child_table = _.filter(child_tables, {
                                     table_name : returnedRow.table
                                 })[0], formatted_child_result={};
+                                var allow_fetch = true;
+                                /*Logic for Conditional Fetching of Results starts here*/
+
+                                    //When Checking the Keys associated with the Child Values, If there is a condition received, then check the condition
+                                /*Check 1 : Check for any condition that has been received in the Request*/
+                                for( var key in child_table.condition){
+                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+
+                                            if(!check_passed){
+                                                if(child_table.join_fetch) {
+                                                    result.pop();
+                                                    /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
+                                                    We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
+                                                    parent_table_encountered = false;
+                                                    allow_fetch = false;
+                                                }
+                                            }
+                                         })
+                                    }
+                                }
+
+                                if(!allow_fetch) return;
+                                /*Logic for Conditional Fetching of Results ends here*/
+
                                 if(child_table && child_table.values){
                                     var formatted_child_result = {};
                                     child_table.values.forEach(function(key){
@@ -249,7 +279,6 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                 }else {
                                     formatted_child_result = returnedRow.row;
                                 }
-
                                 if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
                                     result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
                                 }else{
@@ -411,6 +440,24 @@ function runAllMigrations(){
         })
 
     })
+
+}
+
+
+function conditionValidator(conditions, value, callback){
+
+    console.log("The check received associated with the key is : ", conditions, value);
+    var validated = true;
+    for(var condition in conditions){
+        switch(condition){
+            case '$contains' :  console.log("The associated Value Involved is : ", value, value.indexOf(conditions[condition]));
+                                if(value.indexOf(conditions[condition]) === -1){
+                                    validated = false;
+                                }
+                                break;
+        }
+    }
+    callback(validated);
 
 }
 
