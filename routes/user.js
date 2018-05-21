@@ -50,7 +50,7 @@ function fetchUserDetails(user_id, mode, callback){
 */
 router.get('/user', function(req, res){
 
-    fetchUserDetails(parseInt(req.user.user_id), 'view', function(result){
+    fetchUserDetails(req.user.user_id, 'view', function(result){
         res.send(result)
     })
 
@@ -73,7 +73,7 @@ router.post('/user/edit', function(req, res){
          }
 
         var user_details = {
-            uID : parseInt(req.user.user_id),
+            uID : req.user.user_id,
             uFirstName : req.body.first_name,
             uLastName : req.body.last_name
         }
@@ -84,7 +84,7 @@ router.post('/user/edit', function(req, res){
             if(!req.body.uCurrentPassword || req.body.uCurrentPassword === undefined) return callback(null);
 
             dao.getData('Users', {
-            uID : parseInt(req.user.user_id)
+                uID : req.user.user_id
             }, function(err, result){
 
                 if(err) return callback(err);
@@ -142,7 +142,7 @@ router.post('/user/edit', function(req, res){
                     res.send(err);
                 })
             }
-            fetchUserDetails(parseInt(req.user.user_id), 'update', function(data){
+            fetchUserDetails(req.user.user_id, 'update', function(data){
                 res.send(data);
             })
 
