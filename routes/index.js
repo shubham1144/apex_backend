@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var dao = require('./../dao/dao.js');
 var bcrypt = require('bcrypt');
-var constants = require('./../helpers/constant.js');
+var constants = require('./../helpers/constant.js'),
+shortid = require('shortid');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -15,8 +16,8 @@ router.get('/check_database_crud_connection', function(req, res){
 
     bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
       // Store hash in your password DB.
-          dao.updateDataWithChild('Users', ['uID'], {
-              uID : 1,//Over time use a sequence generator to associate for key
+          dao.createDataWithChild('Users', ['uID'], {
+              uID : shortid.generate(),
               uName : 'Shubham Chodankar',
               uEmail : 'shubham@tentwenty.me',
               uPassword : hash,
@@ -29,6 +30,7 @@ router.get('/check_database_crud_connection', function(req, res){
               {
                   table_name : 'Users.UserDevices',
                   data : {
+                    udToken: 'Test'
                   }
               },
               {
