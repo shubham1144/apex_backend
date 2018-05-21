@@ -2,11 +2,11 @@ var express = require('express'),
     router = express.Router(),
     dao = require('./../dao/dao.js'),
     async = require('async'),
-    util = require('./../helpers/util.js');
+    util = require('./../helpers/util.js'),
+    shortid = require('shortid');
 
 /**
 * API Interface to list all the domains associated with a User in the System
-* @todo: Fetch only the Domains that are accessible to the User making the Request associated with the Domain
 */
 router.get('/domains', function(req, res) {
 
@@ -26,7 +26,7 @@ router.get('/domains', function(req, res) {
             }
 
         },
-        values : [['dID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications']
+        values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications']
     }], function(err, result){
             if(err) return res.send("Database Error")
             util.formatSuccessResponse({
@@ -46,12 +46,13 @@ router.get('/domains', function(req, res) {
 router.post('/domains', function(req, res){
 
      /*Currently Adding mock Data in the System Till the functionality is Ready and Working*/
+     var domain_id = shortid.generate(), domain_form_id = shortid.generate();
      dao.createDataWithChild('Plans.Subscriptions.Domains', ['dID', 'dCreatedByUID'], {
-        pID : 1,
-        sID : 1,
-        dID : 3,
-        dCreatedByUID : 1,
-        dDisplayName : 'Test Domain 03',
+        pID : 'B19VQme1X',
+        sID : 'ryviBmx1m',
+        dID : domain_id,
+        dCreatedByUID : req.user.user_id,
+        dDisplayName : 'Test Domain ' + domain_id ,
         dKey : 'test12345678911',
         dStatus : true,
         dVerified : true,
@@ -62,12 +63,12 @@ router.post('/domains', function(req, res){
        {
           table_name : 'Plans.Subscriptions.Domains.Forms',
           data : {
-            pID : 1,
-            sID : 1,
-            dID : 3,
-            dfID : 3,
-            dfName : "Test Domain 03 - Form 03",
-            users : [1]
+            pID : 'B19VQme1X',
+            sID : 'ryviBmx1m',
+            dID : domain_id,
+            dfID : domain_form_id,
+            dfName : "Test Domain " + domain_id + " - Form 0" + domain_form_id,
+            users : [req.user.user_id]
           }
         }
       ], function(err, callback){

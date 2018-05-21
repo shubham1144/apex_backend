@@ -82,10 +82,8 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
             var result = {};
             iterator.forEach(function(err, returnedRow){
                 if(err) return console.log("Error occured due to : ", err);
-                //console.log("The data retrieved is : ", returnedRow)
                 if(returnedRow.table === table){
                     result = returnedRow.row;
-                    //console.log("The User Details Obtained are : ", JSON.stringify(returnedRow));
                 }
                 else if(Object.keys(result).length){
                     result[returnedRow.table] = returnedRow.row;
@@ -119,7 +117,9 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
                                     case table: if(customization && customization.values){
                                                     var formatted_result = {};
                                                     customization.values.forEach(function(key){
+
                                                         if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+
                                                         else formatted_result[key] = returnedRow.row[key] || 0;
                                                     })
                                                     result = formatted_result;
@@ -248,8 +248,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                 var allow_fetch = true;
                                 /*Logic for Conditional Fetching of Results starts here*/
 
-                                    //When Checking the Keys associated with the Child Values, If there is a condition received, then check the condition
-                                /*Check 1 : Check for any condition that has been received in the Request*/
+                                /*Check 2 : Check for any condition that has been received in the Request*/
                                 for( var key in child_table.condition){
                                     if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
                                          conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
@@ -362,19 +361,18 @@ exports.putData = function(primary_key, table, data, callback){
 */
 exports.createDataWithChild = function(table, primary_key, data, child_tables, callback){
 
-
     store.put(table, data, function(err){
-        if(err) return callback(err)
-        async.each(child_tables, function(table_details, callback){
-            var parent_details = {};
-            primary_key.forEach(function(single_primary_key){
-            console.log("Setting the Primary key as : ", single_primary_key);
-                 parent_details[single_primary_key] = data[single_primary_key]
-            })
-            exports.putData(parent_details, table_details.table_name, table_details.data, callback)
-        }, function(err){
-            callback(err);
+    if(err) return callback(err)
+    async.each(child_tables, function(table_details, callback){
+        var parent_details = {};
+        primary_key.forEach(function(single_primary_key){
+        console.log("Setting the Primary key as : ", single_primary_key);
+             parent_details[single_primary_key] = data[single_primary_key]
         })
+        exports.putData(parent_details, table_details.table_name, table_details.data, callback)
+    }, function(err){
+        callback(err);
+    })
     })
 
 };
@@ -444,6 +442,7 @@ function runAllMigrations(){
 }
 
 
+
 function conditionValidator(conditions, value, callback){
 
     console.log("The check received associated with the key is : ", conditions, value);
@@ -460,4 +459,3 @@ function conditionValidator(conditions, value, callback){
     callback(validated);
 
 }
-

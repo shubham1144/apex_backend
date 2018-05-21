@@ -20,6 +20,7 @@
     "lodash": "^4.17.10",
     "moment": "^2.22.1",
     "morgan": "~1.9.0",
-    "nosqldb-oraclejs": "^18.1.1"
+    "nosqldb-oraclejs": "^18.1.1",
+    "shortid": "^2.2.8"
   }
 }

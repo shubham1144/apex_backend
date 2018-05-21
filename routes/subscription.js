@@ -4,21 +4,24 @@
 * Subscription will be Associated with a User...
 * @module Subscriptions
 */
-var express = require('express');
-var router = express.Router();
-var dao = require('./../dao/dao.js')
+var express = require('express'),
+    router = express.Router(),
+    dao = require('./../dao/dao.js'),
+    shortid = require('shortid');
+
+
 /**
 * API Interface to create a Plan in the System
 */
 router.post('/subscriptions', function(req, res){
 
     dao.createDataWithChild('Plans.Subscriptions', null, {
-        pID : 1,
-        sID : 1,
-        uID : 1,
+        pID : 'B19VQme1X',//Using a Default Plan For all the Subscriptions Temporaily
+        sID : shortid.generate(),
+        uID : req.user.user_id,//For now The Logged in User Will be assocaited with the Subscription
         sIsActive : true,
         sParentID : null,
-        users : [1]
+        users : [req.user.user_id]
     }, null, function(err){
         if(err){
             console.error("Error occured due to : ", err);

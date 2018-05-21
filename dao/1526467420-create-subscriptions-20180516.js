@@ -3,7 +3,7 @@
 module.exports = [
 `
     CREATE TABLE IF NOT EXISTS Plans(
-        pID INTEGER,
+        pID STRING,
         pName STRING,
         pDescription STRING,
         pActive BOOLEAN,
@@ -18,26 +18,26 @@ module.exports = [
 `,
 `
     CREATE TABLE Plans.Subscriptions (
-        sID INTEGER,
-        uID INTEGER,
+        sID STRING,
+        uID STRING,
         sStartDate INTEGER,
         sEndDate INTEGER,
         sIsActive BOOLEAN,
         sParentID INTEGER,
-        users ARRAY(INTEGER),
+        users ARRAY(STRING),
         PRIMARY KEY (sID)
     )
 `,
 `
     CREATE TABLE IF NOT EXISTS Plans.Subscriptions.Domains(
-        dID INTEGER,
+        dID STRING,
         dDisplayName STRING,
         dKey STRING,
         dStatus BOOLEAN,
         dVerified BOOLEAN,
         dUrl STRING,
-        disPingAllowed BOOLEAN,
-        dCreatedByUID INTEGER,
+        dIsPingAllowed BOOLEAN,
+        dCreatedByUID STRING,
         dCreatedAtDate INTEGER,
         dUpdatedAtDate INTEGER,
         PRIMARY KEY (dID, dCreatedByUID)
@@ -45,15 +45,15 @@ module.exports = [
 `,
 `
     CREATE TABLE Plans.Subscriptions.Domains.Forms (
-        dfID INTEGER,
+        dfID STRING,
         dfName STRING,
-        users ARRAY(INTEGER),
+        users ARRAY(STRING),
         PRIMARY KEY (dfID)
     )
 `,
 `
     CREATE TABLE Plans.Subscriptions.Domains.Forms.FormFields (
-        dffID INTEGER,
+        dffID STRING,
         dffValue STRING,
         PRIMARY KEY (dffID)
     )

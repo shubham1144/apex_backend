@@ -6,14 +6,17 @@
 */
 var express = require('express');
 var router = express.Router();
-var dao = require('./../dao/dao.js')
+var dao = require('./../dao/dao.js'),
+    shortid = require('shortid');
+
+
 /**
 * API Interface to create a Plan in the System
 */
 router.post('/plans', function(req, res){
 
     dao.createDataWithChild('Plans', null, {
-        pID : 1,
+        pID : shortid.generate(),
         pName : 'Starter Test 01',
         pDescription : 'For Startup Wanting to Try Out for a Limited Period Of time',
         pActive : true,

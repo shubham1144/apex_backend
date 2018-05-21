@@ -3,7 +3,7 @@
 module.exports = [
 `
     CREATE TABLE IF NOT EXISTS Users(
-        uID INTEGER,
+        uID STRING,
         uName STRING,
         uEmail STRING,
         uPassword STRING,
