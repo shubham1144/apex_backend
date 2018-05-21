@@ -17,25 +17,23 @@ module.exports = [
         uLastName STRING,
         uLastLogin INTEGER,
         uLastLoginIP STRING,
-        PRIMARY KEY (uEmail)
+        PRIMARY KEY (uID)
     )
 `,
-` CREATE INDEX uID on Users(uID)`,
+` CREATE INDEX uEmail on Users(uEmail)`,
 `
     CREATE TABLE Users.UserAttributes (
-        uaID INTEGER,
         uaKey STRING,
         uaValue STRING,
-        PRIMARY KEY (uaID)
+        PRIMARY KEY (uaKey)
     )
 `,
  `
      CREATE TABLE Users.UserDevices (
-         udID INTEGER,
          udToken STRING,
          udType STRING,
          udLastUsed INTEGER,
-         PRIMARY KEY (udID)
+         PRIMARY KEY (udToken)
      )
 `
 ];

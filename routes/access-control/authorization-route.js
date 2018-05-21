@@ -7,6 +7,8 @@ var express = require('express'),
     dao = require('./../../dao/dao.js'),
     token = require('./../../helpers/token.js')
     bcrypt = require('bcrypt'),
+    environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
+    config = require('./../../config/config.js'),
     _ = require('lodash');
 var device_types = ['android', 'ios'];
 
@@ -44,9 +46,7 @@ router.post('/login', function(req, res) {
         if(!_.includes(device_types, req.body.deviceType)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
-        dao.getDataWithChildByIteration('Users', {
-            uEmail : req.body.uEmail
-        }, [], function(err, result){
+        dao.getOneIndexIterator('Users', 'uEmail', req.body.uEmail, [], null, function(err, result){
 
             if(err){
                 console.error("Error occured due to : ", err);
@@ -70,7 +70,7 @@ router.post('/login', function(req, res) {
                             last_name: result.uLastName,
                             first_name: result.uFirstName,
                             user_id: result.uID,
-                            avatar: "http://localhost/notify.me/files/avatars/1.jpg",//HardCoded for Now
+                            avatar: config[environment].static_file_path + result.uID + ".jpg",//HardCoded for Now
                         },
                         token: token
                     }, function(result){

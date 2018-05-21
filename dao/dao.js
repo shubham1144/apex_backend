@@ -8,6 +8,7 @@ var nosqldb = require('nosqldb-oraclejs'),
     environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
     config = require('./../config/config.js'),
     message = require('./../helpers/message.json'),
+    _ = require('lodash');
     configuration = new nosqldb.Configuration();
 
 //nosqldb.Logger.logLevel = nosqldb.LOG_LEVELS.DEBUG;
@@ -67,32 +68,13 @@ exports.getData = function(table, primary_key, callback){
 };
 
 /**
-* Function to fetch Details Along with Child tables associated
-* Need to pass the child table Primary key aswell in the table
-*/
-exports.getDataWithChild = function(table, primary_key, child_tables, callback){
-
-      store.get(table, primary_key, function(err, result){
-            if(err) return callback(err);
-            async.each(child_tables, function(child_table_name, callback){
-                exports.getData(child_table_name,
-                primary_key, function(err, result){
-                    console.log("The data received from child table is : ", result);
-                    callback(null);
-                })
-            }, function(err){
-                callback(err, result.currentRow);
-            })
-        })
-};
-
-/**
 * Function to fetch Details associated With a table along with chilld tables associated
 * @Note The below Function should be Used Ideally to fetch Children Elements along with Parent by using only Parent Primary Key
+* @ Equivalent to findOne Query being Fired in a SQL Relational Database
 */
 exports.getDataWithChildByIteration = function(table, primary_key, child_tables, callback){
 
-        store.tableIterator('Users', primary_key, {
+        store.tableIterator(table, primary_key, {
             includedTables: child_tables
         }, function(err, iterator){
 
@@ -116,31 +98,170 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
 };
 
 /**
- *Function to fetch Data By Iteration and Specifying primary key(There can be more than one primary key) condition
- * @Note Only one fieldRange Can be used with Oracle Node.js Driver For now
+* Custom function to fetch data associated with a table, along with child tables
 */
-exports.getDataByIterationKeyCondition = function(table, key_condition, index, callback){
+exports.getOneByIteration = function(table, primary_key, child_tables, customization, callback){
 
-       store.tableIterator(table, key_condition, {
-            //Currently, Just testing the Working with FieldRange as not yet used
-            fieldRange: new nosqldb.Types.FieldRange(index, 'test', true)
-       }, function(err, iterator){
+        var child_tables_to_fetch = [];
+        child_tables.forEach(function(child_table_details){
+            child_tables_to_fetch.push(child_table_details.table_name)
+        })
 
-                if(err) return callback(err);
-                var result = {};
-                iterator.forEach(function(err, returnedRow){
-                    if(err) return console.log("Error occured due to : ", err);
-                    if(returnedRow.table === table){
-                        result = returnedRow.row;
-                        //console.log("The User Details Obtained are : ", JSON.stringify(returnedRow));
-                    }
-                })
+        store.tableIterator(table, primary_key, {
+            includedTables: child_tables_to_fetch
+        }, function(err, iterator){
 
+            if(err) return callback(err);
+            var result = {};
+            iterator.forEach(function(err, returnedRow){
+                if(err) return console.log("Error occured due to : ", err);
+                switch(returnedRow.table){
+                                    case table: if(customization && customization.values){
+                                                    var formatted_result = {};
+                                                    customization.values.forEach(function(key){
+                                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                        else formatted_result[key] = returnedRow.row[key] || 0;
+                                                    })
+                                                    result = formatted_result;
+                                                }else result = returnedRow.row;
+                                                break;
+                                    default :
+                                                var child_table = _.filter(child_tables, {
+                                                    table_name : returnedRow.table
+                                                })[0], formatted_child_result={};
+                                                if(child_table && child_table.values){
+                                                    var formatted_child_result = {};
+                                                    child_table.values.forEach(function(key){
+                                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                    })
+                                                }else {
+                                                    formatted_child_result = returnedRow.row;
+                                                }
 
-                callback(null, result);
+                                                if(result[child_table && child_table.alias || returnedRow.table]){
+                                                    result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                                }else{
+                                                    result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                }
+                                                break;
+                                }
+            })
+            callback(null, result);
 
+        })
+
+};
+
+/**
+* To be used when Fetching Data with Formatting Associated with the Data being fetched
+* @Note We can use the function below when fetching list of data with child tables and formatting of values for both the parent and the child tables
+*/
+exports.getMultipleDataWithChildByIteration = function(table, primary_key, customization, child_tables, callback){
+
+        var child_tables_to_fetch = [];
+        child_tables.forEach(function(child_table_details){
+            child_tables_to_fetch.push(child_table_details.table_name)
+        })
+
+        store.tableIterator(table, primary_key, {
+            includedTables: child_tables_to_fetch
+        }, function(err, iterator){
+
+            if(err) return callback(err);
+            var result = [], child_tables_to_process = {};
+
+            iterator.forEach(function(err, returnedRow){
+
+                if(err) return console.log("Error occured due to : ", err);
+                switch(returnedRow.table){
+                    case table: if(customization && customization.values){
+                                    var formatted_result = {};
+                                    customization.values.forEach(function(key){
+                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                        else formatted_result[key] = returnedRow.row[key] || 0;
+                                    })
+                                    //Testing with Mock Being Sent out to the application
+                                    //result.push(formatted_result);
+                                                                                                                        result.push(Object.assign(formatted_result, {
+                                                                                                                        "enq_count_stats": {
+                                                                                                                                                                     "month": "05",
+                                                                                                                                                                     "days": [
+                                                                                                                                                                         "2018-05-13",
+                                                                                                                                                                         "2018-05-14",
+                                                                                                                                                                         "2018-05-15",
+                                                                                                                                                                         "2018-05-16",
+                                                                                                                                                                         "2018-05-17",
+                                                                                                                                                                         "2018-05-18",
+                                                                                                                                                                         "2018-05-19",
+                                                                                                                                                                         "2018-05-20"
+                                                                                                                                                                     ],
+                                                                                                                                                                     "enquiries": {
+                                                                                                                                                                         "2018-05-13": "0",
+                                                                                                                                                                         "2018-05-14": "0",
+                                                                                                                                                                         "2018-05-15": "0",
+                                                                                                                                                                         "2018-05-16": "0",
+                                                                                                                                                                         "2018-05-17": "0",
+                                                                                                                                                                         "2018-05-18": "0",
+                                                                                                                                                                         "2018-05-19": "0",
+                                                                                                                                                                         "2018-05-20": "0"
+                                                                                                                                                                     },
+                                                                                                                                                                     "curr_week_total": "0",
+                                                                                                                                                                     "last_week_total": "0"
+                                                                                                                                                                 },
+                                                                                                                         "enq_res_time_stats": {
+                                                                                                                                                                     "month": "05",
+                                                                                                                                                                     "days": [
+                                                                                                                                                                         "2018-05-13",
+                                                                                                                                                                         "2018-05-14",
+                                                                                                                                                                         "2018-05-15",
+                                                                                                                                                                         "2018-05-16",
+                                                                                                                                                                         "2018-05-17",
+                                                                                                                                                                         "2018-05-18",
+                                                                                                                                                                         "2018-05-19",
+                                                                                                                                                                         "2018-05-20"
+                                                                                                                                                                     ],
+                                                                                                                                                                     "response_times": {
+                                                                                                                                                                         "2018-05-13": "0",
+                                                                                                                                                                         "2018-05-14": "0",
+                                                                                                                                                                         "2018-05-15": "0",
+                                                                                                                                                                         "2018-05-16": "0",
+                                                                                                                                                                         "2018-05-17": "0",
+                                                                                                                                                                         "2018-05-18": "0",
+                                                                                                                                                                         "2018-05-19": "0",
+                                                                                                                                                                         "2018-05-20": "0"
+                                                                                                                                                                     },
+                                                                                                                                                                     "curr_week_avg": "0",
+                                                                                                                                                                     "last_week_avg": "0"
+                                                                                                                                                                 }
+                                                                                                                        }))
+                                }else result.push(returnedRow.row);
+                                break;
+                    default:    var child_table = _.filter(child_tables, {
+                                    table_name : returnedRow.table
+                                })[0], formatted_child_result={};
+                                if(child_table && child_table.values){
+                                    var formatted_child_result = {};
+                                    child_table.values.forEach(function(key){
+                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                    })
+                                }else {
+                                    formatted_child_result = returnedRow.row;
+                                }
+
+                                if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
+                                    result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                }else{
+                                    result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                }
+                                break;
+                }
 
             })
+            callback(null, result);
+
+        })
 
 };
 
@@ -149,22 +270,49 @@ exports.getDataByIterationKeyCondition = function(table, key_condition, index, c
  * To search Based on a single index only(Limitation of the NOSQL Oracle Database)
  * If need to search based on multiple keys, need to set them as primary keys
 */
-exports.getDataByIterationWithFieldRange = function(table, key, index, condition, callback){
+exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
        store.indexIterator(table, index, {
-            fieldRange: new nosqldb.Types.FieldRange(index, condition, true)
+            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
        }, function(err, iterator){
+            if(err) return callback(err);
+            var result = {};
+            iterator.forEach(function(err, returnedRow){
+            if(err) return console.log("Error occured due to : ", err);
+            switch(returnedRow.table){
+                                case table: if(customization && customization.values){
+                                                var formatted_result = {};
+                                                customization.values.forEach(function(key){
+                                                    if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else formatted_result[key] = returnedRow.row[key] || 0;
+                                                })
+                                                result = formatted_result;
+                                            }else result = returnedRow.row;
+                                            break;
+                                default :
+                                            var child_table = _.filter(child_tables, {
+                                                table_name : returnedRow.table
+                                            })[0], formatted_child_result={};
+                                            if(child_table && child_table.values){
+                                                var formatted_child_result = {};
+                                                child_table.values.forEach(function(key){
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                })
+                                            }else {
+                                                formatted_child_result = returnedRow.row;
+                                            }
 
-                if(err) return callback(err);
-                var result = [];
-                iterator.forEach(function(err, returnedRow){
-                    if(err) return console.log("Error occured due to : ", err);
-                    result.push(returnedRow.row);
-
-                })
-                callback(null, result);
-
+                                            if(result[child_table && child_table.alias || returnedRow.table]){
+                                                result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                            }else{
+                                                result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                            }
+                                            break;
+                            }
             })
+            callback(null, result);
+        })
 
 };
 
@@ -183,7 +331,8 @@ exports.putData = function(primary_key, table, data, callback){
 /**
 * Function to make database entries in tables along with populating child Tables
 */
-exports.putDataWithChild = function(table, primary_key, data, child_tables, callback){
+exports.createDataWithChild = function(table, primary_key, data, child_tables, callback){
+
 
     store.put(table, data, function(err){
         if(err) return callback(err)
@@ -198,6 +347,37 @@ exports.putDataWithChild = function(table, primary_key, data, child_tables, call
             callback(err);
         })
     })
+
+};
+
+/**
+* Function to Perform Update Operations associated with the Database
+*/
+exports.updateDataWithChild = function(table, primary_key, data, child_tables, callback){
+
+    var child_tables_to_fetch = [];
+            child_tables.forEach(function(child_table_details){
+                child_tables_to_fetch.push(child_table_details.table_name)
+            })
+    exports.getDataWithChildByIteration(table, {
+        primary_key : data[primary_key]
+    }, child_tables_to_fetch, function(err, result){
+
+            store.put(table, Object.assign(result, data), function(err){
+                if(err) return callback(err)
+                async.each(child_tables, function(table_details, callback){
+                    var parent_details = {};
+                    primary_key.forEach(function(single_primary_key){
+                    console.log("Setting the Primary key as : ", single_primary_key);
+                         parent_details[single_primary_key] = data[single_primary_key]
+                    })
+                    exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name], table_details.data), callback)
+                }, function(err){
+                    callback(err);
+                })
+            })
+    })
+
 
 };
 
