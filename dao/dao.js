@@ -20,7 +20,7 @@ configuration.proxy = Object.assign(configuration.proxy, {
     host : config[environment].db.proxy.host,
     KVCLIENT_JAR : 'node_modules/nosqldb-oraclejs/kvproxy/kvclient.jar',
     KVPROXY_JAR : 'node_modules/nosqldb-oraclejs/kvproxy/kvproxy.jar',
-    securityFile : config[environment].db.proxy.security_file_path
+    securityFile :  __dirname + config[environment].db.proxy.security_file_path
 });
 
 configuration.storeHelperHosts = config[environment].db.store_helper_hosts;
@@ -44,6 +44,7 @@ store.on('open', function () {
 
   console.log('Error in the store.');
   console.log(error);
+  store.close();
   store.close();
 
 });
