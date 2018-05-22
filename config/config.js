@@ -15,19 +15,29 @@ module.exports = {
     },
     local_1020 : {
         db : {
-                    store_name : 'notify.me',
-                    store_helper_hosts : ['192.168.1.20:5000'],
-                    username : 'admin',
-                    proxy : {
-                        start : true,
-                        host : 'localhost:7011',
-                        security_file_path : '/security/local_1020/client.security'
-                    }
+            store_name : 'notify.me',
+            store_helper_hosts : ['192.168.1.20:5000'],
+            username : 'admin',
+            proxy : {
+                start : true,
+                host : 'localhost:7011',
+                security_file_path : '/security/local_1020/client.security'
+            }
                 },
-                static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
     },
     development : {
-
+        db : {
+            store_name : 'notify.me.dev',
+            store_helper_hosts : ['46.105.122.80:5000'],
+            username : 'admin',
+            proxy : {
+                start : true,
+                host : 'localhost:7012',
+                security_file_path : '/security/development/client.security'
+            }
+        },
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
     },
     production : {
 
