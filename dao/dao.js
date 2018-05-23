@@ -388,15 +388,15 @@ exports.updateDataWithChild = function(table, primary_key, data, child_tables, c
                 child_tables_to_fetch.push(child_table_details.table_name)
             })
     exports.getDataWithChildByIteration(table, {
-        primary_key : data[primary_key]
+        [primary_key] : data[primary_key]
     }, child_tables_to_fetch, function(err, result){
-
+            if(err) return callback(err);
             store.put(table, Object.assign(result, data), function(err){
                 if(err) return callback(err)
                 async.each(child_tables, function(table_details, callback){
                     var parent_details = {};
                     primary_key.forEach(function(single_primary_key){
-                    console.log("Setting the Primary key as : ", single_primary_key);
+//                    console.log("Setting the Primary key as : ", single_primary_key);
                          parent_details[single_primary_key] = data[single_primary_key]
                     })
                     exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name], table_details.data), callback)
