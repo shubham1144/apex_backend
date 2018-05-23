@@ -1,10 +1,12 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express'),
+    router = express.Router(),
+    dao = require('./../dao/dao.js'),
+    shortid = require('shortid');
 
 /*API Interface to fetch a list of notifications associated with the Platform*/
 router.get('/notifications', function(req, res){
 
-/*Mocking the Data for now, till the Application is functional*/
+    /*Mocking the Data for now, till the Application is functional*/
     res.json({
                  "success": true,
                  "data": {
@@ -328,6 +330,7 @@ router.get('/notifications', function(req, res){
 });
 
 router.get('/notifications/:notification_id', function(req, res){
+
     /*Mocking Data till the functionality is Available*/
     res.json({
                  "success": true,
@@ -363,6 +366,31 @@ router.get('/notifications/:notification_id', function(req, res){
                      ]
                  }
              })
+
+});
+
+/**
+    *API Interface associated with Registering a enquiry in the System
+*/
+router.post('/notifications', function(req, res){
+
+    //@todo : Need to fetch the Details Associated with (Plan and The Subscription Associated and Domain and the form )with the DomainKey Received
+    dao.putData({
+        eID : shortid.generate()
+    }, 'Plans.Subscriptions.Domains.Forms.Enquiry', {
+            ePhone : '8975567457',
+            eEmail : 'shubham@tentwenty.me',
+            eFormLinkedDetails : [{
+                first_name : "Shubham",
+                last_name : "Chodankar"
+            }],
+            eStatus : 'Unread',
+            eIsArchived : false,
+            eIsDeleted : false
+    }, function(err, result){
+        if(err) return res.send("Database Error");
+        res.send("Enquiry Recorded by Notify ME");
+    });
 
 })
 

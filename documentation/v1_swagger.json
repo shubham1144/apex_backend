@@ -139,6 +139,19 @@
          }],
          "responses": {}
        }
+     },
+     "/notifications": {
+       "post": {
+         "tags": ["Notification"],
+         "description": "Api associated with registering a Enquiry in the System",
+         "parameters": [{
+           "name": "dkey",
+           "description": "Verifies the Authenticity of the Domain Involved",
+           "required": false,
+           "in": "header"
+         }],
+         "responses": {}
+       }
      }
    }
 }
