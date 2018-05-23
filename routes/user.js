@@ -161,6 +161,7 @@ router.post('/user/edit', function(req, res){
 */
 router.post('/user', function(req, res){
 
+        return res.send("Testing User Creation API");
         bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
           // Store hash in your password DB.
               dao.createDataWithChild('Users', ['uID'], {
