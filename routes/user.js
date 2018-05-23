@@ -12,6 +12,7 @@ var express = require('express'),
     moment = require('moment'),
     async = require('async'),
     bcrypt = require('bcrypt'),
+    shortid = require('shortid'),
     constants = require('./../helpers/constant.js');
 
 
@@ -29,7 +30,7 @@ function fetchUserDetails(user_id, callback){
         if(err) return callback("Database Error")
 
         Object.assign(result, {
-            avatar: config[environment].static_file_path + result.user_id + ".jpg?" + moment().unix(),
+            avatar: 'http://notify-me.1020dev.com/files/avatars/2.jpg?' + moment().unix(),
             contact : {
                 phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
                                (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
@@ -152,6 +153,52 @@ router.post('/user/edit', function(req, res){
         })
 
     });
+
+});
+
+/*
+* API To Register a User in the System
+*/
+router.post('/user', function(req, res){
+
+        bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
+          // Store hash in your password DB.
+              dao.createDataWithChild('Users', ['uID'], {
+                  uID : shortid.generate(),
+                  uName : 'Idris',
+                  uEmail : 'idris@tentwenty.me',
+                  uPassword : hash,
+                  uFirstName : 'idris',
+                  uLastName : 'khozema',
+                  uIsActive : true,
+                  uIsValidated : true,
+                  uType : 'Admin'
+              }, [
+                  {
+                      table_name : 'Users.UserDevices',
+                      data : {
+                        udToken: 'idris@tentwenty.me'
+                      }
+                  },
+                  {
+                      table_name : 'Users.UserAttributes',
+                      data : {
+                          uaKey: 'contactNumber',
+                          uaValue: '+91 '
+                      }
+                  }
+              ], function(err){
+
+                  if(err) return res.send("Database Error")
+                  dao.getDataWithChildByIteration('Users', {
+                      uEmail : 'syed@tentwenty.me'
+                  }, ['Users.UserDevices', 'Users.UserAttributes'], function(err, result){
+                       if(err) return res.send("Database Error")
+                       res.send("Notify.me Backend Server Health Status : Good");
+                  })
+
+              })
+        });
 
 });
 

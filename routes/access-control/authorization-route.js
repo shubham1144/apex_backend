@@ -70,7 +70,7 @@ router.post('/login', function(req, res) {
                             last_name: result.uLastName,
                             first_name: result.uFirstName,
                             user_id: result.uID,
-                            avatar: config[environment].static_file_path + result.uID + ".jpg",//HardCoded for Now
+                            avatar: 'http://notify-me.1020dev.com/files/avatars/2.jpg',//HardCoded for Now@todo: Implemented Functionality
                         },
                         token: token
                     }, function(result){

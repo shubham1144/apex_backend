@@ -7,7 +7,8 @@ var jwt = require('express-jwt');
 var swaggerUi = require('swagger-ui-express');
 const swaggerDocumentV1 = require('./documentation/v1_swagger.json');
 var options = {
-  customCss: '.swagger-ui .topbar { display: none }'
+  customCss: '.swagger-ui .topbar { display: none }',
+  customJs: '/javascripts/custom.js'
 };
 
 

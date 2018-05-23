@@ -13,21 +13,25 @@
          "description": "Login Api Associated with Notify ME",
          "parameters": [{
            "name": "uEmail",
+           "required": true,
            "in": "formData",
            "type": "string"
          },
          {
            "name": "uPassword",
+           "required": true,
            "in": "formData",
            "type": "string"
          },
            {
              "name": "deviceType",
+             "required": true,
              "in": "formData",
              "type": "string"
            },
            {
              "name": "deviceToken",
+             "required": true,
              "in": "formData",
              "type": "string"
            }
@@ -52,6 +56,7 @@
          "description": "Api associated with Fetching Details associated with Logged in User",
          "parameters": [{
            "name": "Authorization",
+           "required": true,
            "in": "header"
          }],
          "responses": {}
@@ -62,9 +67,64 @@
          "tags": ["User Profile"],
          "description": "Api to edit Details Associated with a User",
          "parameters": [{
-           "name": "Authorization",
-           "in": "header"
-         }],
+             "name": "Authorization",
+             "required": true,
+             "in": "header"
+            },
+           {
+             "name": "first_name",
+             "in": "formData",
+             "required": true,
+             "type": "string"
+           },
+           {
+             "name": "last_name",
+             "in": "formData",
+             "required": true,
+             "type": "string"
+           },
+           {
+             "name": "contact",
+             "description" : "Contact Number Associated with the User Involved",
+             "required": true,
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "is_notification",
+             "description" : "Support for this key will be available over time",
+             "required": true,
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "uCurrentPassword",
+             "description" : "Key to be Passed when User Password Needs to be modified",
+             "required": false,
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "uPassword",
+             "description" : "The New Password to be associated with the user",
+             "required": false,
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "uPasswordConfirm",
+             "description" : "Confirmation Value for the New Password",
+             "required": false,
+             "in": "formData",
+             "type": "string"
+           },
+           {
+             "name": "avatar",
+             "description" : "Support for this key will be available over time",
+             "in": "formData",
+             "type": "string"
+           }
+         ],
          "responses": {}
        }
      },
@@ -74,6 +134,7 @@
          "description": "Api associated with Fetching List of Domains Visible to the Logged in User",
          "parameters": [{
            "name": "Authorization",
+           "required": true,
            "in": "header"
          }],
          "responses": {}
