@@ -52,7 +52,7 @@ router.post('/domains', function(req, res){
         sID : 'ryviBmx1m',
         dID : domain_id,
         dCreatedByUID : req.user.user_id,
-        dDisplayName : 'Test Domain ' + domain_id ,
+        dDisplayName : 'Test Domain 24 May 2018 01' + domain_id ,
         dKey : 'test12345678911',
         dStatus : true,
         dVerified : true,
@@ -67,7 +67,7 @@ router.post('/domains', function(req, res){
             sID : 'ryviBmx1m',
             dID : domain_id,
             dfID : domain_form_id,
-            dfName : "Test Domain " + domain_id + " - Form 0" + domain_form_id,
+            dfName : "Test Domain 24 May 2018 01" + domain_id + " - Form 0" + domain_form_id,
             users : [req.user.user_id]
           }
         }

@@ -6,7 +6,29 @@ var express = require('express'),
 /*API Interface to fetch a list of notifications associated with the Platform*/
 router.get('/notifications', function(req, res){
 
+   dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains.Forms.Enquiry', {
+    }, {
+       values : [
+                ['pID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'],
+                ['dfID', 'form_id'], ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
+                ['eIsDeleted', 'is_deleted']
+        ]
+    }, [{
+                   table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
+                   alias : 'call_logs'
+//                   values : ['uaKey', 'uaValue']
+           }], function(err, result, requested_count_details){
+        if(err) return res.send("Database Error");
+
+        return util.formatSuccessResponse( Object.assign(requested_count_details, {
+                                                      notifications : result,
+                                                  }), function(result){
+                       res.send(result);
+                   })
+    })
+
     /*Mocking the Data for now, till the Application is functional*/
+    return;
     res.json({
                  "success": true,
                  "data": {
@@ -14,23 +36,23 @@ router.get('/notifications', function(req, res){
                      "archive_count": 6,
                      "notifications": [
                          {
-                             "id": "47",
+                                                                        "id": "47",
                              "firstname": "Zahid",
                              "lastname": null,
                              "message": "test message please ignore",
                              "email": "zahid@tentwenty.me",
-                             "phone": "0568318060",
+                                                                        "phone": "0568318060",
                              "subject": "Website Development",
                              "company": null,
-                             "domain_id": "3",
+                                                                        "domain_id": "3",
                              "domain_name": "TenTwenty Test",
-                             "form_id": "3",
+                                                                        "form_id": "3",
                              "form_name": "Enquiry Form",
                              "created_at": "2018-05-03 17:20:02",
-                             "priority": "0",
-                             "status": "3",
-                             "is_archived": "0",
-                             "is_deleted": "0",
+                                                                         "priority": "0",
+                                                                         "status": "3",
+                                                                         "is_archived": "0",
+                                                                         "is_deleted": "0",
                              "call_logs": [
                                  {
                                      "id": "127",
@@ -332,7 +354,7 @@ router.get('/notifications', function(req, res){
 router.get('/notifications/:notification_id', function(req, res){
 
     /*Mocking Data till the functionality is Available*/
-    res.json({
+     res.json({
                  "success": true,
                  "data": {
                      "id": "47",
@@ -376,22 +398,43 @@ router.post('/notifications', function(req, res){
 
     //@todo : Need to fetch the Details Associated with (Plan and The Subscription Associated and Domain and the form )with the DomainKey Received
     dao.putData({
-        eID : shortid.generate()
     }, 'Plans.Subscriptions.Domains.Forms.Enquiry', {
+    "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ",
+    "eID" : shortid.generate(),
             ePhone : '8975567457',
-            eEmail : 'shubham@tentwenty.me',
-            eFormLinkedDetails : [{
-                first_name : "Shubham",
-                last_name : "Chodankar"
-            }],
+            eEmail : 'testuser10@tentwenty.me',
+            eFormAllDetails : "",
             eStatus : 'Unread',
             eIsArchived : false,
             eIsDeleted : false
     }, function(err, result){
         if(err) return res.send("Database Error");
-        res.send("Enquiry Recorded by Notify ME");
+        res.send("Notification Captured")
     });
 
 })
+
+/**
+ * API Interface to update Call Logs associated with Enquiry
+*/
+router.post('/notifications/call_logs', function(req, res){
+
+    dao.putData({}, 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs', {
+    "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ","eID":"SkhmUxVkQ",
+    clID : shortid.generate(),
+    clStatus : "0",
+    clUserDetails : {
+        firstname : 'Shubham',
+        lastname : 'Chodankar',
+        user_id : 'X',
+        user_contact : '8975567457'
+    },
+    clNote : "Testing Creation of a Note using a Enquiry"
+    }, function(err, result){
+         if(err) return res.send("Database Error");
+         res.send("Call Log Captured Against a Enquiry")
+     })
+
+});
 
 module.exports = router;

@@ -186,58 +186,63 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                     })
                                     //Testing with Mock Being Sent out to the application
                                     //result.push(formatted_result);
+                                    if(table === 'Plans.Subscriptions.Domains'){
                                     result.push(Object.assign(formatted_result, {
-                                                                                                                        "enq_count_stats": {
-                                                                                                                                                                     "month": "05",
-                                                                                                                                                                     "days": [
-                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                     ],
-                                                                                                                                                                     "enquiries": {
-                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                     },
-                                                                                                                                                                     "curr_week_total": "0",
-                                                                                                                                                                     "last_week_total": "0"
-                                                                                                                                                                 },
-                                                                                                                         "enq_res_time_stats": {
-                                                                                                                                                                     "month": "05",
-                                                                                                                                                                     "days": [
-                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                     ],
-                                                                                                                                                                     "response_times": {
-                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                     },
-                                                                                                                                                                     "curr_week_avg": "0",
-                                                                                                                                                                     "last_week_avg": "0"
-                                                                                                                                                                 }
-                                                                                                                        }))
+                                                                                                                                                            "enq_count_stats": {
+                                                                                                                                                                                                         "month": "05",
+                                                                                                                                                                                                         "days": [
+                                                                                                                                                                                                             "2018-05-13",
+                                                                                                                                                                                                             "2018-05-14",
+                                                                                                                                                                                                             "2018-05-15",
+                                                                                                                                                                                                             "2018-05-16",
+                                                                                                                                                                                                             "2018-05-17",
+                                                                                                                                                                                                             "2018-05-18",
+                                                                                                                                                                                                             "2018-05-19",
+                                                                                                                                                                                                             "2018-05-20"
+                                                                                                                                                                                                         ],
+                                                                                                                                                                                                         "enquiries": {
+                                                                                                                                                                                                             "2018-05-13": "0",
+                                                                                                                                                                                                             "2018-05-14": "0",
+                                                                                                                                                                                                             "2018-05-15": "0",
+                                                                                                                                                                                                             "2018-05-16": "0",
+                                                                                                                                                                                                             "2018-05-17": "0",
+                                                                                                                                                                                                             "2018-05-18": "0",
+                                                                                                                                                                                                             "2018-05-19": "0",
+                                                                                                                                                                                                             "2018-05-20": "0"
+                                                                                                                                                                                                         },
+                                                                                                                                                                                                         "curr_week_total": "0",
+                                                                                                                                                                                                         "last_week_total": "0"
+                                                                                                                                                                                                     },
+                                                                                                                                                             "enq_res_time_stats": {
+                                                                                                                                                                                                         "month": "05",
+                                                                                                                                                                                                         "days": [
+                                                                                                                                                                                                             "2018-05-13",
+                                                                                                                                                                                                             "2018-05-14",
+                                                                                                                                                                                                             "2018-05-15",
+                                                                                                                                                                                                             "2018-05-16",
+                                                                                                                                                                                                             "2018-05-17",
+                                                                                                                                                                                                             "2018-05-18",
+                                                                                                                                                                                                             "2018-05-19",
+                                                                                                                                                                                                             "2018-05-20"
+                                                                                                                                                                                                         ],
+                                                                                                                                                                                                         "response_times": {
+                                                                                                                                                                                                             "2018-05-13": "0",
+                                                                                                                                                                                                             "2018-05-14": "0",
+                                                                                                                                                                                                             "2018-05-15": "0",
+                                                                                                                                                                                                             "2018-05-16": "0",
+                                                                                                                                                                                                             "2018-05-17": "0",
+                                                                                                                                                                                                             "2018-05-18": "0",
+                                                                                                                                                                                                             "2018-05-19": "0",
+                                                                                                                                                                                                             "2018-05-20": "0"
+                                                                                                                                                                                                         },
+                                                                                                                                                                                                         "curr_week_avg": "0",
+                                                                                                                                                                                                         "last_week_avg": "0"
+                                                                                                                                                                                                     }
+                                                                                                                                                            }))
+                                    }else result.push(formatted_result);
+
+
+
                                 }else result.push(returnedRow.row);
                                 break;
                     default:
@@ -288,7 +293,10 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                 }
 
             })
-            callback(null, result);
+            callback(null, result, {
+                'total_unread_notification_count' : 0,
+                'archive_count' : 0
+            });
 
         })
 

@@ -6,16 +6,16 @@ module.exports = [
         eID STRING,
         ePhone STRING,
         eEmail STRING,
-        eFormLinkedDetails ARRAY(JSON),
-        eFormAllDetails JSON,
         eStatus ENUM(Unread, Read, Engaged, NotReachable),
         eIsArchived BOOLEAN,
         eIsDeleted BOOLEAN,
         eCreatedAt INTEGER,
+        eFormAllDetails STRING,
+        eFormLinkedDetails STRING,
         PRIMARY KEY (eID)
     )
-`,
 `
+,`
     CREATE TABLE Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs (
         clID STRING,
         clStatus STRING,

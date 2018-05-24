@@ -57,5 +57,5 @@ module.exports = [
         dffValue STRING,
         PRIMARY KEY (dffID)
     )
-`
+`,
 ];
