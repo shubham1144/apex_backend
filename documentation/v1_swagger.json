@@ -140,16 +140,70 @@
          "responses": {}
        }
      },
-     "/notifications": {
-       "post": {
+     "/notifications/{notification_id}": {
+       "get": {
          "tags": ["Notification"],
-         "description": "Api associated with registering a Enquiry in the System",
+         "description": "Api associated with Fetching Data associated with Notifications Linked to a Domain",
          "parameters": [{
-           "name": "dkey",
-           "description": "Verifies the Authenticity of the Domain Involved",
-           "required": false,
+           "name": "Authorization",
+           "required": true,
            "in": "header"
+         },
+           {
+           "name": "notification_id",
+           "description": "The Notification Id",
+           "required": true,
+           "in": "path"
          }],
+         "responses": {}
+       }
+     },
+     "/notifications": {
+       "get": {
+         "tags": ["Notification"],
+         "description": "Api associated with Fetching List of Notifications Associated with Domain",
+         "parameters": [
+            {
+            "name": "Authorization",
+            "required": true,
+            "in": "header"
+            },
+            {
+            "name": "domain_id",
+            "description": "Domain",
+            "required": false,
+            "in": "query"
+            },
+           {
+             "name": "form_id",
+             "description": "Form",
+             "required": false,
+             "in": "query"
+           },{
+             "name": "page",
+             "description": "Page",
+             "required": false,
+             "in": "query"
+           },
+           {
+             "name": "keywords",
+             "description": "Search Keyword",
+             "required": false,
+             "in": "query"
+           },
+           {
+             "name" : "archieve",
+             "type": "boolean",
+             "required": false,
+             "in": "query"
+           },
+           {
+             "name" : "status",
+             "type": "string",
+             "required": false,
+             "in": "query"
+           }
+          ],
          "responses": {}
        }
      }

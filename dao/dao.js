@@ -100,6 +100,7 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
 * Custom function to fetch data associated with a table, along with child tables
 */
 exports.getOneByIteration = function(table, primary_key, child_tables, customization, callback){
+        //console.log("The Callback Function Received is : ", callback);
 
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
@@ -308,47 +309,67 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
 */
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
-       store.indexIterator(table, index, {
-            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
-       }, function(err, iterator){
-            if(err) return callback(err);
-            var result = {};
-            iterator.forEach(function(err, returnedRow){
-            if(err) return console.log("Error occured due to : ", err);
-            switch(returnedRow.table){
-                                case table: if(customization && customization.values){
-                                                var formatted_result = {};
-                                                customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                                    else formatted_result[key] = returnedRow.row[key] || 0;
-                                                })
-                                                result = formatted_result;
-                                            }else result = returnedRow.row;
-                                            break;
-                                default :
-                                            var child_table = _.filter(child_tables, {
-                                                table_name : returnedRow.table
-                                            })[0], formatted_child_result={};
-                                            if(child_table && child_table.values){
-                                                var formatted_child_result = {};
-                                                child_table.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
-                                                })
-                                            }else {
-                                                formatted_child_result = returnedRow.row;
-                                            }
+        if(child_tables){
+            store.indexIterator(table, index, {
+                            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
+                       }, function(err, iterator){
 
-                                            if(result[child_table && child_table.alias || returnedRow.table]){
-                                                result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
-                                            }else{
-                                                result[child_table.alias || returnedRow.table] = [formatted_child_result];
-                                            }
-                                            break;
-                            }
-            })
-            callback(null, result);
-        })
+                            if(err) return callback(err);
+                            var result = {};
+                            iterator.forEach(function(err, returnedRow){
+                                if(err) return console.log("Error occured due to : ", err);
+                                dao.getOneByIteration(table, returnedRow.row, child_tables, customization, function(err, data){
+                                    result = data;
+                                    return callback(null, data);
+                                })
+                            })
+
+                        })
+
+        }else{
+               store.indexIterator(table, index, {
+                    fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
+               }, function(err, iterator){
+                    if(err) return callback(err);
+                    var result = {};
+                    iterator.forEach(function(err, returnedRow){
+                    if(err) return console.log("Error occured due to : ", err);
+                    switch(returnedRow.table){
+                                        case table: if(customization && customization.values){
+                                                        var formatted_result = {};
+                                                        customization.values.forEach(function(key){
+                                                            if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                            else formatted_result[key] = returnedRow.row[key] || 0;
+                                                        })
+                                                        result = formatted_result;
+                                                    }else result = returnedRow.row;
+                                                    break;
+                                        default :
+                                                    var child_table = _.filter(child_tables, {
+                                                        table_name : returnedRow.table
+                                                    })[0], formatted_child_result={};
+                                                    if(child_table && child_table.values){
+                                                        var formatted_child_result = {};
+                                                        child_table.values.forEach(function(key){
+                                                            if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                            else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                        })
+                                                    }else {
+                                                        formatted_child_result = returnedRow.row;
+                                                    }
+
+                                                    if(result[child_table && child_table.alias || returnedRow.table]){
+                                                        result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                                    }else{
+                                                        result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                    }
+                                                    break;
+                                    }
+                    })
+                    callback(null, result);
+                })
+        }
+
 
 };
 

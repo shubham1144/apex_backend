@@ -29,5 +29,8 @@ module.exports = [
         clNote STRING,
         PRIMARY KEY (clID)
     )
+`,
+`
+    CREATE INDEX eID ON Plans.Subscriptions.Domains.Forms.Enquiry(eID);
 `
 ];
