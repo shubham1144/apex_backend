@@ -12,6 +12,7 @@ var express = require('express'),
 
 /**
 * API Interface to create a Plan in the System
+* @todo : Work on api for Creating Subscriptions in the system
 */
 router.post('/subscriptions', function(req, res){
 
@@ -27,9 +28,10 @@ router.post('/subscriptions', function(req, res){
             console.error("Error occured due to : ", err);
             return res.status(500).send("Internal Server Error")
         }
-        res.send("Subscription Account has been activated");
+        res.send("Mock Subscription Account has been activated");
     })
 
 });
+
 
 module.exports = router;

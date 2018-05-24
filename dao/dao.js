@@ -184,8 +184,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                         if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
                                         else formatted_result[key] = returnedRow.row[key] || 0;
                                     })
-                                    //Testing with Mock Being Sent out to the application
-                                    //result.push(formatted_result);
+                                    //Temporarily Testing with Mock Being Sent out to the application
                                     if(table === 'Plans.Subscriptions.Domains'){
                                     result.push(Object.assign(formatted_result, {
                                                                                                                                                             "enq_count_stats": {

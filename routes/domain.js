@@ -73,7 +73,7 @@ router.post('/domains', function(req, res){
         }
       ], function(err, callback){
             if(err) return res.send("Database Error")
-            res.send("Domain has been registered in the system");
+            res.send("Mock Domain has been registered in the system");
     });
 
 });

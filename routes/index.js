@@ -1,11 +1,13 @@
-var express = require('express');
-var router = express.Router();
-var dao = require('./../dao/dao.js');
-var bcrypt = require('bcrypt');
-var constants = require('./../helpers/constant.js'),
-shortid = require('shortid');
+var express = require('express'),
+    router = express.Router(),
+    dao = require('./../dao/dao.js'),
+    bcrypt = require('bcrypt'),
+    constants = require('./../helpers/constant.js'),
+    shortid = require('shortid');
 
-/* GET home page. */
+/**
+* GET home page.
+*/
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
@@ -53,8 +55,7 @@ router.get('/check_database_crud_connection', function(req, res){
           })
     });
 
-
-
 });
+
 
 module.exports = router;

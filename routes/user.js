@@ -2,7 +2,6 @@
 * Business Logic Associated with Operations associated with Application User Details
 * @module User
 */
-
 var express = require('express'),
     router = express.Router(),
     dao = require('./../dao/dao.js'),
@@ -16,6 +15,9 @@ var express = require('express'),
     constants = require('./../helpers/constant.js');
 
 
+/**
+* Function to Fetch Details associated with the Users in System
+*/
 function fetchUserDetails(user_id, callback){
 
     dao.getOneByIteration('Users', {
@@ -49,6 +51,8 @@ function fetchUserDetails(user_id, callback){
     });
 
 }
+
+
 /**
 * API Interface to fetch Details associated with a User Profile
 */
@@ -158,34 +162,36 @@ router.post('/user/edit', function(req, res){
 
 /*
 * API To Register a User in the System
+* @todo : Work on the api for Registering a User in the System
 */
 router.post('/user', function(req, res){
 
         return res.send("Testing User Creation API");
+        //Returning as below is being done by restricted priviledged users for now
         bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
-          // Store hash in your password DB.
+
               dao.createDataWithChild('Users', ['uID'], {
                   uID : shortid.generate(),
-                  uName : 'Idris',
-                  uEmail : 'idris@tentwenty.me',
+                  uName : 'Idris',//Place the Uname of the User here
+                  uEmail : 'idris@tentwenty.me',//Place the Email of the User here
                   uPassword : hash,
-                  uFirstName : 'idris',
-                  uLastName : 'khozema',
+                  uFirstName : 'idris',//Place the First Name of the User here
+                  uLastName : 'khozema',//Place the Last Name of the User here
                   uIsActive : true,
                   uIsValidated : true,
-                  uType : 'Admin'
+                  uType : 'Admin'//User type can be 'Admin | User | SuperUser(Across all subscriptions)'
               }, [
                   {
                       table_name : 'Users.UserDevices',
                       data : {
-                        udToken: 'idris@tentwenty.me'
+                        udToken: 'testToken'
                       }
                   },
                   {
                       table_name : 'Users.UserAttributes',
                       data : {
                           uaKey: 'contactNumber',
-                          uaValue: '+91 '
+                          uaValue: '+91 8975567457'
                       }
                   }
               ], function(err){
@@ -202,5 +208,6 @@ router.post('/user', function(req, res){
         });
 
 });
+
 
 module.exports = router;

@@ -4,14 +4,15 @@
 * a Plan will have a Admin User Associated
 * @module Plans
 */
-var express = require('express');
-var router = express.Router();
-var dao = require('./../dao/dao.js'),
+var express = require('express'),
+    router = express.Router(),
+    dao = require('./../dao/dao.js'),
     shortid = require('shortid');
 
 
 /**
 * API Interface to create a Plan in the System
+*@todo : Work on the api for Registration of Plans in the system
 */
 router.post('/plans', function(req, res){
 
@@ -26,10 +27,12 @@ router.post('/plans', function(req, res){
             allowedPing: false,
             DomainCount: 1
         }
-    }, null, function(err){
-            res.send(err);
+    }, null,
+    function(err){
+        res.send(err + "Mock Plan Registration in the System");
     })
 
 });
+
 
 module.exports = router;
