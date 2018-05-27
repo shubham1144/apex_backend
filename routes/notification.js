@@ -8,18 +8,30 @@ var express = require('express'),
 */
 router.get('/notifications', function(req, res){
 
-    dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains.Forms.Enquiry', {
-    }, {
+    dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains.Forms.Enquiry', {}, {
+        condition : {
+
+        },
         values : [
-            ['eID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'],
-            ['dfID', 'form_id'], ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
+            ['eID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'],
+            ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ]
-    }, [{
-        table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
-        alias : 'call_logs',
-        values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status'], ['clNote', 'note']]
-       }],
+    }, [
+            {
+                    table_name : 'Plans.Subscriptions.Domains',
+                    values : [['dDisplayName', 'domain_name'], ['dID', 'domain_id']]
+                },
+            {
+                table_name : 'Plans.Subscriptions.Domains.Forms',
+                values : [['dfName', 'form_name'],  ['dfID', 'form_id']]
+            },
+            {
+                table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
+                alias : 'call_logs',
+                values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status'], ['clNote', 'note']]
+            }
+       ],
     function(err, result, requested_count_details){
 
         if(err) return res.send("Database Error");

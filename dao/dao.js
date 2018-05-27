@@ -165,20 +165,22 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
         })
-
-        store.tableIterator(table, primary_key, {
+        var conditions = {
             includedTables: child_tables_to_fetch
-        }, function(err, iterator){
+        };
+
+        store.tableIterator(table, primary_key, conditions, function(err, iterator){
 
             if(err) return callback(err);
             var result = [], child_tables_to_process = {};
-            var parent_table_encountered = false;
+            var main_table_encountered = false;
+            var parent_table_details = {};
             iterator.forEach(function(err, returnedRow){
 
                 if(err) return console.log("Error occured due to : ", err);
-
                 switch(returnedRow.table){
-                    case table:     parent_table_encountered = true;
+
+                    case table:     main_table_encountered = true;
                                     if(customization && customization.values){
                                     var formatted_result = {};
                                     customization.values.forEach(function(key){
@@ -238,57 +240,75 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                                                                                                                                                                          "curr_week_avg": "0",
                                                                                                                                                                                                          "last_week_avg": "0"
                                                                                                                                                                                                      }
-                                                                                                                                                            }))
-                                    }else result.push(formatted_result);
+                                                                                                                                                            }, parent_table_details))
+                                    }else result.push(Object.assign(formatted_result, parent_table_details));
 
-
-
-                                }else result.push(returnedRow.row);
+                                }else result.push(Object.assign(returnedRow.row, parent_table_details));
                                 break;
                     default:
-                                /*Check 1 : If parent Table has not been encountered, then return from child tables*/
-                                if(!parent_table_encountered) return;
-                                var child_table = _.filter(child_tables, {
-                                    table_name : returnedRow.table
-                                })[0], formatted_child_result={};
-                                var allow_fetch = true;
-                                /*Logic for Conditional Fetching of Results starts here*/
+                                /*
+                                    If the table involved is not a child table, then it can be parent table
+                                    Check 1 : If parent Table has not been encountered, then return from child tables
+                                    The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
+                                */
+                                if(!main_table_encountered && result.length < 1){
 
-                                /*Check 2 : Check for any condition that has been received in the Request*/
-                                for( var key in child_table.condition){
-                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
-                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
-
-                                            if(!check_passed){
-                                                if(child_table.join_fetch) {
-                                                    result.pop();
-                                                    /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
-                                                    We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
-                                                    parent_table_encountered = false;
-                                                    allow_fetch = false;
-                                                }
-                                            }
-                                         })
-                                    }
-                                }
-
-                                if(!allow_fetch) return;
-                                /*Logic for Conditional Fetching of Results ends here*/
-
-                                if(child_table && child_table.values){
-                                    var formatted_child_result = {};
-                                    child_table.values.forEach(function(key){
-                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                    var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
+                                    if(parent_table === undefined) return;
+                                    //console.log("Parent Detected is : ", returnedRow.row);
+                                    //Process the Keys as required
+                                    parent_table.values.forEach(function(key){
+                                        if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
+                                        else parent_table_details[key] = returnedRow.row[key] || 0;
                                     })
-                                }else {
-                                    formatted_child_result = returnedRow.row;
-                                }
-                                if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
-                                    result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+
                                 }else{
-                                    result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+
+                                //Process The Data associated with Child Tables;
+                                    var child_table = _.filter(child_tables, {
+                                        table_name : returnedRow.table
+                                    })[0], formatted_child_result={};
+                                    var allow_fetch = true;
+                                    /*Logic for Conditional Fetching of Results starts here*/
+                                    /*Check 2 : Check for any condition that has been received in the Request*/
+                                    if(child_table === undefined) return;
+                                    for( var key in child_table.condition){
+                                        if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                             conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+
+                                                if(!check_passed){
+                                                    if(child_table.join_fetch) {
+                                                        result.pop();
+                                                        /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
+                                                        We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
+                                                        main_table_encountered = false;
+                                                        allow_fetch = false;
+                                                    }
+                                                }
+                                             })
+                                        }
+                                    }
+
+                                    if(!allow_fetch) return;
+                                    /*Logic for Conditional Fetching of Results ends here*/
+
+                                    if(child_table && child_table.values){
+                                        var formatted_child_result = {};
+                                        child_table.values.forEach(function(key){
+                                            if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                            else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                        })
+                                    }else {
+                                        formatted_child_result = returnedRow.row;
+                                    }
+                                    if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
+                                        result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                    }else{
+                                        result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                    }
+
                                 }
+
                                 break;
                 }
 
