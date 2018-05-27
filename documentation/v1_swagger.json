@@ -188,7 +188,8 @@
            },
            {
              "name" : "archieve",
-             "type": "boolean",
+             "type": "string",
+             "description" : "0 - Not Archived OR 1 - Archived",
              "required": false,
              "in": "query"
            },
