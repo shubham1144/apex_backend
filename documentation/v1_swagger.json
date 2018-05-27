@@ -120,7 +120,7 @@
            },
            {
              "name": "avatar",
-             "description" : "Support for this key will be available over time",
+             "description" : "This Key is Not Yet Supported",
              "in": "formData",
              "type": "string"
            }
@@ -179,11 +179,6 @@
              "description": "Form",
              "required": false,
              "in": "query"
-           },{
-             "name": "page",
-             "description": "Page",
-             "required": false,
-             "in": "query"
            },
            {
              "name": "keywords",
@@ -194,6 +189,12 @@
            {
              "name" : "archieve",
              "type": "boolean",
+             "required": false,
+             "in": "query"
+           },
+           {
+             "name": "page",
+             "description" : "Default Page is 1 and Default Count of rows is 10",
              "required": false,
              "in": "query"
            },

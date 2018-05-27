@@ -11,6 +11,7 @@ router.get('/notifications', function(req, res){
 
         dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains.Forms.Enquiry', {
         }, {
+            page : req.query.page || 1,
             parent_index_filter : req.query.form_id ? {
                                         table_name : 'Plans.Subscriptions.Domains.Forms',
                                         index : 'dfID',
@@ -89,8 +90,13 @@ router.get('/notifications/:notification_id', function(req, res){
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ]
     }, function(err, result){
-        if(err) return res.send("Database Error");
-        return util.formatSuccessResponse(result, function(result){
+        if(err) {
+                        console.error("Error occured due to : ", err);
+                        return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+                            res.send(err);
+                        })
+        }
+        util.formatSuccessResponse(result, function(result){
             res.send(result);
         })
     });

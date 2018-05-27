@@ -100,7 +100,6 @@ exports.getDataWithChildByIteration = function(table, primary_key, child_tables,
 * Custom function to fetch data associated with a table, along with child tables
 */
 exports.getOneByIteration = function(table, primary_key, child_tables, customization, callback){
-        //console.log("The Callback Function Received is : ", callback);
 
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
@@ -126,6 +125,21 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
                                                     })
                                                     result = formatted_result;
                                                 }else result = returnedRow.row;
+                                                //Mock Data starts here
+                                                if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
+                                                    result = Object.assign(result, {
+                                                        custom_fields : [{
+                                                            "type": "text",
+                                                            "key": "Mock Keyword 01",
+                                                            "value": "Mock Keyword 01 Content"
+                                                        },{
+                                                          "type": "text",
+                                                          "key": "Mock Keyword 02",
+                                                          "value": "Mock Keyword 02 Content"
+                                                        }]
+                                                    });
+                                                }
+                                                //Mock Data ends here
                                                 break;
                                     default :
                                                 var child_table = _.filter(child_tables, {
@@ -203,7 +217,6 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
 
                                                            for( var key in customization.condition){
                                                                 main_table_encountered = false;
-                                                                console.log("Trying to Validate the Key involved as : ", key, returnedRow.row[key]);
                                                                 if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
                                                                     conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
 
@@ -276,7 +289,21 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                                                                                                                                                                                                  "last_week_avg": "0"
                                                                                                                                                                                                                              }
                                                                                                                                                                                     }, parent_table_details))
-                                                            }else result.push(Object.assign(formatted_result, parent_table_details));
+                                                            }
+                                                            else if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
+                                                                result.push(Object.assign(formatted_result, {
+                                                                    custom_fields : [{
+                                                                        "type": "text",
+                                                                        "key": "Mock Keyword 01",
+                                                                        "value": "Mock Keyword 01 Content"
+                                                                    },{
+                                                                      "type": "text",
+                                                                      "key": "Mock Keyword 02",
+                                                                      "value": "Mock Keyword 02 Content"
+                                                                    }]
+                                                                }, parent_table_details));
+                                                            }
+                                                            else result.push(Object.assign(formatted_result, parent_table_details));
 
                                                         }else result.push(Object.assign(returnedRow.row, parent_table_details));
                                                         break;
@@ -348,10 +375,16 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                         }
 
                                     })
-                                    callback(null, result, {
-                                        'total_unread_notification_count' : 0,
-                                        'archive_count' : 0
-                                    });
+
+                                    //Paginate Here
+                                    fetchPagination(result, customization.page || 1, function(err, paginated_result){
+                                        callback(null, paginated_result, {
+                                            'total_unread_notification_count' : 0,
+                                            'archive_count' : 0
+                                        });
+                                    })
+
+
 
                                 })
             })
@@ -430,7 +463,21 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                                                                                                                                                                                      "last_week_avg": "0"
                                                                                                                                                                                                                  }
                                                                                                                                                                         }, parent_table_details))
-                                                }else result.push(Object.assign(formatted_result, parent_table_details));
+                                                }
+                                                 else if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
+                                                                                                                result.push(Object.assign(formatted_result, {
+                                                                                                                    custom_fields : [{
+                                                                                                                        "type": "text",
+                                                                                                                        "key": "Mock Keyword 01",
+                                                                                                                        "value": "Mock Keyword 01 Content"
+                                                                                                                    },{
+                                                                                                                      "type": "text",
+                                                                                                                      "key": "Mock Keyword 02",
+                                                                                                                      "value": "Mock Keyword 02 Content"
+                                                                                                                    }]
+                                                                                                                }, parent_table_details));
+                                                                                                            }
+                                                else result.push(Object.assign(formatted_result, parent_table_details));
 
                                             }else result.push(Object.assign(returnedRow.row, parent_table_details));
                                             break;
@@ -502,10 +549,15 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                             }
 
                         })
-                        callback(null, result, {
-                            'total_unread_notification_count' : 0,
-                            'archive_count' : 0
-                        });
+
+                        //Paginate Here
+                        fetchPagination(result, customization.page || 1, function(err, paginated_result){
+                            callback(null, paginated_result, {
+                                'total_unread_notification_count' : 0,
+                                'archive_count' : 0
+                            });
+                        })
+
 
                     })
         }
@@ -522,18 +574,32 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
         if(child_tables && child_tables.length > 0){
 
             store.indexIterator(table, index, {
-                            //fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
+                            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
 
                             if(err) return callback(err);
                             var result = {};
+                            var to_filter_result = [];
+
+                            iterator.on('done', function(){
+                                //The call Inside will be asyncronous as a result cannot use a iterator.
+                                //Currently, in function used to find iterator length and then proceed
+                                if(!to_filter_result[0]) return callback({
+                                    code : 0,
+                                    message : "Not Found"
+                                })
+                                dao.getOneByIteration(table, to_filter_result[0].row, child_tables, customization, function(err, data){
+                                result = data;
+                                return callback(null, data);
+                                })
+
+                            })
                             iterator.forEach(function(err, returnedRow){
                                 if(err) return console.log("Error occured due to : ", err);
-                                dao.getOneByIteration(table, returnedRow.row, child_tables, customization, function(err, data){
-                                    result = data;
-                                    return callback(null, data);
-                                })
+                                to_filter_result.push(returnedRow);
+
                             })
+
 
                         })
 
@@ -699,5 +765,14 @@ function conditionValidator(conditions, value, callback){
         }
     }
     callback(validated);
+
+}
+
+function fetchPagination(result, page, callback){
+
+    var offset = page > 0?(page -1) * 10 : 0;
+    console.log("The offset involved is : ", offset)
+    if(offset > result.length) return callback(null, {})
+    callback(null, _.take(_.slice(result, offset, result.length), 10));
 
 }
