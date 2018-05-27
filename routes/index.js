@@ -45,9 +45,9 @@ router.get('/check_database_crud_connection', function(req, res){
           ], function(err){
 
               if(err) return res.send("Database Error")
-              dao.getDataWithChildByIteration('Users', {
+              dao.getOneTableIterator('Users', {
                   uEmail : 'shubham@tentwenty.me'
-              }, ['Users.UserDevices', 'Users.UserAttributes'], function(err, result){
+              }, ['Users.UserDevices', 'Users.UserAttributes'], null, function(err, result){
                    if(err) return res.send("Database Error")
                    res.send("Notify.me Backend Server Health Status : Good");
               })

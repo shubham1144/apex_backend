@@ -20,14 +20,14 @@ var express = require('express'),
 */
 function fetchUserDetails(user_id, callback){
 
-    dao.getOneByIteration('Users', {
+    dao.getOneTableIterator('Users', {
             'uID' : user_id
             }, [{
             table_name : 'Users.UserAttributes',
             values : ['uaKey', 'uaValue']
     }], {
         values : [['uID', 'user_id'], ['uLastName', 'lastname'], ['uFirstName', 'firstname'], ['uEmail', 'email']]
-    }, function(err, result){
+    }, null, function(err, result){
 
         if(err) return callback("Database Error")
 
@@ -197,9 +197,9 @@ router.post('/user', function(req, res){
               ], function(err){
 
                   if(err) return res.send("Database Error")
-                  dao.getDataWithChildByIteration('Users', {
+                  dao.getOneTableIterator('Users', {
                       uEmail : 'syed@tentwenty.me'
-                  }, ['Users.UserDevices', 'Users.UserAttributes'], function(err, result){
+                  }, ['Users.UserDevices', 'Users.UserAttributes'], null, function(err, result){
                        if(err) return res.send("Database Error")
                        res.send("Notify.me Backend Server Health Status : Good");
                   })

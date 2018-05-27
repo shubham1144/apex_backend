@@ -13,7 +13,7 @@ router.get('/domains', function(req, res) {
     var filter = req.query.domain_id ? {
         dID : parseInt(req.query.domain_id)
     } : {}
-    dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains', filter, {
+    dao.getMultipleTableIterator('Plans.Subscriptions.Domains', filter, {
         values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats']
     },
     [{

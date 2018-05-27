@@ -11,7 +11,7 @@ var express = require('express'),
 */
 router.get('/notifications', function(req, res){
 
-        dao.getMultipleDataWithChildByIteration('Plans.Subscriptions.Domains.Forms.Enquiry', {
+        dao.getMultipleTableIterator('Plans.Subscriptions.Domains.Forms.Enquiry', {
         }, {
             page : req.query.page || 1,
             parent_index_filter : req.query.form_id ? {
