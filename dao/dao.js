@@ -169,156 +169,322 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
             includedTables: child_tables_to_fetch
         };
 
-        store.tableIterator(table, primary_key, conditions, function(err, iterator){
+        if(customization.parent_index_filter){
 
-            if(err) return callback(err);
-            var result = [], child_tables_to_process = {};
-            var main_table_encountered = false;
-            var parent_table_details = {};
-            iterator.forEach(function(err, returnedRow){
+            dao.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, result){
+                if(err) return callback(err);
+                if(Object.keys(result).length < 1){
+                    return callback({
+                        code : 0,
+                        message : customization.parent_index_filter.message
+                    })
+                }
+                //Create a common function to handle Table Iterator for listing
+                store.tableIterator(table, result, conditions, function(err, iterator){
 
-                if(err) return console.log("Error occured due to : ", err);
-                switch(returnedRow.table){
+                                    if(err) return callback(err);
+                                    var result = [], child_tables_to_process = {};
+                                    var main_table_encountered = false;
+                                    var parent_table_details = {};
+                                    iterator.forEach(function(err, returnedRow){
 
-                    case table:     main_table_encountered = true;
-                                    if(customization && customization.values){
-                                    var formatted_result = {};
-                                    customization.values.forEach(function(key){
-                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                        else formatted_result[key] = returnedRow.row[key] || 0;
+                                        if(err) return console.log("Error occured due to : ", err);
+                                        switch(returnedRow.table){
+
+                                            case table:     main_table_encountered = true;
+                                                            if(customization && customization.values){
+                                                            var formatted_result = {};
+                                                            customization.values.forEach(function(key){
+                                                                if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                                else formatted_result[key] = returnedRow.row[key] || 0;
+                                                            })
+                                                            //Temporarily Testing with Mock Being Sent out to the application
+                                                            if(table === 'Plans.Subscriptions.Domains'){
+                                                            result.push(Object.assign(formatted_result, {
+                                                                                                                                                                                    "enq_count_stats": {
+                                                                                                                                                                                                                                 "month": "05",
+                                                                                                                                                                                                                                 "days": [
+                                                                                                                                                                                                                                     "2018-05-13",
+                                                                                                                                                                                                                                     "2018-05-14",
+                                                                                                                                                                                                                                     "2018-05-15",
+                                                                                                                                                                                                                                     "2018-05-16",
+                                                                                                                                                                                                                                     "2018-05-17",
+                                                                                                                                                                                                                                     "2018-05-18",
+                                                                                                                                                                                                                                     "2018-05-19",
+                                                                                                                                                                                                                                     "2018-05-20"
+                                                                                                                                                                                                                                 ],
+                                                                                                                                                                                                                                 "enquiries": {
+                                                                                                                                                                                                                                     "2018-05-13": "0",
+                                                                                                                                                                                                                                     "2018-05-14": "0",
+                                                                                                                                                                                                                                     "2018-05-15": "0",
+                                                                                                                                                                                                                                     "2018-05-16": "0",
+                                                                                                                                                                                                                                     "2018-05-17": "0",
+                                                                                                                                                                                                                                     "2018-05-18": "0",
+                                                                                                                                                                                                                                     "2018-05-19": "0",
+                                                                                                                                                                                                                                     "2018-05-20": "0"
+                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                 "curr_week_total": "0",
+                                                                                                                                                                                                                                 "last_week_total": "0"
+                                                                                                                                                                                                                             },
+                                                                                                                                                                                     "enq_res_time_stats": {
+                                                                                                                                                                                                                                 "month": "05",
+                                                                                                                                                                                                                                 "days": [
+                                                                                                                                                                                                                                     "2018-05-13",
+                                                                                                                                                                                                                                     "2018-05-14",
+                                                                                                                                                                                                                                     "2018-05-15",
+                                                                                                                                                                                                                                     "2018-05-16",
+                                                                                                                                                                                                                                     "2018-05-17",
+                                                                                                                                                                                                                                     "2018-05-18",
+                                                                                                                                                                                                                                     "2018-05-19",
+                                                                                                                                                                                                                                     "2018-05-20"
+                                                                                                                                                                                                                                 ],
+                                                                                                                                                                                                                                 "response_times": {
+                                                                                                                                                                                                                                     "2018-05-13": "0",
+                                                                                                                                                                                                                                     "2018-05-14": "0",
+                                                                                                                                                                                                                                     "2018-05-15": "0",
+                                                                                                                                                                                                                                     "2018-05-16": "0",
+                                                                                                                                                                                                                                     "2018-05-17": "0",
+                                                                                                                                                                                                                                     "2018-05-18": "0",
+                                                                                                                                                                                                                                     "2018-05-19": "0",
+                                                                                                                                                                                                                                     "2018-05-20": "0"
+                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                 "curr_week_avg": "0",
+                                                                                                                                                                                                                                 "last_week_avg": "0"
+                                                                                                                                                                                                                             }
+                                                                                                                                                                                    }, parent_table_details))
+                                                            }else result.push(Object.assign(formatted_result, parent_table_details));
+
+                                                        }else result.push(Object.assign(returnedRow.row, parent_table_details));
+                                                        break;
+                                            default:
+                                                        /*
+                                                            If the table involved is not a child table, then it can be parent table
+                                                            Check 1 : If parent Table has not been encountered, then return from child tables
+                                                            The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
+                                                        */
+                                                        if(!main_table_encountered && result.length < 1){
+
+                                                            var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
+                                                            if(parent_table === undefined) return;
+                                                            //console.log("Parent Detected is : ", returnedRow.row);
+                                                            //Process the Keys as required
+                                                            parent_table.values.forEach(function(key){
+                                                                if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
+                                                                else parent_table_details[key] = returnedRow.row[key] || 0;
+                                                            })
+
+                                                        }else{
+
+                                                        //Process The Data associated with Child Tables;
+                                                            var child_table = _.filter(child_tables, {
+                                                                table_name : returnedRow.table
+                                                            })[0], formatted_child_result={};
+                                                            var allow_fetch = true;
+                                                            /*Logic for Conditional Fetching of Results starts here*/
+                                                            /*Check 2 : Check for any condition that has been received in the Request*/
+                                                            if(child_table === undefined) return;
+                                                            for( var key in child_table.condition){
+                                                                if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                                                     conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+
+                                                                        if(!check_passed){
+                                                                            if(child_table.join_fetch) {
+                                                                                result.pop();
+                                                                                /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
+                                                                                We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
+                                                                                main_table_encountered = false;
+                                                                                allow_fetch = false;
+                                                                            }
+                                                                        }
+                                                                     })
+                                                                }
+                                                            }
+
+                                                            if(!allow_fetch) return;
+                                                            /*Logic for Conditional Fetching of Results ends here*/
+
+                                                            if(child_table && child_table.values){
+                                                                var formatted_child_result = {};
+                                                                child_table.values.forEach(function(key){
+                                                                    if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                                })
+                                                            }else {
+                                                                formatted_child_result = returnedRow.row;
+                                                            }
+                                                            if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
+                                                                result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                                            }else{
+                                                                result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                            }
+
+                                                        }
+
+                                                        break;
+                                        }
+
                                     })
-                                    //Temporarily Testing with Mock Being Sent out to the application
-                                    if(table === 'Plans.Subscriptions.Domains'){
-                                    result.push(Object.assign(formatted_result, {
-                                                                                                                                                            "enq_count_stats": {
-                                                                                                                                                                                                         "month": "05",
-                                                                                                                                                                                                         "days": [
-                                                                                                                                                                                                             "2018-05-13",
-                                                                                                                                                                                                             "2018-05-14",
-                                                                                                                                                                                                             "2018-05-15",
-                                                                                                                                                                                                             "2018-05-16",
-                                                                                                                                                                                                             "2018-05-17",
-                                                                                                                                                                                                             "2018-05-18",
-                                                                                                                                                                                                             "2018-05-19",
-                                                                                                                                                                                                             "2018-05-20"
-                                                                                                                                                                                                         ],
-                                                                                                                                                                                                         "enquiries": {
-                                                                                                                                                                                                             "2018-05-13": "0",
-                                                                                                                                                                                                             "2018-05-14": "0",
-                                                                                                                                                                                                             "2018-05-15": "0",
-                                                                                                                                                                                                             "2018-05-16": "0",
-                                                                                                                                                                                                             "2018-05-17": "0",
-                                                                                                                                                                                                             "2018-05-18": "0",
-                                                                                                                                                                                                             "2018-05-19": "0",
-                                                                                                                                                                                                             "2018-05-20": "0"
-                                                                                                                                                                                                         },
-                                                                                                                                                                                                         "curr_week_total": "0",
-                                                                                                                                                                                                         "last_week_total": "0"
-                                                                                                                                                                                                     },
-                                                                                                                                                             "enq_res_time_stats": {
-                                                                                                                                                                                                         "month": "05",
-                                                                                                                                                                                                         "days": [
-                                                                                                                                                                                                             "2018-05-13",
-                                                                                                                                                                                                             "2018-05-14",
-                                                                                                                                                                                                             "2018-05-15",
-                                                                                                                                                                                                             "2018-05-16",
-                                                                                                                                                                                                             "2018-05-17",
-                                                                                                                                                                                                             "2018-05-18",
-                                                                                                                                                                                                             "2018-05-19",
-                                                                                                                                                                                                             "2018-05-20"
-                                                                                                                                                                                                         ],
-                                                                                                                                                                                                         "response_times": {
-                                                                                                                                                                                                             "2018-05-13": "0",
-                                                                                                                                                                                                             "2018-05-14": "0",
-                                                                                                                                                                                                             "2018-05-15": "0",
-                                                                                                                                                                                                             "2018-05-16": "0",
-                                                                                                                                                                                                             "2018-05-17": "0",
-                                                                                                                                                                                                             "2018-05-18": "0",
-                                                                                                                                                                                                             "2018-05-19": "0",
-                                                                                                                                                                                                             "2018-05-20": "0"
-                                                                                                                                                                                                         },
-                                                                                                                                                                                                         "curr_week_avg": "0",
-                                                                                                                                                                                                         "last_week_avg": "0"
-                                                                                                                                                                                                     }
-                                                                                                                                                            }, parent_table_details))
-                                    }else result.push(Object.assign(formatted_result, parent_table_details));
+                                    callback(null, result, {
+                                        'total_unread_notification_count' : 0,
+                                        'archive_count' : 0
+                                    });
 
-                                }else result.push(Object.assign(returnedRow.row, parent_table_details));
-                                break;
-                    default:
-                                /*
-                                    If the table involved is not a child table, then it can be parent table
-                                    Check 1 : If parent Table has not been encountered, then return from child tables
-                                    The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
-                                */
-                                if(!main_table_encountered && result.length < 1){
+                                })
+            })
 
-                                    var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
-                                    if(parent_table === undefined) return;
-                                    //console.log("Parent Detected is : ", returnedRow.row);
-                                    //Process the Keys as required
-                                    parent_table.values.forEach(function(key){
-                                        if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
-                                        else parent_table_details[key] = returnedRow.row[key] || 0;
-                                    })
+        }else{
+            //Create a common function to handle Table Iterator for listing
+            store.tableIterator(table, primary_key, conditions, function(err, iterator){
 
-                                }else{
+                        if(err) return callback(err);
+                        var result = [], child_tables_to_process = {};
+                        var main_table_encountered = false;
+                        var parent_table_details = {};
+                        iterator.forEach(function(err, returnedRow){
 
-                                //Process The Data associated with Child Tables;
-                                    var child_table = _.filter(child_tables, {
-                                        table_name : returnedRow.table
-                                    })[0], formatted_child_result={};
-                                    var allow_fetch = true;
-                                    /*Logic for Conditional Fetching of Results starts here*/
-                                    /*Check 2 : Check for any condition that has been received in the Request*/
-                                    if(child_table === undefined) return;
-                                    for( var key in child_table.condition){
-                                        if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
-                                             conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+                            if(err) return console.log("Error occured due to : ", err);
+                            switch(returnedRow.table){
 
-                                                if(!check_passed){
-                                                    if(child_table.join_fetch) {
-                                                        result.pop();
-                                                        /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
-                                                        We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
-                                                        main_table_encountered = false;
-                                                        allow_fetch = false;
+                                case table:     main_table_encountered = true;
+                                                if(customization && customization.values){
+                                                var formatted_result = {};
+                                                customization.values.forEach(function(key){
+                                                    if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else formatted_result[key] = returnedRow.row[key] || 0;
+                                                })
+                                                //Temporarily Testing with Mock Being Sent out to the application
+                                                if(table === 'Plans.Subscriptions.Domains'){
+                                                result.push(Object.assign(formatted_result, {
+                                                                                                                                                                        "enq_count_stats": {
+                                                                                                                                                                                                                     "month": "05",
+                                                                                                                                                                                                                     "days": [
+                                                                                                                                                                                                                         "2018-05-13",
+                                                                                                                                                                                                                         "2018-05-14",
+                                                                                                                                                                                                                         "2018-05-15",
+                                                                                                                                                                                                                         "2018-05-16",
+                                                                                                                                                                                                                         "2018-05-17",
+                                                                                                                                                                                                                         "2018-05-18",
+                                                                                                                                                                                                                         "2018-05-19",
+                                                                                                                                                                                                                         "2018-05-20"
+                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                     "enquiries": {
+                                                                                                                                                                                                                         "2018-05-13": "0",
+                                                                                                                                                                                                                         "2018-05-14": "0",
+                                                                                                                                                                                                                         "2018-05-15": "0",
+                                                                                                                                                                                                                         "2018-05-16": "0",
+                                                                                                                                                                                                                         "2018-05-17": "0",
+                                                                                                                                                                                                                         "2018-05-18": "0",
+                                                                                                                                                                                                                         "2018-05-19": "0",
+                                                                                                                                                                                                                         "2018-05-20": "0"
+                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                     "curr_week_total": "0",
+                                                                                                                                                                                                                     "last_week_total": "0"
+                                                                                                                                                                                                                 },
+                                                                                                                                                                         "enq_res_time_stats": {
+                                                                                                                                                                                                                     "month": "05",
+                                                                                                                                                                                                                     "days": [
+                                                                                                                                                                                                                         "2018-05-13",
+                                                                                                                                                                                                                         "2018-05-14",
+                                                                                                                                                                                                                         "2018-05-15",
+                                                                                                                                                                                                                         "2018-05-16",
+                                                                                                                                                                                                                         "2018-05-17",
+                                                                                                                                                                                                                         "2018-05-18",
+                                                                                                                                                                                                                         "2018-05-19",
+                                                                                                                                                                                                                         "2018-05-20"
+                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                     "response_times": {
+                                                                                                                                                                                                                         "2018-05-13": "0",
+                                                                                                                                                                                                                         "2018-05-14": "0",
+                                                                                                                                                                                                                         "2018-05-15": "0",
+                                                                                                                                                                                                                         "2018-05-16": "0",
+                                                                                                                                                                                                                         "2018-05-17": "0",
+                                                                                                                                                                                                                         "2018-05-18": "0",
+                                                                                                                                                                                                                         "2018-05-19": "0",
+                                                                                                                                                                                                                         "2018-05-20": "0"
+                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                     "curr_week_avg": "0",
+                                                                                                                                                                                                                     "last_week_avg": "0"
+                                                                                                                                                                                                                 }
+                                                                                                                                                                        }, parent_table_details))
+                                                }else result.push(Object.assign(formatted_result, parent_table_details));
+
+                                            }else result.push(Object.assign(returnedRow.row, parent_table_details));
+                                            break;
+                                default:
+                                            /*
+                                                If the table involved is not a child table, then it can be parent table
+                                                Check 1 : If parent Table has not been encountered, then return from child tables
+                                                The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
+                                            */
+                                            if(!main_table_encountered && result.length < 1){
+
+                                                var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
+                                                if(parent_table === undefined) return;
+                                                //console.log("Parent Detected is : ", returnedRow.row);
+                                                //Process the Keys as required
+                                                parent_table.values.forEach(function(key){
+                                                    if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    else parent_table_details[key] = returnedRow.row[key] || 0;
+                                                })
+
+                                            }else{
+
+                                            //Process The Data associated with Child Tables;
+                                                var child_table = _.filter(child_tables, {
+                                                    table_name : returnedRow.table
+                                                })[0], formatted_child_result={};
+                                                var allow_fetch = true;
+                                                /*Logic for Conditional Fetching of Results starts here*/
+                                                /*Check 2 : Check for any condition that has been received in the Request*/
+                                                if(child_table === undefined) return;
+                                                for( var key in child_table.condition){
+                                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+
+                                                            if(!check_passed){
+                                                                if(child_table.join_fetch) {
+                                                                    result.pop();
+                                                                    /*If the condition is join_fetch i.e will fetch Parent only if Child meets a condition then
+                                                                    We need to Ignore all other child tables obtained in sequence to prevent data of other valid Parent Rows from being overridden*/
+                                                                    main_table_encountered = false;
+                                                                    allow_fetch = false;
+                                                                }
+                                                            }
+                                                         })
                                                     }
                                                 }
-                                             })
-                                        }
-                                    }
 
-                                    if(!allow_fetch) return;
-                                    /*Logic for Conditional Fetching of Results ends here*/
+                                                if(!allow_fetch) return;
+                                                /*Logic for Conditional Fetching of Results ends here*/
 
-                                    if(child_table && child_table.values){
-                                        var formatted_child_result = {};
-                                        child_table.values.forEach(function(key){
-                                            if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                            else formatted_child_result[key] = returnedRow.row[key] || 0;
-                                        })
-                                    }else {
-                                        formatted_child_result = returnedRow.row;
-                                    }
-                                    if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
-                                        result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
-                                    }else{
-                                        result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
-                                    }
+                                                if(child_table && child_table.values){
+                                                    var formatted_child_result = {};
+                                                    child_table.values.forEach(function(key){
+                                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                    })
+                                                }else {
+                                                    formatted_child_result = returnedRow.row;
+                                                }
+                                                if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
+                                                    result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                                }else{
+                                                    result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                }
 
-                                }
+                                            }
 
-                                break;
-                }
+                                            break;
+                            }
 
-            })
-            callback(null, result, {
-                'total_unread_notification_count' : 0,
-                'archive_count' : 0
-            });
+                        })
+                        callback(null, result, {
+                            'total_unread_notification_count' : 0,
+                            'archive_count' : 0
+                        });
 
-        })
+                    })
+        }
 
 };
 
@@ -329,9 +495,10 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
 */
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
-        if(child_tables){
+        if(child_tables && child_tables.length > 0){
+
             store.indexIterator(table, index, {
-                            fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
+                            //fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
 
                             if(err) return callback(err);
