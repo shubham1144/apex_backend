@@ -119,7 +119,8 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
                                                     var formatted_result = {};
                                                     customization.values.forEach(function(key){
 
-                                                        if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+
 
                                                         else formatted_result[key] = returnedRow.row[key] || 0;
                                                     })
@@ -148,7 +149,7 @@ exports.getOneByIteration = function(table, primary_key, child_tables, customiza
                                                 if(child_table && child_table.values){
                                                     var formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
-                                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                         else formatted_child_result[key] = returnedRow.row[key] || 0;
                                                     })
                                                 }else {
@@ -230,7 +231,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                             if(customization && customization.values){
                                                             var formatted_result = {};
                                                             customization.values.forEach(function(key){
-                                                                if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                                if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                                 else formatted_result[key] = returnedRow.row[key] || 0;
                                                             })
 
@@ -357,7 +358,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                             if(child_table && child_table.values){
                                                                 var formatted_child_result = {};
                                                                 child_table.values.forEach(function(key){
-                                                                    if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                                if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                                     else formatted_child_result[key] = returnedRow.row[key] || 0;
                                                                 })
                                                             }else {
@@ -406,7 +407,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                 if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                     else formatted_result[key] = returnedRow.row[key] || 0;
                                                 })
                                                 //Temporarily Testing with Mock Being Sent out to the application
@@ -531,7 +532,7 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                                 if(child_table && child_table.values){
                                                     var formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
-                                                        if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                         else formatted_child_result[key] = returnedRow.row[key] || 0;
                                                     })
                                                 }else {
@@ -615,7 +616,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                         case table: if(customization && customization.values){
                                                         var formatted_result = {};
                                                         customization.values.forEach(function(key){
-                                                            if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                             else formatted_result[key] = returnedRow.row[key] || 0;
                                                         })
                                                         result = formatted_result;

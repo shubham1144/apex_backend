@@ -28,7 +28,12 @@ router.get('/notifications', function(req, res){
                                   } : null,
             values : [
                 ['eID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'],
-                ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
+                ['eCreatedAt', 'created_at'], ['eStatus', 'status', {
+                    'Unread' : 0,
+                    'Read' : 1,
+                    'NotReachable' : 2,
+                    'Engaged' : 3
+                }], ['eIsArchived', 'is_archived'],
                 ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
             ],
             search_keyword : {
@@ -52,7 +57,12 @@ router.get('/notifications', function(req, res){
                 {
                     table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
                     alias : 'call_logs',
-                    values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status'], ['clNote', 'note']]
+                    values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status', {
+                        'NotCalled' : 0,
+                        'Called' : 1,
+                        'Engaged' : 3,
+                        'NotReachable' : 2
+                    }], ['clNote', 'note']]
                 }
         ],
         function(err, result, requested_count_details){
@@ -83,12 +93,23 @@ router.get('/notifications/:notification_id', function(req, res){
     [{
             table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
             alias : 'call_logs',
-            values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status'], ['clNote', 'note']]
+            values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clStatus', 'status', {
+                            'NotCalled' : 0,
+                            'Called' : 1,
+                            'Engaged' : 3,
+                            'NotReachable' : 2
+                    }], ['clNote', 'note']
+    ]
     }],
     {
         values : [
             ['pID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'], 'domain_name',
-            ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
+            ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status', {
+                                                                                                                      'Unread' : 0,
+                                                                                                                      'Read' : 1,
+                                                                                                                      'NotReachable' : 2,
+                                                                                                                      'Engaged' : 3
+                                                                                                                  }], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ]
     }, function(err, result){
@@ -137,7 +158,7 @@ router.post('/notifications', function(req, res){
 router.post('/notifications/call_logs', function(req, res){
 
     dao.putData({}, 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs', {
-    "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ","eID":"SkhmUxVkQ",
+    "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ","eID": req.query.eID,
     clID : shortid.generate(),
     clStatus : "NotCalled",
     clCreatedAt : moment.utc().format(),
