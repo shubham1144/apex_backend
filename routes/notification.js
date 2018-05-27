@@ -27,7 +27,16 @@ router.get('/notifications', function(req, res){
                 ['eID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'],
                 ['eCreatedAt', 'created_at'], ['eStatus', 'status'], ['eIsArchived', 'is_archived'],
                 ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
-            ]
+            ],
+            search_keyword : {
+                value : req.query.keywords || null,
+                filter_keys : ['ePhone', 'eEmail']
+            },
+            condition : (req.query.archieve)?{
+                'eIsArchived' : {
+                    '$equals' : req.query.archieve === '1' ? true : false
+                }
+            } : null,
         }, [
                 {
                     table_name : 'Plans.Subscriptions.Domains',

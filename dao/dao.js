@@ -192,12 +192,36 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                         switch(returnedRow.table){
 
                                             case table:     main_table_encountered = true;
+                                                            if(customization.search_keyword && customization.search_keyword.value){
+                                                                main_table_encountered = false;
+                                                                customization.search_keyword.filter_keys.forEach(function(key){
+                                                                    if(returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                                        main_table_encountered = true;
+                                                                    }
+                                                                })
+                                                            }
+
+                                                           for( var key in customization.condition){
+                                                                main_table_encountered = false;
+                                                                console.log("Trying to Validate the Key involved as : ", key, returnedRow.row[key]);
+                                                                if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
+                                                                    conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
+
+                                                                        if(check_passed) main_table_encountered = true;
+
+                                                                    })
+                                                                }
+                                                           }
+
+                                                            if(!main_table_encountered) return;
                                                             if(customization && customization.values){
                                                             var formatted_result = {};
                                                             customization.values.forEach(function(key){
                                                                 if(typeof key === 'object') formatted_result[key[1]] = returnedRow.row[key[0]] || 0;
                                                                 else formatted_result[key] = returnedRow.row[key] || 0;
                                                             })
+
+
                                                             //Temporarily Testing with Mock Being Sent out to the application
                                                             if(table === 'Plans.Subscriptions.Domains'){
                                                             result.push(Object.assign(formatted_result, {
@@ -666,6 +690,10 @@ function conditionValidator(conditions, value, callback){
         switch(condition){
             case '$contains' :  if(value.indexOf(conditions[condition]) === -1){
                                     validated = false;
+                                }
+                                break;
+             case '$equals' :   if(value != conditions[condition]){
+                                                validated = false;
                                 }
                                 break;
         }
