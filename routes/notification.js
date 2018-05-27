@@ -2,7 +2,9 @@ var express = require('express'),
     router = express.Router(),
     dao = require('./../dao/dao.js'),
     shortid = require('shortid'),
+    moment = require('moment'),
     async = require('async');
+
 
 /**
     * API Interface to fetch a list of notifications associated with the Platform
@@ -118,6 +120,7 @@ router.post('/notifications', function(req, res){
             eEmail : 'testuser10@tentwenty.me',
             eFormAllDetails : "",
             eStatus : 'Unread',
+            eCreatedAt : moment.utc().format(),
             eIsArchived : false,
             eIsDeleted : false
     }, function(err, result){
@@ -136,12 +139,13 @@ router.post('/notifications/call_logs', function(req, res){
     dao.putData({}, 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs', {
     "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ","eID":"SkhmUxVkQ",
     clID : shortid.generate(),
-    clStatus : "0",
+    clStatus : "NotCalled",
+    clCreatedAt : moment.utc().format(),
     clUserDetails : {
         firstname : 'Shubham',
         lastname : 'Chodankar',
-        user_id : 'X',
-        user_contact : '8975567457'
+        user_id : 'rJfFCcb1X',
+        user_contact : '+91 8975567457'
     },
     clNote : "Testing Creation of a Note using a Enquiry"
     }, function(err, result){

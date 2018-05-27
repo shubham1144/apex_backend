@@ -771,7 +771,6 @@ function conditionValidator(conditions, value, callback){
 function fetchPagination(result, page, callback){
 
     var offset = page > 0?(page -1) * 10 : 0;
-    console.log("The offset involved is : ", offset)
     if(offset > result.length) return callback(null, {})
     callback(null, _.take(_.slice(result, offset, result.length), 10));
 

@@ -9,7 +9,7 @@ module.exports = [
         eStatus ENUM(Unread, Read, Engaged, NotReachable),
         eIsArchived BOOLEAN,
         eIsDeleted BOOLEAN,
-        eCreatedAt INTEGER,
+        eCreatedAt STRING,
         eFormAllDetails STRING,
         eFormLinkedDetails STRING,
         PRIMARY KEY (eID)
@@ -18,8 +18,8 @@ module.exports = [
 ,`
     CREATE TABLE Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs (
         clID STRING,
-        clStatus STRING,
-        clCreatedAt INTEGER,
+        clStatus ENUM(NotCalled, Called, Engaged, NotReachable),
+        clCreatedAt STRING,
         clUserDetails RECORD(
             firstname STRING,
             lastname STRING,
