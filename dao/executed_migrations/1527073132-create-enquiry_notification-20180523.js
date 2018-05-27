@@ -35,5 +35,8 @@ module.exports = [
 `,
 `
     CREATE INDEX dfID on Plans.Subscriptions.Domains.Forms(dfID)
+`,
+`
+    CREATE INDEX dID ON Plans.Subscriptions.Domains(dID)
 `
 ];
