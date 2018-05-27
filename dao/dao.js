@@ -378,11 +378,8 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                                     })
 
                                     //Paginate Here
-                                    fetchPagination(result, customization.page || 1, function(err, paginated_result){
-                                        callback(null, paginated_result, {
-                                            'total_unread_notification_count' : 0,
-                                            'archive_count' : 0
-                                        });
+                                    fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, function(err, paginated_result, requested_count_details){
+                                        callback(null, paginated_result, requested_count_details);
                                     })
 
 
@@ -552,11 +549,8 @@ exports.getMultipleDataWithChildByIteration = function(table, primary_key, custo
                         })
 
                         //Paginate Here
-                        fetchPagination(result, customization.page || 1, function(err, paginated_result){
-                            callback(null, paginated_result, {
-                                'total_unread_notification_count' : 0,
-                                'archive_count' : 0
-                            });
+                        fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, function(err, paginated_result, requested_count_details){
+                            callback(null, paginated_result, requested_count_details);
                         })
 
 
@@ -651,7 +645,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
 
 };
 
-/*
+/**
 * Function to insert data in the nosql database linked to the kvstore
 */
 exports.putData = function(primary_key, table, data, callback){
@@ -715,6 +709,7 @@ exports.updateDataWithChild = function(table, primary_key, data, child_tables, c
 
 };
 
+
 /**
 * Over time need to make sure that we do not repeatedly run the same migration files
 */
@@ -748,8 +743,9 @@ function runAllMigrations(){
 
 }
 
-
-
+/**
+    * Function to Validate Conditions associated with the Query being Executed
+*/
 function conditionValidator(conditions, value, callback){
 
     var validated = true;
@@ -769,10 +765,21 @@ function conditionValidator(conditions, value, callback){
 
 }
 
-function fetchPagination(result, page, callback){
+/**
+    * Function to Paginate the Result set being Obtained
+    * Also Appends any counts requested to be appended.
+*/
+function fetchPagination(result, page, custom_count_fetch, callback){
 
     var offset = page > 0?(page -1) * 10 : 0;
     if(offset > result.length) return callback(null, {})
-    callback(null, _.take(_.slice(result, offset, result.length), 10));
+    var custom_count = {};
+
+    custom_count_fetch.forEach(function(custom_counter){
+        custom_count = Object.assign(custom_count, {
+            [custom_counter.alias] : (_.filter(result, { [custom_counter.key] : custom_counter.criteria})).length
+        })
+    });
+    callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
 
 }

@@ -36,6 +36,15 @@ router.get('/notifications', function(req, res){
                 }], ['eIsArchived', 'is_archived'],
                 ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
             ],
+            custom_count_fetch : [{
+                key : 'is_archived',
+                criteria : true,
+                alias : 'archive_count'
+            }, {
+                key : 'status',
+                criteria : 0,
+                alias : 'total_unread_notification_count'
+            }],
             search_keyword : {
                 value : req.query.keywords || null,
                 filter_keys : ['ePhone', 'eEmail']
@@ -66,7 +75,7 @@ router.get('/notifications', function(req, res){
                 }
         ],
         function(err, result, requested_count_details){
-
+            console.log("The Requested Count Details Obtained are : ", requested_count_details);
             if(err) {
                 console.error("Error occured due to : ", err);
                 return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
