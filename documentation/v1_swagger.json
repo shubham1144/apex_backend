@@ -51,6 +51,18 @@
          "responses": {}
        }
      },
+     "/forgot_password": {
+       "put": {
+         "tags": ["Authentication"],
+         "description": "Sends a Reset Password To Users",
+         "parameters": [{
+           "name": "email",
+           "description" : "The Email Registered with The Application",
+           "in": "formData"
+         }],
+         "responses": {}
+       }
+     },
      "/user": {
        "get": {
          "tags": ["User Profile"],

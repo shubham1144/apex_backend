@@ -16,7 +16,6 @@ var express = require('express'),
     message = require('./../helpers/message.json'),
     constants = require('./../helpers/constant.js');
 
-
 /**
 * Function to Fetch Details associated with the Users in System
 */
