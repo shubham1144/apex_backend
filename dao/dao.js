@@ -401,8 +401,26 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                 break;
                                     default :
                                                 var child_table = _.filter(child_tables, {
-                                                    table_name : returnedRow.table
-                                                })[0], formatted_child_result={};
+                                                        table_name : returnedRow.table
+                                                    })[0],
+                                                    formatted_child_result={},
+                                                    allow_fetch = true;
+                                                /*  Logic for Conditional Fetching of Results starts here
+                                                    Check 2 : Check for any condition that has been received in the Request
+                                                */
+                                                if(child_table === undefined) return;
+                                                for( var key in child_table.condition){
+
+                                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+                                                            if(!check_passed) allow_fetch = false;
+                                                         })
+                                                    }
+
+                                                }
+
+                                                if(!allow_fetch) return result[child_table.alias || returnedRow.table] = [];
+
                                                 if(child_table && child_table.values){
                                                     var formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
@@ -436,7 +454,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
         if(child_tables && child_tables.length > 0){
-
+//            console.log("Trying to fetch data associated with the Child Tables aswell....");
             store.indexIterator(table, index, {
                             fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
@@ -596,13 +614,55 @@ exports.updateDataWithChild = function(table, primary_key, data, child_tables, c
                     })
                     if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined){
                       exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
-                    }else callback(null);
+                    }
+                    else callback(null);
 
                 }, function(err){
                     callback(err);
                 })
 
             })
+    })
+
+};
+
+
+/*Currently The Function Below just supports updates one level done the Relationship heirchy*/
+exports.updateDataIndexIterator = function(table, primary_key, index, condition, data, child_tables, callback){
+
+    exports.getOneIndexIterator(table, index, condition, child_tables, null, function(err, result){
+
+         if(err) return callback(err);
+         if(Object.keys(result) < 1) return callback({
+            code : 0,
+            message : 'Not Found'
+         })
+          //return console.log("The Data received associated with The User is : ", result);
+
+         store.put(table, Object.assign(result, data), function(err){
+
+             if(err) return callback(err);
+             async.each(child_tables, function(table_details, callback){
+
+                var parent_details = {};
+                primary_key.forEach(function(single_primary_key){
+                    parent_details[single_primary_key] = data[single_primary_key] || result[single_primary_key]
+                })
+
+                if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined){
+                    exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+                }
+                else if(table_details.create_if_absent){
+                    exports.putData(parent_details, table_details.table_name, table_details.data, callback);
+                }
+                else callback(null);
+
+             }, function(err){
+                 callback(err, Object.assign(result, data));
+             })
+
+         })
+
     })
 
 };
