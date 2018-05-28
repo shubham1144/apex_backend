@@ -39,12 +39,13 @@
          "responses": {}
        }
      },
-     "/login/logout": {
-       "post": {
+     "/refresh_token": {
+       "get": {
          "tags": ["Authentication"],
-         "description": "Logout Api Associated with Notify ME",
+         "description": "Refresh a Token that has neared Expiry",
          "parameters": [{
            "name": "Authorization",
+           "description" : "Token that has neared its expiry",
            "in": "header"
          }],
          "responses": {}
@@ -88,6 +89,7 @@
              "description" : "Contact Number Associated with the User Involved",
              "required": true,
              "in": "formData",
+             "example" : "{\"phone_number\": \"8975674577\",\"country_code\": \"+91\"}",
              "type": "string"
            },
            {

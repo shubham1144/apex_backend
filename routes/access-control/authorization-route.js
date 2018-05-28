@@ -89,6 +89,7 @@ router.post('/login', function(req, res) {
 
 /**
 * API Interface to logout a user from the system
+*@Not yet Used
 */
 router.post('/login/logout', function(req, res){
 
@@ -99,5 +100,26 @@ router.post('/login/logout', function(req, res){
      })
 
 });
+
+/**
+* API Interface to Refresh a Token that has neared its expiry time
+*/
+router.get('/refresh_token', function(req, res){
+
+    token.signAndGenerateToken({
+        user_id : req.user.user_id
+    }, function(err, token){
+
+        util.formatSuccessResponse({
+            msg: message.success.login.token_refresh,
+            token: token
+        }, function(result){
+            res.json(result);
+        })
+
+    })
+
+});
+
 
 module.exports = router;

@@ -12,6 +12,8 @@ var express = require('express'),
     async = require('async'),
     bcrypt = require('bcrypt'),
     shortid = require('shortid'),
+    util = require('./../helpers/util.js'),
+    message = require('./../helpers/message.json'),
     constants = require('./../helpers/constant.js');
 
 
@@ -27,7 +29,7 @@ function fetchUserDetails(user_id, callback){
             values : ['uaKey', 'uaValue']
     }], {
         values : [['uID', 'user_id'], ['uLastName', 'lastname'], ['uFirstName', 'firstname'], ['uEmail', 'email']]
-    }, null, function(err, result){
+    }, function(err, result){
 
         if(err) return callback("Database Error")
 
@@ -69,7 +71,6 @@ router.get('/user', function(req, res){
 */
 router.post('/user/edit', function(req, res){
 
-    console.log("The Payload received is : ", req.body);
     var required_keys = ['first_name', 'contact', 'is_notification', 'last_name'];//'profile_avatar_img' - key to be added once the image display is functional
     payload_validator.ValidatePayloadKeys(req.body, required_keys, function(err){
          if(err){
@@ -78,13 +79,17 @@ router.post('/user/edit', function(req, res){
                             res.send(err);
                        })
                     }
+         }else if(!util.jsonParseSync(req.body.contact)){
+            return util.formatErrorResponse(0, message.error.json_parse_failure, function(err){
+                return res.send(err);
+            })
          }
 
-        var user_details = {
-            uID : req.user.user_id,
-            uFirstName : req.body.first_name,
-            uLastName : req.body.last_name
-        }
+         var user_details = {
+                     uID : req.user.user_id,
+                     uFirstName : req.body.first_name,
+                     uLastName : req.body.last_name
+                 }, contact = util.jsonParseSync(req.body.contact);
         async.auto({
 
         change_password : function(callback){
@@ -129,11 +134,11 @@ router.post('/user/edit', function(req, res){
                 })
             }
             dao.updateDataWithChild('Users', ['uID'], user_details, [{
-            table_name : 'Users.UserAttributes',
-            data : {
-                uaKey: "contactNumber",
-                uaValue: req.body.contact
-            }
+                table_name : 'Users.UserAttributes',
+                data : {
+                    uaKey: "contactNumber",
+                    uaValue: contact.country_code + " " + contact.phone_number
+                }
             }], function(err){
 
                 if(err) return callback(err);

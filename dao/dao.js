@@ -102,6 +102,27 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             switch(returnedRow.table){
 
                                 case table:     main_table_encountered = true;
+                                                if(customization.search_keyword && customization.search_keyword.value){
+                                                    main_table_encountered = false;
+                                                    customization.search_keyword.filter_keys.forEach(function(key){
+                                                        if(returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                            main_table_encountered = true;
+                                                        }
+                                                    })
+                                                }
+
+                                               for( var key in customization.condition){
+                                                    main_table_encountered = false;
+                                                    if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
+                                                        conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
+
+                                                            if(check_passed) main_table_encountered = true;
+
+                                                        })
+                                                    }
+                                               }
+
+                                                if(!main_table_encountered) return;
                                                 if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
@@ -289,12 +310,17 @@ function fetchPagination(result, page, custom_count_fetch, callback){
     var offset = page > 0?(page -1) * 10 : 0;
     if(offset > result.length) return callback(null, {})
     var custom_count = {};
+//    return console.log("The Custom Count Fetching Details Received are : ", custom_count_fetch)
 
-    custom_count_fetch.forEach(function(custom_counter){
-        custom_count = Object.assign(custom_count, {
-            [custom_counter.alias] : (_.filter(result, { [custom_counter.key] : custom_counter.criteria})).length
-        })
-    });
+    if(custom_count_fetch){
+      custom_count_fetch.forEach(function(custom_counter){
+            custom_count = Object.assign(custom_count, {
+                [custom_counter.alias] : (_.filter(result, { [custom_counter.key] : custom_counter.criteria})).length
+            })
+        });
+    }
+
+
     callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
 
 }
@@ -512,7 +538,7 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
 
             dao.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, important_primary_result){
                 if(err) return callback(err);
-                if(Object.keys(result).length < 1){
+                if(Object.keys(important_primary_result).length < 1){
                     return callback({
                         code : 0,
                         message : customization.parent_index_filter.message
@@ -555,25 +581,27 @@ exports.createDataWithChild = function(table, primary_key, data, child_tables, c
 */
 exports.updateDataWithChild = function(table, primary_key, data, child_tables, callback){
 
-    var child_tables_to_fetch = [];
-            child_tables.forEach(function(child_table_details){
-                child_tables_to_fetch.push(child_table_details.table_name)
-            })
     exports.getOneTableIterator(table, {
         [primary_key] : data[primary_key]
-    }, child_tables_to_fetch, null, function(err, result){
+    }, child_tables, null, function(err, result){
             if(err) return callback(err);
             store.put(table, Object.assign(result, data), function(err){
+
                 if(err) return callback(err)
                 async.each(child_tables, function(table_details, callback){
+
                     var parent_details = {};
                     primary_key.forEach(function(single_primary_key){
                          parent_details[single_primary_key] = data[single_primary_key]
                     })
-                    exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name], table_details.data), callback)
+                    if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined){
+                      exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+                    }else callback(null);
+
                 }, function(err){
                     callback(err);
                 })
+
             })
     })
 

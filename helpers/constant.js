@@ -7,7 +7,7 @@ module.exports = {
         AUDIENCE : 'tentwenty.com',
         ISSUER : 'notify.ae',
         JWTID : 'yYdw9DUsEk55SqRJ',
-        EXPIRES_IN: '365 days'
+        EXPIRES_IN: 3600
 
     }
 };

@@ -19,3 +19,9 @@ exports.signAndGenerateToken = function(content_to_be_signed, callback){
 
 };
 
+/**
+* Function to Invalidate a JWT Token
+*/
+exports.invalidateToken = function(token, callback){
+    
+};

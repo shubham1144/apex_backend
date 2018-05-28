@@ -17,3 +17,29 @@ exports.formatSuccessResponse = function(data, callback){
         })
     })
 }
+exports.jsonParse = function(data, callback){
+
+    if(data) {
+        try {
+            content = JSON.parse(data);
+            callback(null, content);
+        } catch(e) {
+            callback("Provide JSON In String Format");
+            //alert(e); // error in the above string (in this case, yes)!
+        }
+    }else callback(null, {});
+
+}
+
+exports.jsonParseSync = function(data){
+
+    if(data) {
+            try {
+                content = JSON.parse(data);
+               return content;
+            } catch(e) {
+                return false;
+            }
+        }else return({});
+
+}

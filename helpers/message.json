@@ -4,11 +4,13 @@
           "connected" : "Connection to Primary Database is Currently Active"
       },
       "login" : {
-        "success" : "Login Successful"
+        "success" : "Login Successful",
+        "token_refresh" : "Token Refresh Successful"
       }
   },
   "error": {
       "bad_request" : "Bad Request",
+      "json_parse_failure" : "Provide JSON In String Format",
       "database" : {
           "connection_error" : "Primary Database Not Connected"
       },
