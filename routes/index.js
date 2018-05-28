@@ -57,5 +57,21 @@ router.get('/check_database_crud_connection', function(req, res){
 
 });
 
+router.get('/test_token', function(req, res){
+
+     token.signAndGenerateTokenTest({
+                        user_id : req.query.user_id
+                    }, req.query.expiry || 300, function(err, token){
+
+                        util.formatSuccessResponse({
+                            msg: "Test Token Being Generated for Development Ease",
+                            token: token
+                        }, function(result){
+                            res.json(result);
+                        })
+
+     })
+
+})
 
 module.exports = router;

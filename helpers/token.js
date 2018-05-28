@@ -19,9 +19,13 @@ exports.signAndGenerateToken = function(content_to_be_signed, callback){
 
 };
 
-/**
-* Function to Invalidate a JWT Token
-*/
-exports.invalidateToken = function(token, callback){
-    
+exports.signAndGenerateTokenTest = function(content_to_be_signed, expiry, callback){
+
+    var token = jwt.sign(content_to_be_signed,  constants.JWT.SECRET, {
+        issuer : constants.JWT.ISSUER,
+        audience : constants.JWT.AUDIENCE,
+        jwtid : constants.JWT.JWTID,
+        expiresIn : expiry
+    }, callback)
+
 };
