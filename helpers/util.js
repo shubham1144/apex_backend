@@ -16,7 +16,22 @@ exports.formatSuccessResponse = function(data, callback){
             success : 1
         })
     })
-}
+};
+
+exports.formatSuccessResponseStandard = function(res_locals, data, callback){
+
+     callback(Object.assign({
+            success : true,
+            data : Object.assign(data, {
+                success : 1
+            })
+        }, res_locals.token && {
+            token : res_locals.token
+        }))
+
+};
+
+
 exports.jsonParse = function(data, callback){
 
     if(data) {

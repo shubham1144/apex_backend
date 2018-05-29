@@ -4,6 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var jwt = require('express-jwt');
+var jsonwebtoken = require('jsonwebtoken');
+var token_helper = require('./helpers/token.js');
+var moment = require('moment');
+var constant = require('./helpers/constant.js');
+
 var swaggerUi = require('swagger-ui-express');
 const swaggerDocumentV1 = require('./documentation/v1_swagger.json');
 var options = {
@@ -11,16 +16,17 @@ var options = {
   customJs: '/javascripts/custom.js'
 };
 
+/* Configuration of All the Routes associated with the Platform START*/
+var indexRouter = require('./routes/index'),
+    authorizationRouter = require('./routes/access-control/authorization-route.js'),
+    authenticationRouter = require('./routes/access-control/authentication-route.js'),
+    planRouter = require('./routes/plan'),
+    subscriptionRouter = require('./routes/subscription'),
+    domainRouter = require('./routes/domain'),
+    userRouter = require('./routes/user'),
+    notificationRouter = require('./routes/notification');
+/* Configuration of All the Routes associated with the Platform END*/
 
-var indexRouter = require('./routes/index');
-var authorizationRouter = require('./routes/access-control/authorization-route.js');
-var planRouter = require('./routes/plan');
-var subscriptionRouter = require('./routes/subscription');
-var domainRouter = require('./routes/domain');
-var userRouter = require('./routes/user');
-var notificationRouter = require('./routes/notification');
-
-var constant = require('./helpers/constant.js');
 var app = express();
 
 // view engine setup
@@ -33,11 +39,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//Configuration for Exposing Swagger Documentation for Api's based on versioning system
 app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, options));
 
+//Configuration for JWT Stateless Oauth Authentication
 app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', '/check_database_crud_connection', { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}, { url : '/notifications', methods : ['POST']}]}));
 
-app.all('*', indexRouter, authorizationRouter, domainRouter, userRouter, notificationRouter, planRouter, subscriptionRouter);
+app.all('*', indexRouter, authorizationRouter, authenticationRouter, domainRouter, userRouter, notificationRouter, planRouter, subscriptionRouter);
+
+/* Error Handles Configuration START*/
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -59,9 +69,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
-
-
+/* Error Handles Configuration END*/
 
 //Node.js Server Listening on a PORT
 app.listen(3000, function(port){

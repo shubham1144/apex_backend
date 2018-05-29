@@ -6,7 +6,7 @@
 var jwt = require('jsonwebtoken')
     constants = require('./constant.js');
 /**
-* Function to be Used to Sign and Generate a JWT Token
+    * Function to be Used to Sign and Generate a JWT Token
 */
 exports.signAndGenerateToken = function(content_to_be_signed, callback){
 
@@ -20,8 +20,10 @@ exports.signAndGenerateToken = function(content_to_be_signed, callback){
 };
 
 /**
-* Function to Invalidate a JWT Token
+    *Function to Be Used to Verify an existing JWT Token
 */
-exports.invalidateToken = function(token, callback){
-    
+exports.verifyToken = function(token, callback){
+
+    jwt.verify(token, constants.JWT.SECRET, callback);
+
 };

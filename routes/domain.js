@@ -29,7 +29,7 @@ router.get('/domains', function(req, res) {
         values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications']
     }], function(err, result){
             if(err) return res.send("Database Error")
-            util.formatSuccessResponse({
+            util.formatSuccessResponseStandard(res.locals, {
                 total_unread_notification_count: 0,
                 companies : result
             }, function(result){
