@@ -40,21 +40,21 @@ function formatUserForgotPasswordEmailTemplate(details){
 */
 router.post('/login', function(req, res) {
 
-    var required_keys = ['uEmail', 'uPassword', 'deviceType', 'deviceToken'];
+    var required_keys = ['email', 'password', 'device_type', 'device_token'];
     payload_validator.ValidatePayloadKeys(req.body, required_keys, function(err){
 
         if(err){
-            if(err.missing_keys.includes("uEmail") || err.missing_keys.includes("uPassword")){
+            if(err.missing_keys.includes("email") || err.missing_keys.includes("password")){
                return util.formatErrorResponse(0, message.error.login.email_password_missing, function(err){
                     res.send(err);
                })
             }
-            else if(err.missing_keys.includes("deviceType")){
+            else if(err.missing_keys.includes("device_type")){
                 return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
                     res.send(err);
                 })
             }
-            else if(err.missing_keys.includes("deviceToken")){
+            else if(err.missing_keys.includes("device_token")){
                             return util.formatErrorResponse(0, message.error.login.device_token_missing, function(err){
                                                 res.send(err);
                                            })
@@ -64,10 +64,10 @@ router.post('/login', function(req, res) {
             })
         }
 
-        if(!_.includes(device_types, req.body.deviceType)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
+        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
-        dao.getOneIndexIterator('Users', 'uEmail', req.body.uEmail, null, null, function(err, result){
+        dao.getOneIndexIterator('Users', 'uEmail', req.body.email, null, null, function(err, result){
 
             if(err){
                 console.error("Error occured due to : ", err);
@@ -76,7 +76,7 @@ router.post('/login', function(req, res) {
             if(!result || result === undefined || Object.keys(result).length <1) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
                 res.send(err);
             })
-            bcrypt.compare(req.body.uPassword, result.uPassword, function(err, validation_status){
+            bcrypt.compare(req.body.password, result.uPassword, function(err, validation_status){
                 if(!validation_status) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
                     res.send(err);
                 })
@@ -110,13 +110,17 @@ router.post('/login', function(req, res) {
 
 /**
 * API Interface to logout a user from the system
-*@Not yet Used
 */
-router.post('/login/logout', function(req, res){
+router.post('/logout', function(req, res){
 
+      if(!req.body.device_token){
+        return util.formatErrorResponse('Provide Device Token for Logout', function(err){
+            res.send(err);
+        })
+      }
       util.formatSuccessResponse({
                 logout: 'success'
-            }, function(result){
+      }, function(result){
                 res.json(result);
      })
 

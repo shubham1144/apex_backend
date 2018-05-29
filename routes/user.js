@@ -50,7 +50,7 @@ function fetchUserDetails(user_id, res_locals, callback){
             table_name : 'Users.UserAttributes',
             values : ['uaKey', 'uaValue']
     }], {
-        values : [['uID', 'user_id'], ['uLastName', 'lastname'], ['uFirstName', 'firstname'], ['uEmail', 'email']]
+        values : [['uID', 'user_id'], ['uLastName', 'last_name'], ['uFirstName', 'first_name'], ['uEmail', 'email']]
     }, function(err, result){
 
         if(err) return callback("Database Error")
@@ -116,16 +116,16 @@ router.post('/user/edit', function(req, res){
 
         change_password : function(callback){
 
-            if(!req.body.uCurrentPassword || req.body.uCurrentPassword === undefined) return callback(null);
+            if(!req.body.current_password || req.body.current_password === undefined) return callback(null);
 
             dao.getData('Users', {
                 uID : req.user.user_id
             }, function(err, result){
 
                 if(err) return callback(err);
-                var uPassword = req.body.uPassword, uPasswordConfirm = req.body.uPasswordConfirm;
+                var uPassword = req.body.password, uPasswordConfirm = req.body.password_confirm;
 
-                bcrypt.compare(req.body.uCurrentPassword, result.uPassword, function(err, validation_status){
+                bcrypt.compare(req.body.current_password, result.uPassword, function(err, validation_status){
                     if(!validation_status) return callback({
                         code : 0,
                         message : 'The current password is incorrect'
@@ -138,7 +138,7 @@ router.post('/user/edit', function(req, res){
                         code : 0,
                         message : 'The two passwords provided do not match'
                     })
-                    bcrypt.hash(req.body.uPassword, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
+                    bcrypt.hash(uPassword, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
                         callback(null, {
                             new_password : hash
                         });

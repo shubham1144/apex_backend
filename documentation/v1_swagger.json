@@ -12,30 +12,50 @@
          "tags": ["Authentication"],
          "description": "Login Api Associated with Notify ME",
          "parameters": [{
-           "name": "uEmail",
+           "name": "email",
            "required": true,
            "in": "formData",
            "type": "string"
          },
          {
-           "name": "uPassword",
+           "name": "password",
            "required": true,
            "in": "formData",
            "type": "string"
          },
            {
-             "name": "deviceType",
+             "name": "device_type",
              "required": true,
              "in": "formData",
              "type": "string"
            },
            {
-             "name": "deviceToken",
+             "name": "device_token",
              "required": true,
              "in": "formData",
              "type": "string"
            }
       ],
+         "responses": {}
+       }
+     },
+     "/logout":{
+       "post": {
+         "tags": ["Authentication"],
+         "description": "Logout Api Associated with Notify ME",
+         "parameters": [
+           {
+             "name": "Authorization",
+             "description" : "Token that has neared its expiry",
+             "in": "header"
+           },
+           {
+             "name": "device_token",
+             "required": true,
+             "in": "formData",
+             "type": "string"
+           }
+         ],
          "responses": {}
        }
      },
@@ -92,6 +112,16 @@
            "in": "header"
          }],
          "responses": {}
+       },
+       "post": {
+         "tags": ["Web - User Profile"],
+         "description": "Api for Registering Users in the System(In Progress)",
+         "parameters": [{
+           "name": "Authorization",
+           "required": true,
+           "in": "header"
+         }],
+         "responses": {}
        }
      },
      "/user/edit": {
@@ -131,21 +161,21 @@
              "type": "string"
            },
            {
-             "name": "uCurrentPassword",
+             "name": "current_password",
              "description" : "Key to be Passed when User Password Needs to be modified",
              "required": false,
              "in": "formData",
              "type": "string"
            },
            {
-             "name": "uPassword",
+             "name": "password",
              "description" : "The New Password to be associated with the user",
              "required": false,
              "in": "formData",
              "type": "string"
            },
            {
-             "name": "uPasswordConfirm",
+             "name": "password_confirm",
              "description" : "Confirmation Value for the New Password",
              "required": false,
              "in": "formData",
