@@ -34,7 +34,6 @@ function formatUserForgotPasswordEmailTemplate(details){
 }
 
 
-
 /**
 * Api Interface for fetching User Credentials and authenticating the user
 * @todo : Need to Move the Business Logic to Services Layer

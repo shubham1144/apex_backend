@@ -586,11 +586,60 @@ exports.createDataWithChild = function(table, primary_key, data, child_tables, c
         console.log("Setting the Primary key as : ", single_primary_key);
              parent_details[single_primary_key] = data[single_primary_key]
         })
-        exports.putData(parent_details, table_details.table_name, table_details.data, callback)
+        if(table_details.data && table_details.data.constructor === Array){
+
+            async.each(table_details.data, function(row, callback){
+                exports.putData(parent_details, table_details.table_name, row, callback)
+            }, function(err){
+                callback(err);
+            })
+
+        }else{
+            exports.putData(parent_details, table_details.table_name, table_details.data, callback)
+        }
+
     }, function(err){
         callback(err);
     })
     })
+
+};
+
+/**
+* Function to create a Entry if Not Record Found Based on Index
+*/
+exports.findOrCreateIndexIterator = function(table, index, condition, primary_key, data, child_tables, callback){
+
+       exports.getOneIndexIterator(table, index, condition, [], null, function(err, result){
+
+        if(err) return callback(err);
+        console.log("The Result Received is : ", result)
+        if(result && Object.keys(result).length > 0) return callback(null, false);
+        store.put(table, data, function(err){
+            if(err) return callback(err)
+            async.each(child_tables, function(table_details, callback){
+                var parent_details = {};
+                primary_key.forEach(function(single_primary_key){
+                console.log("Setting the Primary key as : ", single_primary_key);
+                     parent_details[single_primary_key] = data[single_primary_key]
+                })
+                if(table_details.data && table_details.data.constructor === Array){
+
+                    async.each(table_details.data, function(row, callback){
+                        exports.putData(parent_details, table_details.table_name, row, callback)
+                    }, function(err){
+                        callback(err);
+                    })
+
+                }else{
+                    exports.putData(parent_details, table_details.table_name, table_details.data, callback)
+                }
+
+            }, function(err){
+                callback(err, true);
+            })
+            })
+       })
 
 };
 
