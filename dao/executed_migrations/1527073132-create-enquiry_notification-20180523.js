@@ -4,6 +4,7 @@ module.exports = [
 `
     CREATE TABLE Plans.Subscriptions.Domains.Forms.Enquiry (
         eID STRING,
+        eFirstName STRING,
         ePhone STRING,
         eEmail STRING,
         eStatus ENUM(Unread, Read, Engaged, NotReachable),
@@ -32,7 +33,8 @@ module.exports = [
 `,
 `
     CREATE INDEX eID ON Plans.Subscriptions.Domains.Forms.Enquiry(eID)
-`,
+`
+,
 `
     CREATE INDEX dfID on Plans.Subscriptions.Domains.Forms(dfID)
 `,
