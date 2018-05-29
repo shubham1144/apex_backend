@@ -14,7 +14,30 @@ var express = require('express'),
     shortid = require('shortid'),
     util = require('./../helpers/util.js'),
     message = require('./../helpers/message.json'),
+    emailer = require('./../helpers/email.js'),
     constants = require('./../helpers/constant.js');
+
+
+/**
+* Function to format the User Validation Email being sent out to the User Created
+*/
+function formatUserValidateEmailTemplate(details){
+
+    return {
+        to : 'shubham@tentwenty.me',//details.user && details.user.uEmail || [],
+        subject : 'NOTIFY ME - Account Activation',
+        html : `<p>Dear ` + details.user.uName + `,</p><p>Please click the following URL in order to activate your account for Notify ME:</p><p>`+
+                '<a href="http://notify.me.1020dev.com/activate_account/' + details.link +
+                '">http://notify.me.1020dev.com/activate_account/' + details.link +
+                `</a></p><p>Thank you!</p><p>
+                Regards,<br>
+                Notify ME
+                </p>
+               `
+    }
+
+}
+
 
 /**
 * Function to Fetch Details associated with the Users in System
@@ -165,52 +188,110 @@ router.post('/user/edit', function(req, res){
 });
 
 /*
-* API To Register a User in the System
-* @todo : Work on the api for Registering a User in the System
+* API To Register a User in the System Based on Unique Email Address
 */
 router.post('/user', function(req, res){
 
-        return res.send("Testing User Creation API");
-        //Returning as below is being done by restricted priviledged users for now
-        bcrypt.hash('testPassword', constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
+ var required_keys = ['uname', 'email', 'first_name', 'last_name', 'contact', 'user_type'];//'profile_avatar_img' - key to be added once the image display is functional
+    payload_validator.ValidatePayloadKeys(req.body, required_keys, function(err){
 
-              dao.createDataWithChild('Users', ['uID'], {
-                  uID : shortid.generate(),
-                  uName : 'Idris',//Place the Uname of the User here
-                  uEmail : 'idris@tentwenty.me',//Place the Email of the User here
-                  uPassword : hash,
-                  uFirstName : 'idris',//Place the First Name of the User here
-                  uLastName : 'khozema',//Place the Last Name of the User here
-                  uIsActive : true,
-                  uIsValidated : true,
-                  uType : 'Admin'//User type can be 'Admin | User | SuperUser(Across all subscriptions)'
-              }, [
-                  {
-                      table_name : 'Users.UserDevices',
-                      data : {
-                        udToken: 'testToken'
-                      }
-                  },
-                  {
-                      table_name : 'Users.UserAttributes',
-                      data : {
-                          uaKey: 'contactNumber',
-                          uaValue: '+91 8975567457'
-                      }
-                  }
-              ], function(err){
+        if(err){
+            if(err.missing_keys.includes("uname")){
+                 return util.formatErrorResponse(0, 'Please enter a valid User Name', function(err){
+                    res.send(err);
+                })
+            }
+            else if(err.missing_keys.includes("first_name")){
+                return util.formatErrorResponse(0, 'Please enter a valid First Name', function(err){
+                    res.send(err);
+                })
+            }
+            else if(err.missing_keys.includes("last_name")){
+                return util.formatErrorResponse(0, 'Please enter a valid Last Name', function(err){
+                    res.send(err);
+                })
+            }
+            else{
+                return util.formatErrorResponse(0, 'Bad Request', function(err){
+                    res.send(err);
+                })
+            }
+        }
+        async.auto({
+            create_user : function(callback){
 
-                  if(err) return res.send("Database Error")
-                  dao.getOneTableIterator('Users', {
-                      uEmail : 'syed@tentwenty.me'
-                  }, ['Users.UserDevices', 'Users.UserAttributes'], null, function(err, result){
-                       if(err) return res.send("Database Error")
-                       res.send("Notify.me Backend Server Health Status : Good");
-                  })
+                var user_password = shortid.generate(),
+                    user_activate_key = shortid.generate(),
+                    contact = req.body.contact;
 
-              })
+                bcrypt.hash(user_password, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
+
+                       var user = {
+                          uID : shortid.generate(),
+                          uName : req.body.uname,
+                          uEmail : req.body.email,
+                          uPassword : hash,
+                          uFirstName : req.body.first_name,
+                          uLastName : req.body.last_name,
+                          uIsActive : true,
+                          uIsValidated : false,
+                          uType : req.body.user_type || 'Admin'//User type can be 'Admin | User | SuperUser(Across all subscriptions)'
+                       }
+                      dao.findOrCreateIndexIterator('Users', 'uEmail', req.body.email, ['uID'], user, [
+                          {
+                              table_name : 'Users.UserAttributes',
+                              data : [{
+                                  uaKey: 'contactNumber',
+                                  uaValue: contact.country_code + " " + contact.phone_number
+                              }, {
+                                    uaKey: 'activationKey',
+                                    uaValue: user_activate_key
+                              }]
+                          }
+                      ], function(err, created){
+
+                            callback(err, {
+                                user : user,
+                                link : user_activate_key,
+                                created : created
+                            });
+
+                      })
+
+                });
+
+            },
+            send_user_created_email : ['create_user', function(results, callback){
+                if(!results.create_user.created) return callback({
+                    code : 0,
+                    message : "User Email Already Registered"
+                })
+                emailer.sendEmail(formatUserValidateEmailTemplate(results.create_user), callback);
+            }]
+        }, function(err){
+           console.log("User Creation Status : ", err);
+           if(err) {
+               console.error("Error occured due to : ", err);
+               return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+                   res.send(err);
+               })
+           }
+           util.formatSuccessResponseStandard(res.locals, { msg : "User Account Generated" }, function(result){
+                res.send(result);
+           })
+
         });
 
+    });
+
+});
+
+/**
+* API Interface to Activate a User Account that has been registered in the system
+*/
+router.get('/activate_account', function(req, res){
+    //@todo: Need to Work on API to activate user account
+    res.send("User Account Activated, Please visit site to login");
 });
 
 
