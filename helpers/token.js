@@ -27,3 +27,15 @@ exports.verifyToken = function(token, callback){
     jwt.verify(token, constants.JWT.SECRET, callback);
 
 };
+
+exports.signAndGenerateTokenTest = function(content_to_be_signed, expiry, callback){
+
+    var token = jwt.sign(content_to_be_signed,  constants.JWT.SECRET, {
+        issuer : constants.JWT.ISSUER,
+        audience : constants.JWT.AUDIENCE,
+        jwtid : constants.JWT.JWTID,
+        expiresIn : expiry
+    }, callback)
+
+};
+

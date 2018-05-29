@@ -39,6 +39,25 @@
          "responses": {}
        }
      },
+     "/test_token": {
+       "get": {
+         "tags": ["Testing"],
+         "description": "Test Custom Expiry Tokens for testing",
+         "parameters": [{
+           "name": "user_id",
+           "required" : true,
+           "description" : "The Id of the user to generate a token with",
+           "in": "query"
+         },
+           {
+             "name": "expiry",
+             "type" : "integer",
+             "description" : "Number of Seconds to set expiry to",
+             "in": "query"
+           }],
+         "responses": {}
+       }
+     },
      "/refresh_token": {
        "get": {
          "tags": ["Authentication"],
@@ -47,6 +66,18 @@
            "name": "Authorization",
            "description" : "Token that has neared its expiry",
            "in": "header"
+         }],
+         "responses": {}
+       }
+     },
+     "/forgot_password": {
+       "put": {
+         "tags": ["Authentication"],
+         "description": "Sends a Reset Password To Users",
+         "parameters": [{
+           "name": "email",
+           "description" : "The Email Registered with The Application",
+           "in": "formData"
          }],
          "responses": {}
        }

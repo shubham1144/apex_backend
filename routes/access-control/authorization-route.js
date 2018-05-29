@@ -9,8 +9,30 @@ var express = require('express'),
     bcrypt = require('bcrypt'),
     environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
     config = require('./../../config/config.js'),
+    async = require('async'),
+    emailer = require('./../../helpers/email.js'),
+    shortid = require('shortid'),
     _ = require('lodash');
 var device_types = ['android', 'ios'];
+
+
+function formatUserForgotPasswordEmailTemplate(details){
+
+    return {
+        to : details.user && details.user.uEmail || [],
+        subject : 'FORGOT PASSWORD',
+        html : `<h3>FORGOT PASSWORD</h3><p></p><p>Dear ` + (details.user && details.user.uFirstName)  + " " + (details.user && details.user.uLastName) + `, </p><p></p><p>
+                 You've recently requested to reset your password for NOTIFY ME.
+                 Click the button below to reset it:
+                 </p><p></p><br><a href="http://notify.me.1020dev.com/reset_password/" ` + details.key + `target="_blank"
+                 style="text-decoration: none; color: #fff; background-color: #78c377; padding: 15px 25px; text-decoration: underline;">
+                 Reset your password
+                 </a><br><br><p>If you did not request a password reset, please ignore this email.</p>
+                `
+    }
+
+}
+
 
 
 /**
@@ -103,6 +125,7 @@ router.post('/login/logout', function(req, res){
 
 /**
 * API Interface to Refresh a Token that has neared its expiry time
+*@Not yet Used
 */
 router.get('/refresh_token', function(req, res){
 
@@ -121,5 +144,59 @@ router.get('/refresh_token', function(req, res){
 
 });
 
+/**
+* API Interface to Send a email to the User To reset his password
+*/
+router.put('/forgot_password', function(req, res){
+
+    async.auto({
+        generate_password_reset_link : function(callback){
+
+            var password_reset_key = shortid.generate();
+            dao.updateDataIndexIterator('Users', ['uID'], 'uEmail', req.body.email, {}, [
+                {
+                    table_name : 'Users.UserAttributes',
+                    condition : {
+                        'uaKey' : {
+                            '$equals' : 'resetPasswordKey'
+                        }
+                    },
+                    create_if_absent : true,
+                    data : {
+                        'uaKey' : 'resetPasswordKey',
+                        'uaValue' : password_reset_key
+                    }
+                }
+            ], function(err, result){
+
+                if(err) return callback(err);
+
+                callback(err, {
+                    key  : password_reset_key,
+                    user : result
+                })
+
+            })
+
+        },
+        send_password_reset_email : ['generate_password_reset_link', function(results, callback){
+            emailer.sendEmail(formatUserForgotPasswordEmailTemplate(results.generate_password_reset_link), callback);
+        }]
+    },
+    function(err, result){
+        if(err) {
+            console.error("Error occured due to : ", err);
+            return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+                res.send(err);
+            })
+        }
+        util.formatSuccessResponse({
+            msg: 'Password Reset Email Sent'
+        }, function(result){
+            res.json(result);
+        })
+    });
+
+});
 
 module.exports = router;
