@@ -19,7 +19,7 @@ var express = require('express'),
 /**
 * Function to Fetch Details associated with the Users in System
 */
-function fetchUserDetails(user_id, callback){
+function fetchUserDetails(user_id, res_locals, callback){
 
     dao.getOneTableIterator('Users', {
             'uID' : user_id
@@ -45,7 +45,7 @@ function fetchUserDetails(user_id, callback){
         });
         delete result['Users.UserAttributes'];
 
-        util.formatSuccessResponseStandard(res.locals, { user : result }, function(result){
+        util.formatSuccessResponseStandard(res_locals, { user : result }, function(result){
              callback(result);
         })
 
@@ -59,7 +59,7 @@ function fetchUserDetails(user_id, callback){
 */
 router.get('/user', function(req, res){
 
-    fetchUserDetails(req.user.user_id, function(result){
+    fetchUserDetails(req.user.user_id, res.locals, function(result){
         res.send(result)
     })
 
@@ -154,7 +154,7 @@ router.post('/user/edit', function(req, res){
                     res.send(err);
                 })
             }
-            fetchUserDetails(req.user.user_id, function(data){
+            fetchUserDetails(req.user.user_id, res.locals, function(data){
                 res.send(data);
             })
 
