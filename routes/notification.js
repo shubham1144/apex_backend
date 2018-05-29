@@ -105,19 +105,19 @@ router.get('/notifications', function(req, res){
                 }
         ],
         function(err, result, requested_count_details){
-            console.log("The Requested Count Details Obtained are : ", requested_count_details);
+
             if(err) {
                 console.error("Error occured due to : ", err);
                 return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
                     res.send(err);
                 })
             }
-            util.formatSuccessResponseStandard(res.locals, Object.assign(requested_count_details, {
+
+            util.formatSuccessResponseStandard(res.locals, Object.assign(requested_count_details || {}, {
                notifications : result
            }), function(result){
                 res.send(result);
             })
-
 
         });
 

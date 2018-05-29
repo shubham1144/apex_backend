@@ -314,9 +314,7 @@ function conditionValidator(conditions, value, callback){
 function fetchPagination(result, page, custom_count_fetch, sort_by, callback){
 
     var offset = page > 0?(page -1) * 10 : 0;
-    if(offset > result.length) return callback(null, {})
     var custom_count = {};
-//    return console.log("The Custom Count Fetching Details Received are : ", custom_count_fetch)
 
     if(custom_count_fetch){
       custom_count_fetch.forEach(function(custom_counter){
