@@ -45,7 +45,7 @@ function fetchUserDetails(user_id, callback){
         });
         delete result['Users.UserAttributes'];
 
-        util.formatSuccessResponse({ user : result }, function(result){
+        util.formatSuccessResponseStandard(res.locals, { user : result }, function(result){
              callback(result);
         })
 

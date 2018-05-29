@@ -82,7 +82,7 @@ router.get('/notifications', function(req, res){
                     res.send(err);
                 })
             }
-            util.formatSuccessResponse(Object.assign(requested_count_details, {
+            util.formatSuccessResponseStandard(res.locals, Object.assign(requested_count_details, {
                notifications : result
            }), function(result){
                 res.send(result);
@@ -128,7 +128,7 @@ router.get('/notifications/:notification_id', function(req, res){
                             res.send(err);
                         })
         }
-        util.formatSuccessResponse(result, function(result){
+        util.formatSuccessResponseStandard(res.locals, result, function(result){
             res.send(result);
         })
     });

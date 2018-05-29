@@ -6,7 +6,7 @@
 var jwt = require('jsonwebtoken')
     constants = require('./constant.js');
 /**
-* Function to be Used to Sign and Generate a JWT Token
+    * Function to be Used to Sign and Generate a JWT Token
 */
 exports.signAndGenerateToken = function(content_to_be_signed, callback){
 
@@ -16,6 +16,15 @@ exports.signAndGenerateToken = function(content_to_be_signed, callback){
         jwtid : constants.JWT.JWTID,
         expiresIn : constants.JWT.EXPIRES_IN
     }, callback)
+
+};
+
+/**
+    *Function to Be Used to Verify an existing JWT Token
+*/
+exports.verifyToken = function(token, callback){
+
+    jwt.verify(token, constants.JWT.SECRET, callback);
 
 };
 
@@ -29,3 +38,4 @@ exports.signAndGenerateTokenTest = function(content_to_be_signed, expiry, callba
     }, callback)
 
 };
+
