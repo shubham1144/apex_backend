@@ -4,9 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var jwt = require('express-jwt');
-var jsonwebtoken = require('jsonwebtoken');
-var token_helper = require('./helpers/token.js');
-var moment = require('moment');
 var constant = require('./helpers/constant.js');
 
 var swaggerUi = require('swagger-ui-express');
