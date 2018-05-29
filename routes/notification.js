@@ -57,7 +57,7 @@ router.get('/notifications', function(req, res){
                                         message : "Domain Id Not Found"
                                   } : null,
             values : [
-                ['eID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'],
+                ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
                 ['eCreatedAt', 'created_at'], ['eStatus', 'status', {
                     'Unread' : 0,
                     'Read' : 1,
@@ -142,7 +142,7 @@ router.get('/notifications/:notification_id', function(req, res){
     }],
     {
         values : [
-            ['pID', 'id'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'], 'domain_name',
+            ['pID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'], 'domain_name',
             ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status', {
                                                                                                                       'Unread' : 0,
                                                                                                                       'Read' : 1,
