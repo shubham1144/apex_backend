@@ -8,6 +8,7 @@ var nosqldb = require('nosqldb-oraclejs'),
     environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
     config = require('./../config/config.js'),
     message = require('./../helpers/message.json'),
+    util = require('./../helpers/util.js'),
     _ = require('lodash');
     configuration = new nosqldb.Configuration();
 
@@ -271,7 +272,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                         })
 
                         //Paginate Here With Customized Counts being Fetched
-                        fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, function(err, paginated_result, requested_count_details){
+                        fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, customization.sort_by || null, function(err, paginated_result, requested_count_details){
                             callback(null, paginated_result, requested_count_details);
                         })
 
@@ -291,10 +292,15 @@ function conditionValidator(conditions, value, callback){
                                     validated = false;
                                 }
                                 break;
-             case '$equals' :   if(value != conditions[condition]){
+            case '$equals' :   if(value != conditions[condition]){
                                                 validated = false;
                                 }
                                 break;
+            case '$equalsAny' : if(conditions[condition].indexOf(value) === -1){
+                                    validated = false;
+                                }
+                                break;
+
         }
     }
     callback(validated);
@@ -305,7 +311,7 @@ function conditionValidator(conditions, value, callback){
     * Function to Paginate the Result set being Obtained
     * Also Appends any counts requested to be appended.
 */
-function fetchPagination(result, page, custom_count_fetch, callback){
+function fetchPagination(result, page, custom_count_fetch, sort_by, callback){
 
     var offset = page > 0?(page -1) * 10 : 0;
     if(offset > result.length) return callback(null, {})
@@ -320,6 +326,10 @@ function fetchPagination(result, page, custom_count_fetch, callback){
         });
     }
 
+    //Sort by Condition Passed.
+    if(sort_by && sort_by !== undefined){
+        result = util.sortBySequence(sort_by.order, sort_by.key, result || []);
+    }
 
     callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
 
