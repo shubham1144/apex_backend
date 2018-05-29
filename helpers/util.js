@@ -58,3 +58,23 @@ exports.jsonParseSync = function(data){
         }else return({});
 
 }
+
+/**
+* Function to be used to sort Result Set in a sequence
+*/
+exports.sortBySequence = function(sort_sequence, key, data){
+
+            /*Less than 0: Sort "a" to be a lower index than "b"
+               Zero: "a" and "b" should be considered equal, and no sorting performed.
+               Greater than 0: Sort "b" to be a lower index than "a".
+            */
+
+            return data && data.sort(function(a, b){
+
+                if(sort_sequence.indexOf(b[key]) === -1) return -1;
+                if(sort_sequence.indexOf(a[key]) === -1) return 1;
+                return sort_sequence.indexOf(a[key]) - sort_sequence.indexOf(b[key])
+
+            });
+
+}

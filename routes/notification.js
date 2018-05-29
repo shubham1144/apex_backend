@@ -11,6 +11,36 @@ var express = require('express'),
 */
 router.get('/notifications', function(req, res){
 
+        var condition_filter = {};
+
+        if(req.query.archieve){
+            condition_filter = Object.assign(condition_filter, {
+                'eIsArchived' : {
+                    '$equals' : req.query.archieve === '1' ? true : false
+                }
+            })
+        }
+        if(req.query.status){
+
+            var notification_status_code = {
+                0 : 'Unread',
+                1 : 'Read',
+                2 : 'NotReachable',
+                3 : 'Engaged'
+            },  status_filter = [],
+                status_preprocess_list = req.query.status && req.query.status !== undefined && req.query.status.split(",");
+
+            status_preprocess_list && status_preprocess_list.forEach(function(key){
+                if(notification_status_code[key] !== undefined)
+                         status_filter.push(notification_status_code[key]);
+            })
+            condition_filter = Object.assign(condition_filter, {
+                'eStatus' : {
+                    '$equalsAny' : status_filter
+                }
+            })
+        }
+
         dao.getMultipleTableIterator('Plans.Subscriptions.Domains.Forms.Enquiry', {
         }, {
             page : req.query.page || 1,
@@ -49,11 +79,11 @@ router.get('/notifications', function(req, res){
                 value : req.query.keywords || null,
                 filter_keys : ['ePhone', 'eEmail']
             },
-            condition : (req.query.archieve)?{
-                'eIsArchived' : {
-                    '$equals' : req.query.archieve === '1' ? true : false
-                }
-            } : null,
+            condition : condition_filter,
+            sort_by : {
+                                    key : 'status',
+                                    order : [3, 0, 2, 1]
+                        }
         }, [
                 {
                     table_name : 'Plans.Subscriptions.Domains',

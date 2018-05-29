@@ -264,7 +264,8 @@
            },
            {
              "name" : "status",
-             "description" : "This Key is Not Yet Supported",
+             "description" : "string of comma seperated notification status codes",
+             "example" : "0,1,2",
              "type": "string",
              "required": false,
              "in": "query"
