@@ -51,6 +51,11 @@ store.on('open', function () {
 //Open The Connection to be associated with the NOSQL database
 store.open();
 
+
+var TABLE_RECORD = {
+
+};
+
 /**
 * Over time need to make sure that we do not repeatedly run the same migration files
 */

@@ -1,12 +1,14 @@
 var express = require('express'),
     router = express.Router(),
-    dao = require('./../dao/dao.js'),
     shortid = require('shortid'),
+    async = require('async'),
     moment = require('moment'),
     _ = require('lodash'),
     payload_validator = require('./../helpers/payload_validator.js'),
-    async = require('async');
-var userService = require('./../services/user-service.js');
+    constant = require('./../helpers/constant.js'),
+    message = require('./../helpers/message.json'),
+    dao = require('./../dao/dao.js'),
+    userService = require('./../services/user-service.js');
 
 /* Customizable Objects associated with the Status Codes */
 var STATUS_CODE = {
@@ -24,7 +26,7 @@ var STATUS_CODE = {
         'NotReachable' : 2
     }
 
-}
+};
 
 
 /**
@@ -57,22 +59,21 @@ router.get('/notifications', function(req, res){
                 }
             })
         }
-        console.log("The Filter Associated with the Status is : ", condition_filter)
-        dao.getMultipleTableIterator('Plans.Subscriptions.Domains.Forms.Enquiry', {
-        }, {
-            page : req.query.page || 1,
+
+        dao.getMultipleTableIterator('Plans.Subscriptions.Domains.Forms.Enquiry', {}, {
+            page : req.query.page || constant.PAGINATION.DEFAULT_PAGE,
             parent_index_filter : req.query.form_id ? {
-                                        table_name : 'Plans.Subscriptions.Domains.Forms',
-                                        index : 'dfID',
-                                        value : req.query.form_id,
-                                        message : "Form Id Not Found"
-                                  } :
-                                  req.query.domain_id? {
-                                        table_name : 'Plans.Subscriptions.Domains',
-                                        index : 'dID',
-                                        value : req.query.domain_id,
-                                        message : "Domain Id Not Found"
-                                  } : null,
+                table_name : 'Plans.Subscriptions.Domains.Forms',
+                index : 'dfID',
+                value : req.query.form_id,
+                message : "Form Id Not Found"
+            } :
+            req.query.domain_id? {
+                table_name : 'Plans.Subscriptions.Domains',
+                index : 'dID',
+                value : req.query.domain_id,
+                message : "Domain Id Not Found"
+            } : null,
             values : [
                 ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
                 ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
@@ -84,7 +85,7 @@ router.get('/notifications', function(req, res){
                 alias : 'archive_count'
             }, {
                 key : 'status',
-                criteria : 0,
+                criteria : STATUS_CODE.NOTIFICATION.Unread,
                 alias : 'total_unread_notification_count'
             }],
             search_keyword : {
@@ -94,7 +95,11 @@ router.get('/notifications', function(req, res){
             condition : condition_filter,
             sort_by : {
                 key : 'status',
-                order : [3, 0, 2, 1]
+                order : [   STATUS_CODE.NOTIFICATION['Engaged'],
+                            STATUS_CODE.NOTIFICATION['Unread'],
+                            STATUS_CODE.NOTIFICATION['NotReachable'],
+                            STATUS_CODE.NOTIFICATION['Read']
+                ]
             }
         }, [
                 {
@@ -108,14 +113,16 @@ router.get('/notifications', function(req, res){
                 {
                     table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
                     alias : 'call_logs',
-                    values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'], ['clStatus', 'status', STATUS_CODE.CALL_LOG], ['clNote', 'note']]
+                    values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'],
+                                ['clUpdatedAt', 'updated_at'], ['clStatus', 'status', STATUS_CODE.CALL_LOG], ['clNote', 'note']
+                    ]
                 }
         ],
         function(err, result, requested_count_details){
 
             if(err) {
-                console.error("Error occured due to : ", err);
-                return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+                console.error(message.error.default_error_prefix, err);
+                return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error, function(err){
                     res.send(err);
                 })
             }
@@ -132,7 +139,7 @@ router.get('/notifications', function(req, res){
 
 /**
     * API Interface to fetch Status Codes associated with the Application
-    *@TODO : The same is not being used yet, Once we reach a scalable phase, we can change the Client Side Logic to customized values for statuses.
+    *@TODO The api is not being used yet, Once we reach a scalable phase, we can change the Client Side Logic to customized values for notification status.
 */
 router.get('/notifications/status_codes', function(req, res){
 
@@ -155,10 +162,11 @@ router.get('/notifications/:notification_id', function(req, res){
 
     dao.getOneIndexIterator('Plans.Subscriptions.Domains.Forms.Enquiry', "eID", req.params.notification_id || null,
     [{
-            table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
-            alias : 'call_logs',
-            values : [['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'], ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
-    ]
+        table_name : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
+        alias : 'call_logs',
+        values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'],
+                    ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
+        ]
     }],
     {
         values : [
@@ -168,10 +176,11 @@ router.get('/notifications/:notification_id', function(req, res){
         ]
     }, function(err, result){
         if(err) {
-                        console.error("Error occured due to : ", err);
-                        return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
-                            res.send(err);
-                        })
+            console.error(message.error.default_error_prefix, err);
+            return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error,
+            function(err){
+                res.send(err);
+            })
         }
         util.formatSuccessResponseStandard(res.locals, result, function(result){
             res.send(result);
@@ -182,15 +191,14 @@ router.get('/notifications/:notification_id', function(req, res){
 
 /**
     *API Interface associated with Registering a enquiry in the System
-    *@todo : Remove Data Mocks associated with the Notifications API
+    *@todo Remove Data Mocks associated with the Notifications API
 */
 router.post('/notifications', function(req, res){
 
-    //@todo : Need to fetch the Details Associated with (Plan and The Subscription Associated and Domain and the form )with the DomainKey Received
     dao.putData({
     }, 'Plans.Subscriptions.Domains.Forms.Enquiry', {
-    "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ",
-    "eID" : shortid.generate(),
+            "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ",
+            eID : shortid.generate(),
             ePhone : '8975567457',
             eEmail : 'testuser10@tentwenty.me',
             eFormAllDetails : "",
@@ -201,11 +209,15 @@ router.post('/notifications', function(req, res){
             eIsDeleted : false
     }, function(err, result){
         if(err) return res.send("Database Error");
-        res.send("Mock Notification Captured")
+        util.formatSuccessResponse({
+            msg: 'Call Log has been generated Successfully',
+            id : results.create_call_log
+        }, function(result){
+            res.json(result);
+        })
     });
 
-})
-
+});
 
 /**
     * API Interface to update Call Logs associated with Enquiry
@@ -213,14 +225,14 @@ router.post('/notifications', function(req, res){
 router.post('/notifications/:notification_id/call_logs', function(req, res){
 
     if(!req.params.notification_id || req.params.notification_id === undefined){
-        return util.formatErrorResponse(400, 'notification_id not provided', function(err){
+        return util.formatErrorResponse(message.code.bad_request, 'notification_id not provided', function(err){
             res.send(err);
         })
     }
     async.auto({
         fetch_calling_user_details : function(callback){
 
-            userService.fetchUserDetails(req.user.user_id, function(err, result){
+            userService.fetchUser(req.user.user_id, function(err, result){
                 if(err) return callback(err);
                 var user_details = {
                     first_name : result.user.first_name || null,
@@ -269,8 +281,8 @@ router.post('/notifications/:notification_id/call_logs', function(req, res){
     }, function(err, results){
 
         if(err) {
-            console.error("Error occured due to : ", err);
-            return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error',
+            console.error(message.error.default_error_prefix, err);
+            return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error,
             function(err){
                 res.send(err);
             })
@@ -285,7 +297,6 @@ router.post('/notifications/:notification_id/call_logs', function(req, res){
     });
 
 });
-
 
 /**
     * API Interface to Update the Details associated with an Existing Call Log
@@ -326,20 +337,19 @@ router.put('/notifications/:notification_id/call_logs', function(req, res){
             function(err){
 
                 if(err) {
-                    console.error("Error occured due to : ", err);
-                    return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error',
+                    console.error(message.error.default_error_prefix, err);
+                    return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error,
                     function(err){
-                    res.send(err);
+                        res.send(err);
                     })
                 }
                 util.formatSuccessResponse({
                     msg: 'Call Log has been updated Successfully',
                 }, function(result){
-                res.json(result);
+                    res.json(result);
                 })
             })
         });
-
 
 });
 

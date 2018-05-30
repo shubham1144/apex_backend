@@ -19,7 +19,7 @@ var express = require('express'),
 
 
 /**
-* Function to format the User Validation Email being sent out to the User Created
+    * Function to format the User Validation Email being sent out to the User Created
 */
 function formatUserValidateEmailTemplate(details){
 
@@ -40,7 +40,7 @@ function formatUserValidateEmailTemplate(details){
 
 
 /**
-* Function to Fetch Details associated with the Users in System
+    * Function to Fetch Details associated with the Users in System
 */
 function fetchUserDetails(user_id, res_locals, callback){
 
@@ -78,18 +78,12 @@ function fetchUserDetails(user_id, res_locals, callback){
 
 
 /**
-* API Interface to fetch Details associated with a User Profile
+    * API Interface to fetch Details associated with a User Profile
 */
-router.get('/user', function(req, res){
-
-    fetchUserDetails(req.user.user_id, res.locals, function(result){
-        res.send(result)
-    })
-
-});
+//router.get('/user', fetchUser);
 
 /**
-* API Interface to update the details associated with a User Profile
+    * API Interface to update the details associated with a User Profile
 */
 router.post('/user/edit', function(req, res){
 
@@ -188,7 +182,7 @@ router.post('/user/edit', function(req, res){
 });
 
 /*
-* API To Register a User in the System Based on Unique Email Address
+    * API To Register a User in the System Based on Unique Email Address
 */
 router.post('/user', function(req, res){
 
@@ -287,7 +281,7 @@ router.post('/user', function(req, res){
 });
 
 /**
-* API Interface to Activate a User Account that has been registered in the system
+    * API Interface to Activate a User Account that has been registered in the system
 */
 router.get('/activate_account', function(req, res){
     //@todo: Need to Work on API to activate user account

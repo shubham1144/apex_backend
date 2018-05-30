@@ -9,7 +9,9 @@
       }
   },
   "error": {
+      "default_error_prefix" : "Error occured due to : ",
       "bad_request" : "Bad Request",
+      "internal_server_error" : "Internal Server Error",
       "json_parse_failure" : "Provide JSON In String Format",
       "database" : {
           "connection_error" : "Primary Database Not Connected"
@@ -20,5 +22,9 @@
         "device_token_missing" : "Device token is missing",
         "invalid_credentials" : "Invalid email address or password."
       }
+  },
+  "code" : {
+    "bad_request" : 400,
+    "custom_bad_request" : 0
   }
 }

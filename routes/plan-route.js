@@ -7,12 +7,13 @@
 var express = require('express'),
     router = express.Router(),
     dao = require('./../dao/dao.js'),
-    shortid = require('shortid');
+    shortid = require('shortid'),
+    message = require("./../helpers/message.json");
 
 
 /**
-* API Interface to create a Plan in the System
-*@todo : Work on the api for Registration of Plans in the system
+    * API Interface to create a Plan in the System
+    *@todo : Work on the api for Registration of Plans in the system
 */
 router.post('/plans', function(req, res){
 
@@ -29,6 +30,10 @@ router.post('/plans', function(req, res){
         }
     }, null,
     function(err){
+        if(err) {
+            console.error(message.error.default_error_prefix, err);
+            return res.send(message.error.internal_server_error)
+        }
         res.send(err + "Mock Plan Registration in the System");
     })
 
