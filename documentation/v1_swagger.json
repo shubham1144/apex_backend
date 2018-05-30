@@ -273,6 +273,81 @@
           ],
          "responses": {}
        }
+     },
+     "/notifications/{notification_id}/call_logs": {
+       "post": {
+         "tags": ["Notification"],
+         "description": "Api to Register a Call Log Against a Notification",
+         "parameters": [
+           {
+             "name": "Authorization",
+             "required": true,
+             "in": "header"
+           },
+           {
+             "name": "notification_id",
+             "description": "Notification Id to ",
+             "required": true,
+             "in": "path"
+           },
+           {
+             "name": "status",
+             "description": "Default Value 'NotCalled'",
+             "example" : "0",
+             "required": false,
+             "type": "string",
+             "in": "formData"
+           },
+           {
+             "name": "note",
+             "description" : "The Note to be associated with The Call Log",
+             "required": false,
+             "type": "string",
+             "in": "formData"
+           }
+         ],
+         "responses": {}
+       },
+       "put": {
+         "tags": ["Notification"],
+         "description": "Api to Update a Existing Call Log Against a Notification",
+         "parameters": [
+           {
+             "name": "Authorization",
+             "required": true,
+             "in": "header"
+           },
+           {
+             "name": "notification_id",
+             "description": "Notification Id to ",
+             "required": true,
+             "in": "path"
+           },
+           {
+             "name": "call_log_id",
+             "description": "The Id of the Call Log to Update",
+             "example" : "0",
+             "required": true,
+             "type": "string",
+             "in": "formData"
+           },
+           {
+             "name": "status",
+             "example" : "0",
+             "required": true,
+             "type": "string",
+             "in": "formData"
+           },
+           {
+             "name": "note",
+             "description" : "The Note to be associated with The Call Log",
+             "required": true,
+             "type": "string",
+             "in": "formData"
+           }
+         ],
+         "responses": {}
+       }
      }
    }
 }

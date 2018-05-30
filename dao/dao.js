@@ -45,9 +45,7 @@ store.on('open', function () {
 
   console.log('Error in the store.');
   console.log(error);
-  store.close();
-  store.close();
-
+    //Close the store only for certain Error Conditions@todo : Determine the Conditions of error when to close the store
 });
 
 //Open The Connection to be associated with the NOSQL database
@@ -250,7 +248,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 /*Logic for Conditional Fetching of Results ends here*/
 
                                                 if(child_table && child_table.values){
-                                                    var formatted_child_result = {};
+                                                    formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
                                                     if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                         else formatted_child_result[key] = returnedRow.row[key] || 0;
@@ -427,10 +425,14 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 
                                                 }
 
-                                                if(!allow_fetch) return result[child_table.alias || returnedRow.table] = [];
+                                                if(!allow_fetch)
+                                                {
+                                                    if(result[child_table.alias || returnedRow.table] === undefined) return result[child_table.alias || returnedRow.table] = null;
+                                                    return;
+                                                }
 
                                                 if(child_table && child_table.values){
-                                                    var formatted_child_result = {};
+                                                    formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
                                                     if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                                         else formatted_child_result[key] = returnedRow.row[key] || 0;
@@ -475,7 +477,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                 //The call Inside will be asyncronous as a result cannot use a iterator.
                                 //Currently, in function used to find iterator length and then proceed
                                 if(!to_filter_result[0]) return callback({
-                                    code : 0,
+                                    code : 401,
                                     message : "Not Found"
                                 })
                                 exports.getOneTableIterator(table, to_filter_result[0].row, child_tables, customization, function(err, data){
@@ -718,6 +720,44 @@ exports.updateDataIndexIterator = function(table, primary_key, index, condition,
                  callback(err, Object.assign(result, data));
              })
 
+         })
+
+    })
+
+};
+
+/**
+* Function to be used to only Update Child Tables Associated with a Parent Table
+* The functionality is supported only one level down the chain of hierarchy
+*/
+exports.updateChildIndexIterator = function(table, primary_key, index, condition, child_tables, callback){
+
+    exports.getOneIndexIterator(table, index, condition, child_tables, null, function(err, result){
+
+         if(err) return callback(err);
+         if(Object.keys(result) < 1) return callback({
+            code : 401,
+            message : 'Not Found'
+         })
+
+         async.each(child_tables, function(table_details, callback){
+
+            var parent_details = {};
+            primary_key.forEach(function(single_primary_key){
+                parent_details[single_primary_key] = result[single_primary_key]
+            })
+
+            if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
+                exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+            }
+            else if(table_details.create_if_absent || table_details.create){
+                exports.putData(parent_details, table_details.table_name, table_details.data, callback);
+            }
+            else callback(null);
+
+         }, function(err){
+
+             callback(err);
          })
 
     })
