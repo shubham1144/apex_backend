@@ -21,9 +21,10 @@ module.exports = [
         clID STRING,
         clStatus ENUM(NotCalled, Called, Engaged, NotReachable),
         clCreatedAt STRING,
+        clUpdatedAt STRING,
         clUserDetails RECORD(
-            firstname STRING,
-            lastname STRING,
+            first_name STRING,
+            last_name STRING,
             user_id STRING,
             user_contact STRING
         ),
