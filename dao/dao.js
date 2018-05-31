@@ -53,7 +53,15 @@ store.open();
 
 
 var TABLE_RECORD = {
+    'PLAN' : 'Plans',
+    'SUBSCRIPTION': 'Plans.Subscriptions',
+    'DOMAIN' : 'Plans.Subscriptions.Domains',
+    'FORM' : 'Plans.Subscriptions.Domains.Forms',
+    'ENQUIRY' : 'Plans.Subscriptions.Domains.Forms.Enquiry',
+    'CALL_LOG' : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
 
+    'USER' : 'Users',
+    'USER_ATTRIBUTE' : 'Users.UserAttributes'
 };
 
 /**

@@ -9,10 +9,13 @@ var dao = require('./../dao/dao.js'),
     message = require("./../helpers/message.json");
 
 
-/* API Interface to register a plan in the System*/
+/**
+    * Function to register a plan in the System
+    * @todo Modify the code for plan registration to remove hardcoding over time
+*/
 exports.addPlan = function(data, callback){
 
-  dao.createDataWithChild('Plans', null, {
+  dao.createDataWithChild(dao.TABLE_RECORD.PLAN, null, {
       pID : shortid.generate(),
       pName : 'Starter Test 01',
       pDescription : 'For Startup Wanting to Try Out for a Limited Period Of time',
@@ -29,7 +32,7 @@ exports.addPlan = function(data, callback){
        if(err){
             console.error(message.error.default_error_prefix, err);
             return callback({
-                code : 500,
+                code : message.code.internal_server_error,
                 message : message.error.internal_server_error
             })
         }

@@ -45,39 +45,41 @@ router.post('/login', function(req, res) {
 
         if(err){
             if(err.missing_keys.includes("email") || err.missing_keys.includes("password")){
-               return util.formatErrorResponse(0, message.error.login.email_password_missing, function(err){
+               return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.email_password_missing, function(err){
                     res.send(err);
                })
             }
             else if(err.missing_keys.includes("device_type")){
-                return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
+                return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_type_missing, function(err){
                     res.send(err);
                 })
             }
             else if(err.missing_keys.includes("device_token")){
-                            return util.formatErrorResponse(0, message.error.login.device_token_missing, function(err){
+                            return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_token_missing, function(err){
                                                 res.send(err);
                                            })
                         }
-            else return util.formatErrorResponse(0, message.error.bad_request, function(err){
+            else return util.formatErrorResponse(message.code.custom_bad_request, message.error.bad_request, function(err){
                 res.send(err)
             })
         }
 
-        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
+        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(err.code.custom_bad_request, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
         dao.getOneIndexIterator('Users', 'uEmail', req.body.email, null, null, function(err, result){
 
             if(err){
-                console.error("Error occured due to : ", err);
-                return res.status(500).send("Internal Server Error");
+                console.error(message.error.default_error_prefix, err);
+                return util.formatErrorResponse(err.code || message.code.internal_server_error, err.message || message.error.internal_server_error, function(err){
+                  res.send(err);
+                })
             }
             if(!result || result === undefined || Object.keys(result).length <1) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
                 res.send(err);
             })
             bcrypt.compare(req.body.password, result.uPassword, function(err, validation_status){
-                if(!validation_status) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
+                if(!validation_status) return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.invalid_credentials, function(err){
                     res.send(err);
                 })
                 token.signAndGenerateToken({
@@ -157,9 +159,9 @@ router.put('/forgot_password', function(req, res){
         generate_password_reset_link : function(callback){
 
             var password_reset_key = shortid.generate();
-            dao.updateDataIndexIterator('Users', ['uID'], 'uEmail', req.body.email, {}, [
+            dao.updateDataIndexIterator(dao.TABLE_RECORD.USER, ['uID'], 'uEmail', req.body.email, {}, [
                 {
-                    table_name : 'Users.UserAttributes',
+                    table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
                     condition : {
                         'uaKey' : {
                             '$equals' : 'resetPasswordKey'
@@ -190,8 +192,8 @@ router.put('/forgot_password', function(req, res){
     function(err, result){
 
         if(err) {
-            console.error("Error occured due to : ", err);
-            return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+            console.error(message.error.default_error_prefix, err);
+            return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error, function(err){
                 res.send(err);
             })
         }

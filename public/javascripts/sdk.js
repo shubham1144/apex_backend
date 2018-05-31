@@ -12,7 +12,7 @@
             //NotifyME.$forms         = document.getElementsByTagName("form");
             NotifyME.$submitButtons = document.querySelectorAll("button[type=submit]");
             NotifyME.$submitInputs  = document.querySelectorAll("input[type=submit]");
-            NotifyME.restURL        = 'http://notify-me.1020dev.com/index.php/hit';
+            NotifyME.restURL        = 'http://notify.me.1020dev.com/hit';
             NotifyME.href           = encodeURIComponent(window.location.href);
             NotifyME.hostname       = window.location.hostname;
             NotifyME.allowSubmit    = false;

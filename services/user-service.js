@@ -17,6 +17,10 @@ var express = require('express'),
     emailer = require('./../helpers/email.js'),
     constants = require('./../helpers/constant.js');
 
+var PASSWORD_LENGTH : {
+    MIN : '5',
+    MAX : '128'
+}
 
 /**
     * Function to format the User Validation Email being sent out to the User Created
@@ -44,23 +48,23 @@ function formatUserValidateEmailTemplate(details){
 */
 exports.fetchUser = function(user_id, callback){
 
-    dao.getOneTableIterator('Users', {
+    dao.getOneTableIterator(dao.TABLE_RECORD.USER, {
             'uID' : user_id
             }, [{
-            table_name : 'Users.UserAttributes',
+            table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
             values : ['uaKey', 'uaValue']
     }], {
         values : [['uID', 'user_id'], ['uLastName', 'last_name'], ['uFirstName', 'first_name'], ['uEmail', 'email']]
     }, function(err, result){
 
         if(err) return callback({
-            code : err.code || 0,
-            message : err.message || "Internal Server Error"
+            code : err.code || message.code.custom_bad_request,
+            message : err.message || message.error.internal_server_error
         })
 
         if(!result || Object.keys(result).length < 1) return callback({
-            code : 401,
-            message : "User Not Found"
+            code : message.code.not_found,
+            message : message.error.user.not_found
         })
         Object.assign(result, {
             avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg?' + moment().unix(),
@@ -74,7 +78,7 @@ exports.fetchUser = function(user_id, callback){
             total_unread_notification_count: 0
         });
 
-        delete result['Users.UserAttributes'];
+        delete result[dao.TABLE_RECORD.USER_ATTRIBUTE];
         callback(null, {
             user : result
         })
@@ -93,14 +97,14 @@ exports.editUser = function(user_id, data, callback){
                  if(err){
                             if(err.missing_keys.includes("first_name")){
                                 return callback({
-                                    code : 0,
-                                    message : "Please enter a valid First Name"
+                                    code : message.code.custom_bad_request,
+                                    message : message.error.user.invalid_first_name
                                 })
                             }
                  }else if(!util.jsonParseSync(data.contact)){
 
                     return callback({
-                        code : 0,
+                        code : message.code.custom_bad_request,
                         message : message.error.json_parse_failure
                     })
 
@@ -117,7 +121,7 @@ exports.editUser = function(user_id, data, callback){
 
                     if(!data.current_password || data.current_password === undefined) return callback(null);
 
-                    dao.getData('Users', {
+                    dao.getData(dao.TABLE_RECORD.USER, {
                         uID : user_id
                     }, function(err, result){
 
@@ -126,16 +130,16 @@ exports.editUser = function(user_id, data, callback){
 
                         bcrypt.compare(data.current_password, result.uPassword, function(err, validation_status){
                             if(!validation_status) return callback({
-                                code : 0,
-                                message : 'The current password is incorrect'
+                                code : message.code.custom_bad_request,
+                                message : message.error.user.invalid_password
                             })
-                            if(uPassword.length < 5 || uPassword.length > 128) return callback({
-                                code : 0,
-                                message : 'Password must be between 5 to 128 characters'
+                            if(uPassword.length < PASSWORD_LENGTH.MIN || uPassword.length > PASSWORD_LENGTH.MAX) return callback({
+                                code : message.code.custom_bad_request,
+                                message : message.error.user.unsupported_password
                             })
                             if(!uPasswordConfirm || uPasswordConfirm !== uPassword) return callback({
-                                code : 0,
-                                message : 'The two passwords provided do not match'
+                                code : message.code.custom_bad_request,
+                                message : message.error.user.mismatch_password
                             })
                             bcrypt.hash(uPassword, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
                                 callback(null, {
@@ -154,8 +158,8 @@ exports.editUser = function(user_id, data, callback){
                             uPassword : results.change_password.new_password
                         })
                     }
-                    dao.updateDataWithChild('Users', ['uID'], user_details, [{
-                        table_name : 'Users.UserAttributes',
+                    dao.updateDataWithChild(dao.TABLE_RECORD.USER, ['uID'], user_details, [{
+                        table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
                         data : {
                             uaKey: "contactNumber",
                             uaValue: contact.country_code + " " + contact.phone_number
@@ -171,10 +175,10 @@ exports.editUser = function(user_id, data, callback){
                 }, function(err, result){
 
                     if(err) {
-                        console.error("Error occured due to : ", err);
+                        console.error(message.error.default_error_prefix, err);
                         return callback({
-                            code : err.code || 0,
-                            message : err.message || "Internal Server Error"
+                            code : err.code || message.code.custom_bad_request,
+                            message : err.message || message.error.internal_server_error
                         })
                     }
                     exports.fetchUser(user_id, callback);
@@ -195,28 +199,27 @@ exports.addUser = function(data, callback){
 
           if(err){
               if(err.missing_keys.includes("uname")){
-                    return callback({
-                        code : 0,
-                        message : 'Please enter a valid User Name'
-                    })
+                return callback({
+                    code : message.code.custom_bad_request,
+                    message : message.error.user.invalid_username
+                })
               }
               else if(err.missing_keys.includes("first_name")){
-                    return callback({
-                        code : 0,
-                        message : 'Please enter a valid First Name'
-                    })
+                return callback({
+                    code : message.code.custom_bad_request,
+                    message : message.error.user.user.invalid_first_name
+                })
               }
               else if(err.missing_keys.includes("last_name")){
-
-                    return callback({
-                        code : 0,
-                        message : 'Please enter a valid Last Name'
-                    })
+                return callback({
+                    code : message.code.custom_bad_request,
+                    message : message.error.user.invalid_last_name
+                })
               }
               else{
                 return callback({
-                    code : 0,
-                    message : 'Bad Request'
+                    code : message.code.custom_bad_request,
+                    message : message.error.bad_request
                 })
               }
           }
@@ -240,9 +243,9 @@ exports.addUser = function(data, callback){
                             uIsValidated : false,
                             uType : data.user_type || 'Admin'//User type can be 'Admin | User | SuperUser(Across all subscriptions)'
                          }
-                        dao.findOrCreateIndexIterator('Users', 'uEmail', data.email, ['uID'], user, [
+                        dao.findOrCreateIndexIterator(dao.TABLE_RECORD.USER, 'uEmail', data.email, ['uID'], user, [
                             {
-                                table_name : 'Users.UserAttributes',
+                                table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
                                 data : [{
                                     uaKey: 'contactNumber',
                                     uaValue: contact.country_code + " " + contact.phone_number
@@ -266,22 +269,22 @@ exports.addUser = function(data, callback){
               },
               send_user_created_email : ['create_user', function(results, callback){
                   if(!results.create_user.created) return callback({
-                      code : 0,
-                      message : "User Email Already Registered"
+                      code : message.code.custom_bad_request,
+                      message : message.error.user.email_exists
                   })
                   emailer.sendEmail(formatUserValidateEmailTemplate(results.create_user), callback);
               }]
           }, function(err){
 
                 if(err) {
-                    console.error("Error occured due to : ", err);
+                    console.error(message.error.default_error_prefix, err);
                     return callback({
-                        code : err.code || 0,
-                        message : err.message || "Internal Server Error"
+                        code : err.code || message.code.custom_bad_request,
+                        message : err.message || message.error.internal_server_error
                     })
                 }
                 callback(null, {
-                    msg : "User Account Generated"
+                    msg : message.success.user.account_generated
                 })
 
           });

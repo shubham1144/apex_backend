@@ -14,11 +14,11 @@ exports.fetchDomains = function(user_id, domain_id, callback){
   var filter = domain_id ? {
        dID : parseInt(domain_id)
    } : {}
-   dao.getMultipleTableIterator('Plans.Subscriptions.Domains', filter, {
+   dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, filter, {
        values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats']
    },
    [{
-       table_name : 'Plans.Subscriptions.Domains.Forms',
+       table_name : dao.TABLE_RECORD.FORM,
        alias : 'forms',
        join_fetch : true,
        condition : {
@@ -54,7 +54,7 @@ exports.addDomain = function(user_id, callback){
     /*Currently Adding mock Data in the System Till the functionality is Ready and Working*/
     var domain_id = shortid.generate(),
     domain_form_id = shortid.generate();
-    dao.createDataWithChild('Plans.Subscriptions.Domains', ['dID', 'dCreatedByUID'], {
+    dao.createDataWithChild(dao.TABLE_RECORD.DOMAIN, ['dID', 'dCreatedByUID'], {
         pID : 'B19VQme1X',
         sID : 'ryviBmx1m',
         dID : domain_id,
@@ -68,7 +68,7 @@ exports.addDomain = function(user_id, callback){
     },
     [
     {
-        table_name : 'Plans.Subscriptions.Domains.Forms',
+        table_name : dao.TABLE_RECORD.FORM,
         data : {
             pID : 'B19VQme1X',
             sID : 'ryviBmx1m',
