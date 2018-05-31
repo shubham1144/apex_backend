@@ -287,7 +287,7 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
             })
         }
         callback(null, {
-            msg: message.success.notification.call_log_captured
+            msg: message.success.notification.call_log_captured,
             id : results.create_call_log
         });
 

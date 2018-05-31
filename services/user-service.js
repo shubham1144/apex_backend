@@ -17,7 +17,7 @@ var express = require('express'),
     emailer = require('./../helpers/email.js'),
     constants = require('./../helpers/constant.js');
 
-var PASSWORD_LENGTH : {
+var PASSWORD_LENGTH = {
     MIN : '5',
     MAX : '128'
 }
