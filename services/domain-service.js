@@ -2,6 +2,8 @@ var dao = require('./../dao/dao.js'),
     async = require('async'),
     util = require('./../helpers/util.js'),
     moment = require('moment'),
+    constant = require('./../helpers/constant.js'),
+    message = require('./../helpers/message.json'),
     shortid = require('shortid');
 
 
@@ -9,13 +11,20 @@ var dao = require('./../dao/dao.js'),
     * Function to fetch A list of domains accessible for user registered on the platform
     * @todo Remove the hardcoding associated with stats and notifications
 */
-exports.fetchDomains = function(user_id, domain_id, callback){
+exports.fetchDomains = function(user_id, page, domain_id, callback){
 
   var filter = domain_id ? {
        dID : parseInt(domain_id)
    } : {}
    dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, filter, {
-       values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats']
+       page : page || constant.PAGINATION.DEFAULT_PAGE,
+       values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms'],
+       default_values : {
+            'forms' : [],
+            'notifications' : 0,
+            'enq_count_stats' : {},
+            'enq_res_time_stats' : {}
+       }
    },
    [{
        table_name : dao.TABLE_RECORD.FORM,
@@ -26,9 +35,27 @@ exports.fetchDomains = function(user_id, domain_id, callback){
                '$contains' : user_id
            }
        },
-       values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications']
-   }],
-   function(err, result){
+       values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications', 'users'],
+       default_values : {
+            'no_of_unread_notifications' : 0
+       }
+   },
+   {
+          table_name : dao.TABLE_RECORD.ENQUIRY,
+          alias : 'notifications',
+          parent_counter : {
+            'forms' : {
+                alias : 'no_of_unread_notifications',
+                bind_key : ['dfID', 'id'],
+                condition : {
+                    'eStatus' : 'Unread'
+                }
+            }
+          },
+          count_fetch : true,
+    }
+   ],
+   function(err, result, requested_count_details){
 
         if(err) {
             console.error(message.error.default_error_prefix, err);
@@ -37,10 +64,9 @@ exports.fetchDomains = function(user_id, domain_id, callback){
                 message : err.message || message.error.internal_server_error
             })
         }
-        callback(null, {
-            total_unread_notification_count: 0,
+         callback(null, Object.assign(requested_count_details || {}, {
             companies : result
-        });
+         }));
 
    })
 

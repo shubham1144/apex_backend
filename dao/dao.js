@@ -35,6 +35,7 @@ store.on('open', function () {
   console.log("Local Database Connection has been established successfully");
   console.log('Store opened.');
   //runAllMigrations();
+  //test()
 
 }).on('close', function() {
 
@@ -52,7 +53,7 @@ store.on('open', function () {
 store.open();
 
 
-var TABLE_RECORD = {
+exports.TABLE_RECORD = {
     'PLAN' : 'Plans',
     'SUBSCRIPTION': 'Plans.Subscriptions',
     'DOMAIN' : 'Plans.Subscriptions.Domains',
@@ -98,7 +99,7 @@ function runAllMigrations(){
 }
 
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
-
+            console.log("Fetching data associated with domain using child table as : ", child_tables)
             //Create a common function to handle Table Iterator for listing
             store.tableIterator(table, primary_key, conditions, function(err, iterator){
 
@@ -127,7 +128,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                     main_table_encountered = false;
                                                     if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
                                                         conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
-
+                                                            console.log("Determining if the check against the user has passed")
                                                             if(check_passed) main_table_encountered = true;
 
                                                         })
@@ -138,8 +139,8 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                    else formatted_result[key] = returnedRow.row[key] || 0;
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
                                                 })
                                                 //Temporarily Testing with Mock Being Sent out to the application
                                                 if(table === 'Plans.Subscriptions.Domains'){
@@ -240,6 +241,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                     Check 2 : Check for any condition that has been received in the Request
                                                 */
                                                 if(child_table === undefined) return;
+
                                                 for( var key in child_table.condition){
                                                     if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
                                                          conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
@@ -258,13 +260,38 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 }
 
                                                 if(!allow_fetch) return;
+
+                                                if(child_table.count_fetch){
+
+                                                    var result_length = result.length - 1;
+                                                    if(result[result_length][child_table && child_table.alias || returnedRow.table]){
+                                                        result[result_length][child_table && child_table.alias || returnedRow.table]++;
+                                                    }else{
+                                                        result[result_length][child_table.alias || returnedRow.table] = 1;
+
+                                                    }
+                                                    for(var key in child_table.parent_counter){
+                                                        for(var sub_key in child_table.parent_counter[key]['condition']){
+
+                                                            var index = _.findIndex(result[result_length][key], [child_table.parent_counter[key]['bind_key'][1], returnedRow.row[child_table.parent_counter[key]['bind_key'][0]]]);
+                                                            if(index !==-1 &&  child_table.parent_counter[key]['condition'][sub_key] == returnedRow.row[sub_key]){
+                                                                if(result[result_length][key][index][child_table.parent_counter[key]['alias']])
+                                                                    result[result_length][key][index][child_table.parent_counter[key]['alias']]++;
+                                                                else result[result_length][key][index][child_table.parent_counter[key]['alias']] = 1;
+                                                            }
+
+                                                        }
+                                                    }
+                                                    return;
+
+                                                }
                                                 /*Logic for Conditional Fetching of Results ends here*/
 
                                                 if(child_table && child_table.values){
                                                     formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
                                                     })
                                                 }else {
                                                     formatted_child_result = returnedRow.row;
@@ -340,7 +367,9 @@ function fetchPagination(result, page, custom_count_fetch, sort_by, callback){
         result = util.sortBySequence(sort_by.order, sort_by.key, result || []);
     }
 
-    callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
+    //callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
+     callback(null, result, custom_count);
+
 
 }
 
@@ -372,6 +401,13 @@ exports.putData = function(primary_key, table, data, callback){
 
 };
 
+function test(){
+    store.multiGet('Plans.Subscriptions.Domains.Forms.Enquiry', {
+        "dID":"r1Hn91EyX"
+    }, null,function (err, result) {
+        console.log("The result received is : ", err, result && result.length)
+    });
+}
 /**
 * Custom function to fetch data associated with a table, along with child tables
 */
@@ -574,7 +610,13 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
         var conditions = {
             includedTables: child_tables_to_fetch
         };
+        if(customization.child_count_fetch){
+            //Make a request to fetch the count associated with the child table with or without conditional key
 
+        }
+
+
+        //If a request is made to fetch the child table count OR Child table condition key count, then we need to iterate the child table with the primary key and fetch the count..
         if(customization.parent_index_filter){
 
             dao.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, important_primary_result){

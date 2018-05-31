@@ -4,7 +4,7 @@ var domain_service = require('./../services/domain-service.js'),
 /*API Interface to be used to fetch details associated with domains*/
 exports.fetchDomains = function(req, res) {
 
-   domain_service.fetchDomains(req.user.user_id, req.query.domain_id, function(err, result){
+   domain_service.fetchDomains(req.user.user_id, req.query.page, req.query.domain_id, function(err, result){
 
         if(err) {
             return util.formatErrorResponse(err.code, err.message, function(err){

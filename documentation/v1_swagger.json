@@ -248,6 +248,11 @@
           "name": "Authorization",
           "required": true,
           "in": "header"
+        },{
+          "name": "page",
+          "description" : "Default Page is 1 and Default Count of rows is 10",
+          "required": false,
+          "in": "query"
         }],
         "responses": {}
       }
