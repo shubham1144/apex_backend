@@ -1,9 +1,6 @@
 var express = require('express'),
     router = express.Router(),
-    dao = require('./../dao/dao.js'),
-    bcrypt = require('bcrypt'),
-    constants = require('./../helpers/constant.js'),
-    shortid = require('shortid');
+    util = require('./../helpers/util.js');
 
 /**
 * GET home page.

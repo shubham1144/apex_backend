@@ -1,5 +1,6 @@
+var util = {};
 /*Formats the Error Response Being Sent Out to the Client to a specific Standard being Followed in the platform*/
-exports.formatErrorResponse = function(code, err_message, callback){
+util.formatErrorResponse = function(code, err_message, callback){
 
     callback({
         success : false,
@@ -9,7 +10,7 @@ exports.formatErrorResponse = function(code, err_message, callback){
 
 };
 
-exports.formatSuccessResponse = function(data, callback){
+util.formatSuccessResponse = function(data, callback){
     callback({
         success : true,
         data : Object.assign(data, {
@@ -18,7 +19,7 @@ exports.formatSuccessResponse = function(data, callback){
     })
 };
 
-exports.formatSuccessResponseStandard = function(res_locals, data, callback){
+util.formatSuccessResponseStandard = function(res_locals, data, callback){
 
      callback(Object.assign({
             success : true,
@@ -32,7 +33,7 @@ exports.formatSuccessResponseStandard = function(res_locals, data, callback){
 };
 
 
-exports.jsonParse = function(data, callback){
+util.jsonParse = function(data, callback){
 
     if(data) {
         try {
@@ -46,7 +47,7 @@ exports.jsonParse = function(data, callback){
 
 }
 
-exports.jsonParseSync = function(data){
+util.jsonParseSync = function(data){
 
     if(data) {
             try {
@@ -62,7 +63,7 @@ exports.jsonParseSync = function(data){
 /**
 * Function to be used to sort Result Set in a sequence
 */
-exports.sortBySequence = function(sort_sequence, key, data){
+util.sortBySequence = function(sort_sequence, key, data){
 
             /*Less than 0: Sort "a" to be a lower index than "b"
                Zero: "a" and "b" should be considered equal, and no sorting performed.
@@ -78,3 +79,5 @@ exports.sortBySequence = function(sort_sequence, key, data){
             });
 
 }
+module.exports = util;
+

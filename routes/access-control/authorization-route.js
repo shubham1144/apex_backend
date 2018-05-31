@@ -1,8 +1,7 @@
 var express = require('express'),
     router = express.Router(),
-    authorization = require('./../../controllers/access-control/authorization-controller.js'),
     payload_validator = require('./../../helpers/payload_validator.js'),
-    message = require('./../../helpers/message.json')
+    message = require('./../../helpers/message.json'),
     util = require('./../../helpers/util.js'),
     dao = require('./../../dao/dao.js'),
     token = require('./../../helpers/token.js')
@@ -24,7 +23,9 @@ function formatUserForgotPasswordEmailTemplate(details){
         html : `<h3>FORGOT PASSWORD</h3><p></p><p>Dear ` + (details.user && details.user.uFirstName)  + " " + (details.user && details.user.uLastName) + `, </p><p></p><p>
                  You've recently requested to reset your password for NOTIFY ME.
                  Click the button below to reset it:
-                 </p><p></p><br><a href="http://notify.me.1020dev.com/reset_password/" ` + details.key + `target="_blank"
+                 </p><p></p><br><a href="`
+                 +  config[environment].host
+                 + `/reset_password/ ` + details.key + '"' + `target="_blank"
                  style="text-decoration: none; color: #fff; background-color: #78c377; padding: 15px 25px; text-decoration: underline;">
                  Reset your password
                  </a><br><br><p>If you did not request a password reset, please ignore this email.</p>
@@ -35,8 +36,7 @@ function formatUserForgotPasswordEmailTemplate(details){
 
 
 /**
-* Api Interface for fetching User Credentials and authenticating the user
-* @todo : Need to Move the Business Logic to Services Layer
+    * Api Interface for fetching User Credentials and authenticating the user
 */
 router.post('/login', function(req, res) {
 
@@ -91,7 +91,7 @@ router.post('/login', function(req, res) {
                             last_name: result.uLastName,
                             first_name: result.uFirstName,
                             user_id: result.uID,
-                            avatar: 'http://notify-me.1020dev.com/files/avatars/2.jpg',//HardCoded for Now@todo: Implemented Functionality
+                            avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg',
                         },
                         token: token
                     }, function(result){
@@ -109,7 +109,8 @@ router.post('/login', function(req, res) {
 });
 
 /**
-* API Interface to logout a user from the system
+    * API Interface to logout a user from the system
+    *@todo : Delete the device token once the User has logged out from the device
 */
 router.post('/logout', function(req, res){
 
@@ -119,16 +120,16 @@ router.post('/logout', function(req, res){
         })
       }
       util.formatSuccessResponse({
-                logout: 'success'
+        logout: 'success'
       }, function(result){
-                res.json(result);
+        res.json(result);
      })
 
 });
 
 /**
 * API Interface to Refresh a Token that has neared its expiry time
-*@Not yet Used
+* @Deprecated
 */
 router.get('/refresh_token', function(req, res){
 
@@ -187,6 +188,7 @@ router.put('/forgot_password', function(req, res){
         }]
     },
     function(err, result){
+
         if(err) {
             console.error("Error occured due to : ", err);
             return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
@@ -198,6 +200,7 @@ router.put('/forgot_password', function(req, res){
         }, function(result){
             res.json(result);
         })
+
     });
 
 });
