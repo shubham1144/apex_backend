@@ -1,6 +1,7 @@
 var moment = require('moment'),
     token_helper = require('./../../helpers/token.js'),
-    constants = require('./../../helpers/constant.js');
+    constants = require('./../../helpers/constant.js'),
+    message = require('./../../helpers/message.json');
 
 
 /**
@@ -11,9 +12,9 @@ module.exports = function(req, res, next){
     token_helper.verifyToken(req.headers['authorization'].split(" ")[1], function(err, decoded_token){
 
         if(err) {
-            console.error("Error Occured due to : ", err)
+            console.error(message.error.default_error_prefix, err);
             return next({
-                code : 401,
+                code : message.code.unauthorized,
                 message : "Invalid OAuth Token Passed"
             });
         }

@@ -11,7 +11,8 @@ module.exports = {
                 security_file_path : '/security/local/client.security'
             }
         },
-        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
+        host : "http://localhost:3000"
     },
     local_1020 : {
         db : {
@@ -24,7 +25,8 @@ module.exports = {
                 security_file_path : '/security/local_1020/client.security'
             }
                 },
-        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
+        host : "http://localhost:3000"
     },
     development : {
         db : {
@@ -37,7 +39,8 @@ module.exports = {
                 security_file_path : '/security/development/client.security'
             }
         },
-        static_file_path : "http://192.168.1.3/notify.me/files/avatars/"
+        static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
+        host : "http://notify.me.1020dev.com"
     },
     production : {
 

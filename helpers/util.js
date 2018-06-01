@@ -55,7 +55,7 @@ exports.jsonParseSync = function(data){
             } catch(e) {
                 return false;
             }
-        }else return({});
+        }else return null;
 
 }
 
@@ -78,3 +78,4 @@ exports.sortBySequence = function(sort_sequence, key, data){
             });
 
 }
+

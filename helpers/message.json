@@ -6,10 +6,19 @@
       "login" : {
         "success" : "Login Successful",
         "token_refresh" : "Token Refresh Successful"
+      },
+      "user" : {
+        "account_generated" : "User Account Generated"
+      },
+      "notification" : {
+        "call_log_captured" : "Call Log has been generated Successfully",
+        "call_log_updated" : "Call Log has been Updated Successfully"
       }
   },
   "error": {
+      "default_error_prefix" : "Error occured due to : ",
       "bad_request" : "Bad Request",
+      "internal_server_error" : "Internal Server Error",
       "json_parse_failure" : "Provide JSON In String Format",
       "database" : {
           "connection_error" : "Primary Database Not Connected"
@@ -19,6 +28,30 @@
         "device_type_missing" : "Invalid device type",
         "device_token_missing" : "Device token is missing",
         "invalid_credentials" : "Invalid email address or password."
+      },
+      "user" : {
+        "not_found" :  "User Not Found",
+        "invalid_first_name" : "Please enter a valid First Name",
+        "invalid_last_name" : "Please enter a valid Last Name",
+        "invalid_username" : "Please enter a valid User Name",
+        "email_exists" : "User Email Already Registered",
+        "invalid_password" : "The current password is incorrect",
+        "unsupported_password" : "Password must be between 5 to 128 characters",
+        "mismatch_password" : "The two passwords provided do not match"
+      },
+      "notification" : {
+        "not_found" : "Notification Not Found",
+        "missing_id" : "notification_id not provided",
+        "missing_call_log_id" : "Please Provide call_log_id",
+        "missing_form_id" : "Form Id Not Found",
+        "missing_domain_id" : "Domain Id Not Found"
       }
+  },
+  "code" : {
+    "bad_request" : 400,
+    "not_found" : 404,
+    "unauthorized" : 401,
+    "internal_server_error" : 500,
+    "custom_bad_request" : 0
   }
 }

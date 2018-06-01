@@ -1,353 +1,407 @@
 {
-   "swagger": "2.0",
-   "info": {
-     "title": "Notify ME",
-     "description": "Api Documentation associated with Notify ME Application",
-     "version": "1.0"
-   },
-   "produces": ["application/json"],
-   "paths": {
-     "/login": {
-       "post": {
-         "tags": ["Authentication"],
-         "description": "Login Api Associated with Notify ME",
-         "parameters": [{
-           "name": "email",
-           "required": true,
-           "in": "formData",
-           "type": "string"
-         },
-         {
-           "name": "password",
-           "required": true,
-           "in": "formData",
-           "type": "string"
-         },
-           {
-             "name": "device_type",
-             "required": true,
-             "in": "formData",
-             "type": "string"
-           },
-           {
-             "name": "device_token",
-             "required": true,
-             "in": "formData",
-             "type": "string"
-           }
-      ],
-         "responses": {}
-       }
-     },
-     "/logout":{
-       "post": {
-         "tags": ["Authentication"],
-         "description": "Logout Api Associated with Notify ME",
-         "parameters": [
-           {
-             "name": "Authorization",
-             "description" : "Token that has neared its expiry",
-             "in": "header"
-           },
-           {
-             "name": "device_token",
-             "required": true,
-             "in": "formData",
-             "type": "string"
-           }
-         ],
-         "responses": {}
-       }
-     },
-     "/test_token": {
-       "get": {
-         "tags": ["Testing"],
-         "description": "Test Custom Expiry Tokens for testing",
-         "parameters": [{
-           "name": "user_id",
-           "required" : true,
-           "description" : "The Id of the user to generate a token with",
-           "in": "query"
-         },
-           {
-             "name": "expiry",
-             "type" : "integer",
-             "description" : "Number of Seconds to set expiry to",
-             "in": "query"
-           }],
-         "responses": {}
-       }
-     },
-     "/refresh_token": {
-       "get": {
-         "tags": ["Authentication"],
-         "description": "Refresh a Token that has neared Expiry",
-         "parameters": [{
-           "name": "Authorization",
-           "description" : "Token that has neared its expiry",
-           "in": "header"
-         }],
-         "responses": {}
-       }
-     },
-     "/forgot_password": {
-       "put": {
-         "tags": ["Authentication"],
-         "description": "Sends a Reset Password To Users",
-         "parameters": [{
-           "name": "email",
-           "description" : "The Email Registered with The Application",
-           "in": "formData"
-         }],
-         "responses": {}
-       }
-     },
-     "/user": {
-       "get": {
-         "tags": ["User Profile"],
-         "description": "Api associated with Fetching Details associated with Logged in User",
-         "parameters": [{
-           "name": "Authorization",
-           "required": true,
-           "in": "header"
-         }],
-         "responses": {}
-       },
-       "post": {
-         "tags": ["Web - User Profile"],
-         "description": "Api for Registering Users in the System(In Progress)",
-         "parameters": [{
-           "name": "Authorization",
-           "required": true,
-           "in": "header"
-         }],
-         "responses": {}
-       }
-     },
-     "/user/edit": {
-       "post": {
-         "tags": ["User Profile"],
-         "description": "Api to edit Details Associated with a User",
-         "parameters": [{
-             "name": "Authorization",
-             "required": true,
-             "in": "header"
-            },
-           {
-             "name": "first_name",
-             "in": "formData",
-             "required": true,
-             "type": "string"
-           },
-           {
-             "name": "last_name",
-             "in": "formData",
-             "required": true,
-             "type": "string"
-           },
-           {
-             "name": "contact",
-             "description" : "Contact Number Associated with the User Involved",
-             "required": true,
-             "in": "formData",
-             "example" : "{\"phone_number\": \"8975674577\",\"country_code\": \"+91\"}",
-             "type": "string"
-           },
-           {
-             "name": "is_notification",
-             "description" : "Support for this key will be available over time",
-             "required": true,
-             "in": "formData",
-             "type": "string"
-           },
-           {
-             "name": "current_password",
-             "description" : "Key to be Passed when User Password Needs to be modified",
-             "required": false,
-             "in": "formData",
-             "type": "string"
-           },
-           {
-             "name": "password",
-             "description" : "The New Password to be associated with the user",
-             "required": false,
-             "in": "formData",
-             "type": "string"
-           },
-           {
-             "name": "password_confirm",
-             "description" : "Confirmation Value for the New Password",
-             "required": false,
-             "in": "formData",
-             "type": "string"
-           },
-           {
-             "name": "avatar",
-             "description" : "This Key is Not Yet Supported",
-             "in": "formData",
-             "type": "string"
-           }
-         ],
-         "responses": {}
-       }
-     },
-     "/domains": {
-       "get": {
-         "tags": ["Domains"],
-         "description": "Api associated with Fetching List of Domains Visible to the Logged in User",
-         "parameters": [{
-           "name": "Authorization",
-           "required": true,
-           "in": "header"
-         }],
-         "responses": {}
-       }
-     },
-     "/notifications/{notification_id}": {
-       "get": {
-         "tags": ["Notification"],
-         "description": "Api associated with Fetching Data associated with Notifications Linked to a Domain",
-         "parameters": [{
-           "name": "Authorization",
-           "required": true,
-           "in": "header"
-         },
-           {
-           "name": "notification_id",
-           "description": "The Notification Id",
-           "required": true,
-           "in": "path"
-         }],
-         "responses": {}
-       }
-     },
-     "/notifications": {
-       "get": {
-         "tags": ["Notification"],
-         "description": "Api associated with Fetching List of Notifications Associated with Domain",
-         "parameters": [
-            {
+  "swagger": "2.0",
+  "info": {
+    "title": "Notify ME",
+    "description": "Api Documentation associated with Notify ME Application",
+    "version": "1.0"
+  },
+  "produces": ["application/json"],
+  "definitions": {
+    "Contact" : {
+      "required" : ["country_code", "phone_number"],
+      "properties": {
+        "country_code": {
+          "type": "string"
+        },
+        "phone_number": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "required" : ["uname", "email", "first_name", "last_name", "user_type", "contact"],
+      "properties": {
+        "uname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "user_type": {
+          "type": "string"
+        },
+        "contact": {
+          "$ref": "#/definitions/Contact"
+
+
+        }
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "description": "Login Api Associated with Notify ME",
+        "parameters": [{
+          "name": "email",
+          "required": true,
+          "in": "formData",
+          "type": "string"
+        },
+          {
+            "name": "password",
+            "required": true,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "device_type",
+            "required": true,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "device_token",
+            "required": true,
+            "in": "formData",
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/logout":{
+      "post": {
+        "tags": ["Authentication"],
+        "description": "Logout Api Associated with Notify ME",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "description" : "Token that has neared its expiry",
+            "in": "header"
+          },
+          {
+            "name": "device_token",
+            "required": true,
+            "in": "formData",
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/test_token": {
+      "get": {
+        "tags": ["Testing"],
+        "description": "Test Custom Expiry Tokens for testing",
+        "parameters": [{
+          "name": "user_id",
+          "required" : true,
+          "description" : "The Id of the user to generate a token with",
+          "in": "query"
+        },
+          {
+            "name": "expiry",
+            "type" : "integer",
+            "description" : "Number of Seconds to set expiry to",
+            "in": "query"
+          }],
+        "responses": {}
+      }
+    },
+    "/refresh_token": {
+      "get": {
+        "tags": ["Authentication"],
+        "description": "Refresh a Token that has neared Expiry",
+        "parameters": [{
+          "name": "Authorization",
+          "description" : "Token that has neared its expiry",
+          "in": "header"
+        }],
+        "responses": {}
+      }
+    },
+    "/forgot_password": {
+      "put": {
+        "tags": ["Authentication"],
+        "description": "Sends a Reset Password To Users",
+        "parameters": [{
+          "name": "email",
+          "description" : "The Email Registered with The Application",
+          "in": "formData"
+        }],
+        "responses": {}
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User Profile"],
+        "description": "Api associated with Fetching Details associated with Logged in User",
+        "parameters": [{
+          "name": "Authorization",
+          "required": true,
+          "in": "header"
+        }],
+        "responses": {}
+      },
+      "post": {
+        "tags": ["Web - User Profile"],
+        "description": "Api for Registering Users in the System(In Progress)",
+        "parameters": [
+          {
             "name": "Authorization",
             "required": true,
             "in": "header"
+          },
+          {
+            "name": "User Details",
+            "required": true,
+            "schema" : {
+              "$ref": "#/definitions/User"
             },
-            {
+            "in": "body"
+          }
+
+        ],
+        "responses": {}
+      }
+    },
+    "/user/edit": {
+      "post": {
+        "tags": ["User Profile"],
+        "description": "Api to edit Details Associated with a User",
+        "parameters": [{
+          "name": "Authorization",
+          "required": true,
+          "in": "header"
+        },
+          {
+            "name": "first_name",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "last_name",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contact",
+            "description" : "Contact Number Associated with the User Involved",
+            "required": true,
+            "in": "formData",
+            "example" : "{\"phone_number\": \"8975674577\",\"country_code\": \"+91\"}",
+            "type": "string"
+          },
+          {
+            "name": "is_notification",
+            "description" : "Support for this key will be available over time",
+            "required": true,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "current_password",
+            "description" : "Key to be Passed when User Password Needs to be modified",
+            "required": false,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "description" : "The New Password to be associated with the user",
+            "required": false,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "password_confirm",
+            "description" : "Confirmation Value for the New Password",
+            "required": false,
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "description" : "This Key is Not Yet Supported",
+            "in": "formData",
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/domains": {
+      "get": {
+        "tags": ["Domains"],
+        "description": "Api associated with Fetching List of Domains Visible to the Logged in User",
+        "parameters": [{
+          "name": "Authorization",
+          "required": true,
+          "in": "header"
+        },{
+          "name": "page",
+          "description" : "Default Page is 1 and Default Count of rows is 10",
+          "required": false,
+          "in": "query"
+        }],
+        "responses": {}
+      }
+    },
+    "/notifications/{notification_id}": {
+      "get": {
+        "tags": ["Notification"],
+        "description": "Api associated with Fetching Data associated with Notifications Linked to a Domain",
+        "parameters": [{
+          "name": "Authorization",
+          "required": true,
+          "in": "header"
+        },
+          {
+            "name": "notification_id",
+            "description": "The Notification Id",
+            "required": true,
+            "in": "path"
+          }],
+        "responses": {}
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": ["Notification"],
+        "description": "Api associated with Fetching List of Notifications Associated with Domain",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "in": "header"
+          },
+          {
             "name": "domain_id",
             "description": "Domain",
             "required": false,
             "in": "query"
-            },
-           {
-             "name": "form_id",
-             "description": "Form",
-             "required": false,
-             "in": "query"
-           },
-           {
-             "name": "keywords",
-             "description": "Search Keyword",
-             "required": false,
-             "in": "query"
-           },
-           {
-             "name" : "archieve",
-             "type": "string",
-             "description" : "0 - Not Archived OR 1 - Archived",
-             "required": false,
-             "in": "query"
-           },
-           {
-             "name": "page",
-             "description" : "Default Page is 1 and Default Count of rows is 10",
-             "required": false,
-             "in": "query"
-           },
-           {
-             "name" : "status",
-             "description" : "string of comma seperated notification status codes",
-             "example" : "0,1,2",
-             "type": "string",
-             "required": false,
-             "in": "query"
-           }
-          ],
-         "responses": {}
-       }
-     },
-     "/notifications/{notification_id}/call_logs": {
-       "post": {
-         "tags": ["Notification"],
-         "description": "Api to Register a Call Log Against a Notification",
-         "parameters": [
-           {
-             "name": "Authorization",
-             "required": true,
-             "in": "header"
-           },
-           {
-             "name": "notification_id",
-             "description": "Notification Id to ",
-             "required": true,
-             "in": "path"
-           },
-           {
-             "name": "status",
-             "description": "Default Value 'NotCalled'",
-             "example" : "0",
-             "required": false,
-             "type": "string",
-             "in": "formData"
-           },
-           {
-             "name": "note",
-             "description" : "The Note to be associated with The Call Log",
-             "required": false,
-             "type": "string",
-             "in": "formData"
-           }
-         ],
-         "responses": {}
-       },
-       "put": {
-         "tags": ["Notification"],
-         "description": "Api to Update a Existing Call Log Against a Notification",
-         "parameters": [
-           {
-             "name": "Authorization",
-             "required": true,
-             "in": "header"
-           },
-           {
-             "name": "notification_id",
-             "description": "Notification Id to ",
-             "required": true,
-             "in": "path"
-           },
-           {
-             "name": "call_log_id",
-             "description": "The Id of the Call Log to Update",
-             "example" : "0",
-             "required": true,
-             "type": "string",
-             "in": "formData"
-           },
-           {
-             "name": "status",
-             "example" : "0",
-             "required": true,
-             "type": "string",
-             "in": "formData"
-           },
-           {
-             "name": "note",
-             "description" : "The Note to be associated with The Call Log",
-             "required": true,
-             "type": "string",
-             "in": "formData"
-           }
-         ],
-         "responses": {}
-       }
-     }
-   }
+          },
+          {
+            "name": "form_id",
+            "description": "Form",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "keywords",
+            "description": "Search Keyword",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name" : "archieve",
+            "type": "string",
+            "description" : "0 - Not Archived OR 1 - Archived",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "page",
+            "description" : "Default Page is 1 and Default Count of rows is 10",
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name" : "status",
+            "description" : "string of comma seperated notification status codes",
+            "example" : "0,1,2",
+            "type": "string",
+            "required": false,
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/notifications/{notification_id}/call_logs": {
+      "post": {
+        "tags": ["Notification"],
+        "description": "Api to Register a Call Log Against a Notification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "in": "header"
+          },
+          {
+            "name": "notification_id",
+            "description": "Notification Id to ",
+            "required": true,
+            "in": "path"
+          },
+          {
+            "name": "status",
+            "description": "Default Value 'NotCalled'",
+            "example" : "0",
+            "required": false,
+            "type": "string",
+            "in": "formData"
+          },
+          {
+            "name": "note",
+            "description" : "The Note to be associated with The Call Log",
+            "required": false,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "tags": ["Notification"],
+        "description": "Api to Update a Existing Call Log Against a Notification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "in": "header"
+          },
+          {
+            "name": "notification_id",
+            "description": "Notification Id to ",
+            "required": true,
+            "in": "path"
+          },
+          {
+            "name": "call_log_id",
+            "description": "The Id of the Call Log to Update",
+            "example" : "0",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          },
+          {
+            "name": "status",
+            "example" : "0",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          },
+          {
+            "name": "note",
+            "description" : "The Note to be associated with The Call Log",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  }
 }

@@ -1,8 +1,7 @@
 var express = require('express'),
     router = express.Router(),
-    authorization = require('./../../controllers/access-control/authorization-controller.js'),
     payload_validator = require('./../../helpers/payload_validator.js'),
-    message = require('./../../helpers/message.json')
+    message = require('./../../helpers/message.json'),
     util = require('./../../helpers/util.js'),
     dao = require('./../../dao/dao.js'),
     token = require('./../../helpers/token.js')
@@ -24,7 +23,9 @@ function formatUserForgotPasswordEmailTemplate(details){
         html : `<h3>FORGOT PASSWORD</h3><p></p><p>Dear ` + (details.user && details.user.uFirstName)  + " " + (details.user && details.user.uLastName) + `, </p><p></p><p>
                  You've recently requested to reset your password for NOTIFY ME.
                  Click the button below to reset it:
-                 </p><p></p><br><a href="http://notify.me.1020dev.com/reset_password/" ` + details.key + `target="_blank"
+                 </p><p></p><br><a href="`
+                 +  config[environment].host
+                 + `/reset_password/ ` + details.key + '"' + `target="_blank"
                  style="text-decoration: none; color: #fff; background-color: #78c377; padding: 15px 25px; text-decoration: underline;">
                  Reset your password
                  </a><br><br><p>If you did not request a password reset, please ignore this email.</p>
@@ -35,8 +36,7 @@ function formatUserForgotPasswordEmailTemplate(details){
 
 
 /**
-* Api Interface for fetching User Credentials and authenticating the user
-* @todo : Need to Move the Business Logic to Services Layer
+    * Api Interface for fetching User Credentials and authenticating the user
 */
 router.post('/login', function(req, res) {
 
@@ -45,39 +45,41 @@ router.post('/login', function(req, res) {
 
         if(err){
             if(err.missing_keys.includes("email") || err.missing_keys.includes("password")){
-               return util.formatErrorResponse(0, message.error.login.email_password_missing, function(err){
+               return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.email_password_missing, function(err){
                     res.send(err);
                })
             }
             else if(err.missing_keys.includes("device_type")){
-                return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
+                return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_type_missing, function(err){
                     res.send(err);
                 })
             }
             else if(err.missing_keys.includes("device_token")){
-                            return util.formatErrorResponse(0, message.error.login.device_token_missing, function(err){
+                            return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_token_missing, function(err){
                                                 res.send(err);
                                            })
                         }
-            else return util.formatErrorResponse(0, message.error.bad_request, function(err){
+            else return util.formatErrorResponse(message.code.custom_bad_request, message.error.bad_request, function(err){
                 res.send(err)
             })
         }
 
-        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(0, message.error.login.device_type_missing, function(err){
+        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(err.code.custom_bad_request, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
         dao.getOneIndexIterator('Users', 'uEmail', req.body.email, null, null, function(err, result){
 
             if(err){
-                console.error("Error occured due to : ", err);
-                return res.status(500).send("Internal Server Error");
+                console.error(message.error.default_error_prefix, err);
+                return util.formatErrorResponse(err.code || message.code.internal_server_error, err.message || message.error.internal_server_error, function(err){
+                  res.send(err);
+                })
             }
             if(!result || result === undefined || Object.keys(result).length <1) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
                 res.send(err);
             })
             bcrypt.compare(req.body.password, result.uPassword, function(err, validation_status){
-                if(!validation_status) return util.formatErrorResponse(0, message.error.login.invalid_credentials, function(err){
+                if(!validation_status) return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.invalid_credentials, function(err){
                     res.send(err);
                 })
                 token.signAndGenerateToken({
@@ -91,7 +93,7 @@ router.post('/login', function(req, res) {
                             last_name: result.uLastName,
                             first_name: result.uFirstName,
                             user_id: result.uID,
-                            avatar: 'http://notify-me.1020dev.com/files/avatars/2.jpg',//HardCoded for Now@todo: Implemented Functionality
+                            avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg',
                         },
                         token: token
                     }, function(result){
@@ -109,7 +111,8 @@ router.post('/login', function(req, res) {
 });
 
 /**
-* API Interface to logout a user from the system
+    * API Interface to logout a user from the system
+    *@todo : Delete the device token once the User has logged out from the device
 */
 router.post('/logout', function(req, res){
 
@@ -119,16 +122,16 @@ router.post('/logout', function(req, res){
         })
       }
       util.formatSuccessResponse({
-                logout: 'success'
+        logout: 'success'
       }, function(result){
-                res.json(result);
+        res.json(result);
      })
 
 });
 
 /**
 * API Interface to Refresh a Token that has neared its expiry time
-*@Not yet Used
+* @Deprecated
 */
 router.get('/refresh_token', function(req, res){
 
@@ -156,9 +159,9 @@ router.put('/forgot_password', function(req, res){
         generate_password_reset_link : function(callback){
 
             var password_reset_key = shortid.generate();
-            dao.updateDataIndexIterator('Users', ['uID'], 'uEmail', req.body.email, {}, [
+            dao.updateDataIndexIterator(dao.TABLE_RECORD.USER, ['uID'], 'uEmail', req.body.email, {}, [
                 {
-                    table_name : 'Users.UserAttributes',
+                    table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
                     condition : {
                         'uaKey' : {
                             '$equals' : 'resetPasswordKey'
@@ -187,9 +190,10 @@ router.put('/forgot_password', function(req, res){
         }]
     },
     function(err, result){
+
         if(err) {
-            console.error("Error occured due to : ", err);
-            return util.formatErrorResponse(err.code || 0, err.message || 'Internal Server Error', function(err){
+            console.error(message.error.default_error_prefix, err);
+            return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error, function(err){
                 res.send(err);
             })
         }
@@ -198,6 +202,7 @@ router.put('/forgot_password', function(req, res){
         }, function(result){
             res.json(result);
         })
+
     });
 
 });

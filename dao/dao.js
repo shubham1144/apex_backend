@@ -51,6 +51,19 @@ store.on('open', function () {
 //Open The Connection to be associated with the NOSQL database
 store.open();
 
+
+exports.TABLE_RECORD = {
+    'PLAN' : 'Plans',
+    'SUBSCRIPTION': 'Plans.Subscriptions',
+    'DOMAIN' : 'Plans.Subscriptions.Domains',
+    'FORM' : 'Plans.Subscriptions.Domains.Forms',
+    'ENQUIRY' : 'Plans.Subscriptions.Domains.Forms.Enquiry',
+    'CALL_LOG' : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
+
+    'USER' : 'Users',
+    'USER_ATTRIBUTE' : 'Users.UserAttributes'
+};
+
 /**
 * Over time need to make sure that we do not repeatedly run the same migration files
 */
@@ -85,7 +98,7 @@ function runAllMigrations(){
 }
 
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
-
+            // console.log("Fetching data associated with domain using child table as : ", child_tables)
             //Create a common function to handle Table Iterator for listing
             store.tableIterator(table, primary_key, conditions, function(err, iterator){
 
@@ -114,7 +127,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                     main_table_encountered = false;
                                                     if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
                                                         conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
-
+                                                            console.log("Determining if the check against the user has passed")
                                                             if(check_passed) main_table_encountered = true;
 
                                                         })
@@ -125,80 +138,15 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                    else formatted_result[key] = returnedRow.row[key] || 0;
-                                                })
-                                                //Temporarily Testing with Mock Being Sent out to the application
-                                                if(table === 'Plans.Subscriptions.Domains'){
-                                                result.push(Object.assign(formatted_result, {
-                                                                                                                                                                        "enq_count_stats": {
-                                                                                                                                                                                                                     "month": "05",
-                                                                                                                                                                                                                     "days": [
-                                                                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                                                                     ],
-                                                                                                                                                                                                                     "enquiries": {
-                                                                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                                                                     },
-                                                                                                                                                                                                                     "curr_week_total": "0",
-                                                                                                                                                                                                                     "last_week_total": "0"
-                                                                                                                                                                                                                 },
-                                                                                                                                                                         "enq_res_time_stats": {
-                                                                                                                                                                                                                     "month": "05",
-                                                                                                                                                                                                                     "days": [
-                                                                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                                                                     ],
-                                                                                                                                                                                                                     "response_times": {
-                                                                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                                                                     },
-                                                                                                                                                                                                                     "curr_week_avg": "0",
-                                                                                                                                                                                                                     "last_week_avg": "0"
-                                                                                                                                                                                                                 }
-                                                                                                                                                                        }, parent_table_details))
-                                                }
-                                                 else if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
-                                                                                                                result.push(Object.assign(formatted_result, {
-                                                                                                                    custom_fields : [{
-                                                                                                                        "type": "text",
-                                                                                                                        "key": "Mock Keyword 01",
-                                                                                                                        "value": "Mock Keyword 01 Content"
-                                                                                                                    },{
-                                                                                                                      "type": "text",
-                                                                                                                      "key": "Mock Keyword 02",
-                                                                                                                      "value": "Mock Keyword 02 Content"
-                                                                                                                    }]
-                                                                                                                }, parent_table_details));
-                                                                                                            }
-                                                else result.push(Object.assign(formatted_result, parent_table_details));
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                    else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
+
+
+                                                });
+                                                result.push(Object.assign(formatted_result, parent_table_details));
 
                                             }else result.push(Object.assign(returnedRow.row, parent_table_details));
+                                            if(customization.custom_function) customization.custom_function(result[result.length - 1], returnedRow.row);
                                             break;
                                 default:    /*
                                                 If the table involved is not a child table, then it can be parent table
@@ -227,6 +175,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                     Check 2 : Check for any condition that has been received in the Request
                                                 */
                                                 if(child_table === undefined) return;
+
                                                 for( var key in child_table.condition){
                                                     if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
                                                          conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
@@ -245,13 +194,42 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 }
 
                                                 if(!allow_fetch) return;
+                                                /*Function for Custom Statistics starts here*/
+
+                                                if(child_table.custom_function) child_table.custom_function(result[result.length - 1], returnedRow.row);
+
+                                                /*Functiont for Custom Statistics ends here*/
+                                                if(child_table.count_fetch){
+
+                                                    var result_length = result.length - 1;
+                                                    if(result[result_length][child_table && child_table.alias || returnedRow.table]){
+                                                        result[result_length][child_table && child_table.alias || returnedRow.table]++;
+                                                    }else{
+                                                        result[result_length][child_table.alias || returnedRow.table] = 1;
+
+                                                    }
+                                                    for(var key in child_table.parent_counter){
+                                                        for(var sub_key in child_table.parent_counter[key]['condition']){
+
+                                                            var index = _.findIndex(result[result_length][key], [child_table.parent_counter[key]['bind_key'][1], returnedRow.row[child_table.parent_counter[key]['bind_key'][0]]]);
+                                                            if(index !==-1 &&  child_table.parent_counter[key]['condition'][sub_key] == returnedRow.row[sub_key]){
+                                                                if(result[result_length][key][index][child_table.parent_counter[key]['alias']])
+                                                                    result[result_length][key][index][child_table.parent_counter[key]['alias']]++;
+                                                                else result[result_length][key][index][child_table.parent_counter[key]['alias']] = 1;
+                                                            }
+
+                                                        }
+                                                    }
+                                                    return;
+
+                                                }
                                                 /*Logic for Conditional Fetching of Results ends here*/
 
                                                 if(child_table && child_table.values){
                                                     formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
                                                     })
                                                 }else {
                                                     formatted_child_result = returnedRow.row;
@@ -367,7 +345,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
-        })
+        });
 
         store.tableIterator(table, primary_key, {
             includedTables: child_tables_to_fetch
@@ -389,21 +367,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                     })
                                                     result = formatted_result;
                                                 }else result = returnedRow.row;
-                                                //Mock Data starts here
-                                                if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
-                                                    result = Object.assign(result, {
-                                                        custom_fields : [{
-                                                            "type": "text",
-                                                            "key": "Mock Keyword 01",
-                                                            "value": "Mock Keyword 01 Content"
-                                                        },{
-                                                          "type": "text",
-                                                          "key": "Mock Keyword 02",
-                                                          "value": "Mock Keyword 02 Content"
-                                                        }]
-                                                    });
-                                                }
-                                                //Mock Data ends here
+                                         if(customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                 break;
                                     default :
                                                 var child_table = _.filter(child_tables, {
@@ -448,7 +412,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                 }
                                                 break;
                                 }
-            })
+            });
             callback(null, result);
 
         })
@@ -464,7 +428,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
         if(child_tables && child_tables.length > 0){
-//            console.log("Trying to fetch data associated with the Child Tables aswell....");
+
             store.indexIterator(table, index, {
                             fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
@@ -512,6 +476,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                                         })
                                                         result = formatted_result;
                                                     }else result = returnedRow.row;
+                                                    if(customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                     break;
                                         default :
                                                     var child_table = _.filter(child_tables, {
@@ -557,11 +522,12 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
-        })
+        });
         var conditions = {
             includedTables: child_tables_to_fetch
         };
 
+        //If a request is made to fetch the child table count OR Child table condition key count, then we need to iterate the child table with the primary key and fetch the count..
         if(customization.parent_index_filter){
 
             dao.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, important_primary_result){
@@ -695,8 +661,8 @@ exports.updateDataIndexIterator = function(table, primary_key, index, condition,
          if(Object.keys(result) < 1) return callback({
             code : 0,
             message : 'Not Found'
-         })
-          //return console.log("The Data received associated with The User is : ", result);
+         });
+
 
          store.put(table, Object.assign(result, data), function(err){
 
@@ -738,14 +704,14 @@ exports.updateChildIndexIterator = function(table, primary_key, index, condition
          if(Object.keys(result) < 1) return callback({
             code : 401,
             message : 'Not Found'
-         })
+         });
 
          async.each(child_tables, function(table_details, callback){
 
             var parent_details = {};
             primary_key.forEach(function(single_primary_key){
                 parent_details[single_primary_key] = result[single_primary_key]
-            })
+            });
 
             if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
                 exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)

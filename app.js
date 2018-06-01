@@ -1,10 +1,10 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var jwt = require('express-jwt');
-var constant = require('./helpers/constant.js');
+var createError = require('http-errors'),
+    express = require('express'),
+    path = require('path'),
+    cookieParser = require('cookie-parser'),
+    logger = require('morgan'),
+    jwt = require('express-jwt'),
+    constant = require('./helpers/constant.js');
 
 var swaggerUi = require('swagger-ui-express');
 const swaggerDocumentV1 = require('./documentation/v1_swagger.json');
@@ -15,13 +15,13 @@ var options = {
 
 /* Configuration of All the Routes associated with the Platform START*/
 var indexRouter = require('./routes/index'),
-    authorizationRouter = require('./routes/access-control/authorization-route.js'),
-    authenticationRouter = require('./routes/access-control/authentication-route.js'),
-    planRouter = require('./routes/plan'),
-    subscriptionRouter = require('./routes/subscription'),
-    domainRouter = require('./routes/domain'),
-    userRouter = require('./routes/user'),
-    notificationRouter = require('./routes/notification');
+    authorizationRouter = require('./routes/access-control/authorization-route'),
+    authenticationRouter = require('./routes/access-control/authentication-route'),
+    planRouter = require('./routes/plan-route'),
+    subscriptionRouter = require('./routes/subscription-route'),
+    domainRouter = require('./routes/domain-route'),
+    userRouter = require('./routes/user-route'),
+    notificationRouter = require('./routes/notification-route');
 /* Configuration of All the Routes associated with the Platform END*/
 
 var app = express();
@@ -40,7 +40,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, options));
 
 //Configuration for JWT Stateless Oauth Authentication
-app.use(jwt({ secret: constant.JWT.SECRET}).unless({path: ['/', '/check_database_crud_connection', { url : '/test_token', methods : ['GET']}, { url : '/forgot_password', methods : ['PUT']}, { url : '/login', methods : ['POST']}, { url : '/login/logout', methods : ['POST']}, { url : '/notifications', methods : ['POST']}]}));
+app.use(jwt({ secret: constant.JWT.SECRET})
+.unless({path: ['/', { url : '/test_token', methods : ['GET']},
+                     { url : '/forgot_password', methods : ['PUT']},
+                     { url : '/login', methods : ['POST']},
+                     { url : '/login/logout', methods : ['POST']},
+                     { url : '/notifications', methods : ['POST']}]
+}));
 
 app.all('*', indexRouter, authorizationRouter, authenticationRouter, domainRouter, userRouter, notificationRouter, planRouter, subscriptionRouter);
 
