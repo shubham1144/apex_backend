@@ -46,7 +46,7 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                '$contains' : user_id
            }
        },
-       values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications', 'users'],
+       values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications'],
        default_values : {
             'no_of_unread_notifications' : 0
        }
