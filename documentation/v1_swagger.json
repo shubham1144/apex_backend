@@ -118,7 +118,7 @@
     },
     "/refresh_token": {
       "get": {
-        "tags": ["Authentication"],
+        "tags": ["Testing"],
         "description": "Refresh a Token that has neared Expiry",
         "parameters": [{
           "name": "Authorization",
