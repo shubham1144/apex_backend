@@ -6,6 +6,7 @@ var shortid = require('shortid'),
     constant = require('./../helpers/constant.js'),
     message = require('./../helpers/message.json'),
     dao = require('./../dao/dao.js'),
+    util = require('./../helpers/util.js'),
     userService = require('./user-service.js');
 
 /* Customizable Objects associated with the Status Codes */
@@ -75,8 +76,13 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
             values : [
                 ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
                 ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
-                ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
+                ['eIsDeleted', 'is_deleted'], 'call_logs'
             ],
+            custom_function : function(result_row, item){
+
+                result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
+
+            },
             custom_count_fetch : [{
                 key : 'is_archived',
                 criteria : true,
@@ -165,7 +171,10 @@ exports.fetchNotification = function(notification_id, callback){
             ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'], 'domain_name',
             ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
-        ]
+        ],
+        custom_function : function(result_row, item){
+            result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
+        }
     }, function(err, result){
 
         if(err) {
@@ -190,11 +199,22 @@ exports.addNotification = function(data, callback){
     dao.putData({
     }, dao.TABLE_RECORD.ENQUIRY, {
             //Currently, the data is mocked till the functionality is available
-            "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"r1Hn91EyX","dCreatedByUID":"r1UH8Of1m","dfID":"HyxH391EkQ",
+        "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"S1EZJJ1x7","dCreatedByUID":"S1XGA00J7","dfID":"SJgVWJJklm",
             eID : shortid.generate(),
             ePhone : '8975567457',
             eEmail : 'testuser10@tentwenty.me',
             eFormAllDetails : "",
+            eFormLinkedDetails : JSON.stringify(
+                [{
+                "type": "text",
+                "key": "Mock Keyword 01",
+                "value": "Mock Keyword 01 Content"
+                },{
+                "type": "text",
+                "key": "Mock Keyword 02",
+                "value": "Mock Keyword 02 Content"
+                }]
+            ),
             eStatus : 'Unread',
             eCreatedAt : moment.utc().format(),
             eUpdatedAt : moment.utc().format(),

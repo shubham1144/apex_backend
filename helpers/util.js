@@ -55,7 +55,7 @@ exports.jsonParseSync = function(data){
             } catch(e) {
                 return false;
             }
-        }else return({});
+        }else return null;
 
 }
 

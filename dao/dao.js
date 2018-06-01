@@ -139,26 +139,14 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
                                                     if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
-                                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values && customization.default_values[key] !== undefined || customization.default_values[key] == 0)? customization.default_values[key] : null);
+                                                    else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
 
-                                                })
-                                                //Temporarily Testing with Mock Being Sent out to the application
-                                                if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
-                                                    result.push(Object.assign(formatted_result, {
-                                                        custom_fields : [{
-                                                            "type": "text",
-                                                            "key": "Mock Keyword 01",
-                                                            "value": "Mock Keyword 01 Content"
-                                                        },{
-                                                          "type": "text",
-                                                          "key": "Mock Keyword 02",
-                                                          "value": "Mock Keyword 02 Content"
-                                                        }]
-                                                    }, parent_table_details));
-                                                }
-                                                else result.push(Object.assign(formatted_result, parent_table_details));
+
+                                                });
+                                                result.push(Object.assign(formatted_result, parent_table_details));
 
                                             }else result.push(Object.assign(returnedRow.row, parent_table_details));
+                                            if(customization.custom_function) customization.custom_function(result[result.length - 1], returnedRow.row);
                                             break;
                                 default:    /*
                                                 If the table involved is not a child table, then it can be parent table
@@ -317,9 +305,7 @@ function fetchPagination(result, page, custom_count_fetch, sort_by, callback){
         result = util.sortBySequence(sort_by.order, sort_by.key, result || []);
     }
 
-    //callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
-     callback(null, result, custom_count);
-
+    callback(null, _.take(_.slice(result, offset, result.length), 10), custom_count);
 
 }
 
@@ -359,7 +345,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
-        })
+        });
 
         store.tableIterator(table, primary_key, {
             includedTables: child_tables_to_fetch
@@ -381,21 +367,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                     })
                                                     result = formatted_result;
                                                 }else result = returnedRow.row;
-                                                //Mock Data starts here
-                                                if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
-                                                    result = Object.assign(result, {
-                                                        custom_fields : [{
-                                                            "type": "text",
-                                                            "key": "Mock Keyword 01",
-                                                            "value": "Mock Keyword 01 Content"
-                                                        },{
-                                                          "type": "text",
-                                                          "key": "Mock Keyword 02",
-                                                          "value": "Mock Keyword 02 Content"
-                                                        }]
-                                                    });
-                                                }
-                                                //Mock Data ends here
+                                         if(customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                 break;
                                     default :
                                                 var child_table = _.filter(child_tables, {
@@ -440,7 +412,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                 }
                                                 break;
                                 }
-            })
+            });
             callback(null, result);
 
         })
@@ -456,7 +428,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
         if(child_tables && child_tables.length > 0){
-//            console.log("Trying to fetch data associated with the Child Tables aswell....");
+
             store.indexIterator(table, index, {
                             fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
@@ -504,6 +476,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                                         })
                                                         result = formatted_result;
                                                     }else result = returnedRow.row;
+                                                    if(customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                     break;
                                         default :
                                                     var child_table = _.filter(child_tables, {
@@ -549,7 +522,7 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
         var child_tables_to_fetch = [];
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
-        })
+        });
         var conditions = {
             includedTables: child_tables_to_fetch
         };
