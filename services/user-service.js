@@ -67,7 +67,7 @@ exports.fetchUser = function(user_id, callback){
             message : message.error.user.not_found
         })
         Object.assign(result, {
-            avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg?' + moment().unix(),
+            avatar: config[environment].host + '/files/avatars/' + result.user_id + '.jpg?' + moment().unix(),
             contact : {
                 phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
                                (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
