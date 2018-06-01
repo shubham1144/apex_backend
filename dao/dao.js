@@ -35,7 +35,6 @@ store.on('open', function () {
   console.log("Local Database Connection has been established successfully");
   console.log('Store opened.');
   //runAllMigrations();
-  //test()
 
 }).on('close', function() {
 
@@ -99,7 +98,7 @@ function runAllMigrations(){
 }
 
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
-            console.log("Fetching data associated with domain using child table as : ", child_tables)
+            // console.log("Fetching data associated with domain using child table as : ", child_tables)
             //Create a common function to handle Table Iterator for listing
             store.tableIterator(table, primary_key, conditions, function(err, iterator){
 
@@ -140,76 +139,23 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
                                                     if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
-                                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
+                                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values && customization.default_values[key] !== undefined || customization.default_values[key] == 0)? customization.default_values[key] : null);
+
                                                 })
                                                 //Temporarily Testing with Mock Being Sent out to the application
-                                                if(table === 'Plans.Subscriptions.Domains'){
-                                                result.push(Object.assign(formatted_result, {
-                                                                                                                                                                        "enq_count_stats": {
-                                                                                                                                                                                                                     "month": "05",
-                                                                                                                                                                                                                     "days": [
-                                                                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                                                                     ],
-                                                                                                                                                                                                                     "enquiries": {
-                                                                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                                                                     },
-                                                                                                                                                                                                                     "curr_week_total": "0",
-                                                                                                                                                                                                                     "last_week_total": "0"
-                                                                                                                                                                                                                 },
-                                                                                                                                                                         "enq_res_time_stats": {
-                                                                                                                                                                                                                     "month": "05",
-                                                                                                                                                                                                                     "days": [
-                                                                                                                                                                                                                         "2018-05-13",
-                                                                                                                                                                                                                         "2018-05-14",
-                                                                                                                                                                                                                         "2018-05-15",
-                                                                                                                                                                                                                         "2018-05-16",
-                                                                                                                                                                                                                         "2018-05-17",
-                                                                                                                                                                                                                         "2018-05-18",
-                                                                                                                                                                                                                         "2018-05-19",
-                                                                                                                                                                                                                         "2018-05-20"
-                                                                                                                                                                                                                     ],
-                                                                                                                                                                                                                     "response_times": {
-                                                                                                                                                                                                                         "2018-05-13": "0",
-                                                                                                                                                                                                                         "2018-05-14": "0",
-                                                                                                                                                                                                                         "2018-05-15": "0",
-                                                                                                                                                                                                                         "2018-05-16": "0",
-                                                                                                                                                                                                                         "2018-05-17": "0",
-                                                                                                                                                                                                                         "2018-05-18": "0",
-                                                                                                                                                                                                                         "2018-05-19": "0",
-                                                                                                                                                                                                                         "2018-05-20": "0"
-                                                                                                                                                                                                                     },
-                                                                                                                                                                                                                     "curr_week_avg": "0",
-                                                                                                                                                                                                                     "last_week_avg": "0"
-                                                                                                                                                                                                                 }
-                                                                                                                                                                        }, parent_table_details))
+                                                if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
+                                                    result.push(Object.assign(formatted_result, {
+                                                        custom_fields : [{
+                                                            "type": "text",
+                                                            "key": "Mock Keyword 01",
+                                                            "value": "Mock Keyword 01 Content"
+                                                        },{
+                                                          "type": "text",
+                                                          "key": "Mock Keyword 02",
+                                                          "value": "Mock Keyword 02 Content"
+                                                        }]
+                                                    }, parent_table_details));
                                                 }
-                                                 else if(table === 'Plans.Subscriptions.Domains.Forms.Enquiry'){
-                                                                                                                result.push(Object.assign(formatted_result, {
-                                                                                                                    custom_fields : [{
-                                                                                                                        "type": "text",
-                                                                                                                        "key": "Mock Keyword 01",
-                                                                                                                        "value": "Mock Keyword 01 Content"
-                                                                                                                    },{
-                                                                                                                      "type": "text",
-                                                                                                                      "key": "Mock Keyword 02",
-                                                                                                                      "value": "Mock Keyword 02 Content"
-                                                                                                                    }]
-                                                                                                                }, parent_table_details));
-                                                                                                            }
                                                 else result.push(Object.assign(formatted_result, parent_table_details));
 
                                             }else result.push(Object.assign(returnedRow.row, parent_table_details));
@@ -260,7 +206,11 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 }
 
                                                 if(!allow_fetch) return;
+                                                /*Function for Custom Statistics starts here*/
 
+                                                if(child_table.custom_function) child_table.custom_function(result[result.length - 1], returnedRow.row);
+
+                                                /*Functiont for Custom Statistics ends here*/
                                                 if(child_table.count_fetch){
 
                                                     var result_length = result.length - 1;
@@ -401,13 +351,6 @@ exports.putData = function(primary_key, table, data, callback){
 
 };
 
-function test(){
-    store.multiGet('Plans.Subscriptions.Domains.Forms.Enquiry', {
-        "dID":"r1Hn91EyX"
-    }, null,function (err, result) {
-        console.log("The result received is : ", err, result && result.length)
-    });
-}
 /**
 * Custom function to fetch data associated with a table, along with child tables
 */
@@ -610,11 +553,6 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
         var conditions = {
             includedTables: child_tables_to_fetch
         };
-        if(customization.child_count_fetch){
-            //Make a request to fetch the count associated with the child table with or without conditional key
-
-        }
-
 
         //If a request is made to fetch the child table count OR Child table condition key count, then we need to iterate the child table with the primary key and fetch the count..
         if(customization.parent_index_filter){
@@ -750,8 +688,8 @@ exports.updateDataIndexIterator = function(table, primary_key, index, condition,
          if(Object.keys(result) < 1) return callback({
             code : 0,
             message : 'Not Found'
-         })
-          //return console.log("The Data received associated with The User is : ", result);
+         });
+
 
          store.put(table, Object.assign(result, data), function(err){
 
@@ -793,14 +731,14 @@ exports.updateChildIndexIterator = function(table, primary_key, index, condition
          if(Object.keys(result) < 1) return callback({
             code : 401,
             message : 'Not Found'
-         })
+         });
 
          async.each(child_tables, function(table_details, callback){
 
             var parent_details = {};
             primary_key.forEach(function(single_primary_key){
                 parent_details[single_primary_key] = result[single_primary_key]
-            })
+            });
 
             if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
                 exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)

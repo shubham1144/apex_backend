@@ -9,21 +9,32 @@ var dao = require('./../dao/dao.js'),
 
 /**
     * Function to fetch A list of domains accessible for user registered on the platform
-    * @todo Remove the hardcoding associated with stats and notifications
 */
 exports.fetchDomains = function(user_id, page, domain_id, callback){
 
   var filter = domain_id ? {
        dID : parseInt(domain_id)
-   } : {}
+   } : {};
    dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, filter, {
        page : page || constant.PAGINATION.DEFAULT_PAGE,
        values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms'],
        default_values : {
             'forms' : [],
             'notifications' : 0,
-            'enq_count_stats' : {},
-            'enq_res_time_stats' : {}
+            'enq_count_stats' : {
+                "month" : moment().format("MM"),
+                "days" : [],
+                "enquiries" : {},
+                "curr_week_total" : 0,
+                "last_week_total" : 0
+            },
+            'enq_res_time_stats' : {
+                "month": moment().format("MM"),
+                "days": [],
+                "response_times": {},
+                "curr_week_avg": 0,
+                "last_week_avg": 0
+            }
        }
    },
    [{
@@ -43,6 +54,23 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
    {
           table_name : dao.TABLE_RECORD.ENQUIRY,
           alias : 'notifications',
+          custom_function : function(result_row, item){
+
+            if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
+            if(result_row["enq_count_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
+                result_row["enq_count_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
+            if(moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'week'))
+                result_row["enq_count_stats"]["curr_week_total"]++;
+
+            if(!result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")])
+                result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")] = 1;
+            else result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]++;
+
+
+            if(result_row["enq_res_time_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
+              result_row["enq_res_time_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
+
+          },
           parent_counter : {
             'forms' : {
                 alias : 'no_of_unread_notifications',
@@ -52,7 +80,7 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                 }
             }
           },
-          count_fetch : true,
+          count_fetch : true
     }
    ],
    function(err, result, requested_count_details){
@@ -114,10 +142,7 @@ exports.addDomain = function(user_id, callback){
             message : err.message || message.error.internal_server_error
             })
         }
-        callback(null, {
-            total_unread_notification_count: 0,
-            companies : result
-        });
+
         callback(null, {
             msg : "Mock Domain has been registered in the system"
         })
