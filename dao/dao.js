@@ -367,7 +367,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                                     })
                                                     result = formatted_result;
                                                 }else result = returnedRow.row;
-                                         if(customization.custom_function) customization.custom_function(result, returnedRow.row);
+                                         if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                 break;
                                     default :
                                                 var child_table = _.filter(child_tables, {
@@ -476,7 +476,7 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                                         })
                                                         result = formatted_result;
                                                     }else result = returnedRow.row;
-                                                    if(customization.custom_function) customization.custom_function(result, returnedRow.row);
+                                                    if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
                                                     break;
                                         default :
                                                     var child_table = _.filter(child_tables, {
