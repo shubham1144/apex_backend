@@ -15,6 +15,9 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
   var filter = domain_id ? {
        dID : parseInt(domain_id)
    } : {};
+   var customized_keys = {
+        "total_unread_notification_count" : 0
+   };
    dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, filter, {
        page : page || constant.PAGINATION.DEFAULT_PAGE,
        values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms'],
@@ -70,6 +73,10 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
             if(result_row["enq_res_time_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
               result_row["enq_res_time_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
 
+            if(item["eStatus"] === 'Unread'){
+                customized_keys["total_unread_notification_count"]++;
+            }
+
           },
           parent_counter : {
             'forms' : {
@@ -92,7 +99,7 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                 message : err.message || message.error.internal_server_error
             })
         }
-         callback(null, Object.assign(requested_count_details || {}, {
+         callback(null, Object.assign(requested_count_details || {}, customized_keys, {
             companies : result
          }));
 
