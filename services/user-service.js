@@ -92,7 +92,7 @@ exports.fetchUser = function(user_id, callback){
     *Function to Edit Details associated with a User associated with the Platform
 */
 exports.editUser = function(user_id, data, callback){
-
+    //return callback(null, { msg : "mock test"})
     var required_keys = ['first_name', 'contact', 'is_notification', 'last_name'];//'profile_avatar_img' - key to be added once the image display is functional
     payload_validator.ValidatePayloadKeys(data, required_keys, function(err){
                  if(err){
@@ -166,7 +166,7 @@ exports.editUser = function(user_id, data, callback){
                             uaValue: contact.country_code + " " + contact.phone_number
                         }, {
                             uaKey: "isNotification",
-                            uaValue: data.is_notification || 0
+                            uaValue: (data.is_notification && parseInt(data.is_notification)) || 0
                         }]
                     }], function(err){
 
