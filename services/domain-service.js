@@ -35,8 +35,8 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                 "month": moment().format("MM"),
                 "days": [],
                 "response_times": {},
-                "curr_week_avg": 0,
-                "last_week_avg": 0
+                "curr_week_avg": 0.0,
+                "last_week_avg": 0.0
             }
        }
    },
@@ -58,7 +58,7 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
           table_name : dao.TABLE_RECORD.ENQUIRY,
           alias : 'notifications',
           custom_function : function(result_row, item){
-
+            //@todo : work on the stats as per the Required Format associated with output
             if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
             if(result_row["enq_count_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
                 result_row["enq_count_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
