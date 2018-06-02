@@ -175,8 +175,9 @@
     },
     "/user/edit": {
       "post": {
-        "summary": "uploads an image",
-        "description": "Testing File Upload via the swagger docs",
+        "tags": ["User Profile"],
+        "summary": "User Profile Update",
+        "description": "Updates Details Associated with a User Profile",
         "consumes": [
           "multipart/form-data"
         ],
