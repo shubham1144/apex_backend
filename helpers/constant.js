@@ -14,5 +14,8 @@ module.exports = {
     PAGINATION : {
         DEFAULT_PAGE : 1,
         DEFAULT_ROW_COUNT : 10
+    },
+    USER : {
+        PROFILE_FOLDER : 'files/avatars/'
     }
 };

@@ -74,7 +74,8 @@ exports.fetchUser = function(user_id, callback){
                 country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
                                                               (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
             },
-            is_notification: "0",
+            is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
+            _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] : 0,
             total_unread_notification_count: 0
         });
 
@@ -160,10 +161,13 @@ exports.editUser = function(user_id, data, callback){
                     }
                     dao.updateDataWithChild(dao.TABLE_RECORD.USER, ['uID'], user_details, [{
                         table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
-                        data : {
+                        data : [{
                             uaKey: "contactNumber",
                             uaValue: contact.country_code + " " + contact.phone_number
-                        }
+                        }, {
+                            uaKey: "isNotification",
+                            uaValue: data.is_notification || 0
+                        }]
                     }], function(err){
 
                         if(err) return callback(err);

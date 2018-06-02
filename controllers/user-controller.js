@@ -1,5 +1,7 @@
 var user_service = require('./../services/user-service.js'),
-    util = require('./../helpers/util.js');
+    util = require('./../helpers/util.js'),
+    constant = require('./../helpers/constant.js'),
+    file_upload = require('./../helpers/file_upload.js');
 
 
 /*
@@ -27,15 +29,24 @@ exports.fetchUser = function(req, res){
 */
 exports.editUser = function(req, res){
 
-    user_service.editUser(req.user.user_id, req.body, function(err, result){
+    file_upload.uploadSingleFile(req, res, {
+        destination : constant.USER.PROFILE_FOLDER,
+        file_name : req.user.user_id + '.jpg',
+        key : 'avatar'
+    }, function(err){
 
-        if(err) {
-            return util.formatErrorResponse(err.code, err.message, function(err){
-                res.send(err);
-            })
-        }
-        util.formatSuccessResponseStandard(res.locals, result, function(formatted_result){
-             res.send(formatted_result);
+        if(err) console.error("Error occured due to : ", err)
+        user_service.editUser(req.user.user_id, req.body, function(err, result){
+
+           if(err) {
+               return util.formatErrorResponse(err.code, err.message, function(err){
+                   res.send(err);
+               })
+           }
+           util.formatSuccessResponseStandard(res.locals, result, function(formatted_result){
+                res.send(formatted_result);
+           })
+
         })
 
     })
