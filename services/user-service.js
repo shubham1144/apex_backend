@@ -76,6 +76,7 @@ exports.fetchUser = function(user_id, callback){
             },
             is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
             parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0,
+            //@todo : Remove the hardcodings
             total_unread_notification_count: 0
         });
 
@@ -92,7 +93,7 @@ exports.fetchUser = function(user_id, callback){
     *Function to Edit Details associated with a User associated with the Platform
 */
 exports.editUser = function(user_id, data, callback){
-    //return callback(null, { msg : "mock test"})
+
     var required_keys = ['first_name', 'contact', 'is_notification', 'last_name'];//'profile_avatar_img' - key to be added once the image display is functional
     payload_validator.ValidatePayloadKeys(data, required_keys, function(err){
                  if(err){
@@ -166,7 +167,7 @@ exports.editUser = function(user_id, data, callback){
                             uaValue: contact.country_code + " " + contact.phone_number
                         }, {
                             uaKey: "isNotification",
-                            uaValue: data.is_notification || 0
+                            uaValue: data.is_notification || "0"
                         }]
                     }], function(err){
 
@@ -198,8 +199,8 @@ exports.editUser = function(user_id, data, callback){
 */
 exports.addUser = function(data, callback){
 
-   var required_keys = ['uname', 'email', 'first_name', 'last_name', 'contact', 'user_type'];//'profile_avatar_img' - key to be added once the image display is functional
-      payload_validator.ValidatePayloadKeys(data, required_keys, function(err){
+    var required_keys = ['uname', 'email', 'first_name', 'last_name', 'contact', 'user_type'];//'profile_avatar_img' - key to be added once the image display is functional
+    payload_validator.ValidatePayloadKeys(data, required_keys, function(err){
 
           if(err){
               if(err.missing_keys.includes("uname")){

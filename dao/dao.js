@@ -113,29 +113,28 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             if(err) return console.log("Error occured due to : ", err);
                             switch(returnedRow.table){
 
-                                case table:     main_table_encountered = true;
-                                                if(customization.search_keyword && customization.search_keyword.value){
-                                                    main_table_encountered = false;
-                                                    customization.search_keyword.filter_keys.forEach(function(key){
-                                                        if(returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
-                                                            main_table_encountered = true;
-                                                        }
+                                case table: main_table_encountered = true;
+                                            if(customization.search_keyword && customization.search_keyword.value){
+                                                main_table_encountered = false;
+                                                customization.search_keyword.filter_keys.forEach(function(key){
+                                                    if(returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                        main_table_encountered = true;
+                                                    }
+                                                })
+                                            }
+
+                                            for( var key in customization.condition){
+                                                main_table_encountered = false;
+                                                if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
+                                                    conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
+                                                        if(check_passed) main_table_encountered = true;
+
                                                     })
                                                 }
+                                            }
 
-                                               for( var key in customization.condition){
-                                                    main_table_encountered = false;
-                                                    if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
-                                                        conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
-                                                            console.log("Determining if the check against the user has passed")
-                                                            if(check_passed) main_table_encountered = true;
-
-                                                        })
-                                                    }
-                                               }
-
-                                                if(!main_table_encountered) return;
-                                                if(customization && customization.values){
+                                            if(!main_table_encountered) return;
+                                            if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
                                                     if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
@@ -144,7 +143,6 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
                                                 });
                                                 result.push(Object.assign(formatted_result, parent_table_details));
-
                                             }else result.push(Object.assign(returnedRow.row, parent_table_details));
                                             if(customization.custom_function) customization.custom_function(result[result.length - 1], returnedRow.row);
                                             break;
@@ -356,62 +354,61 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
             iterator.forEach(function(err, returnedRow){
                 if(err) return console.log("Error occured due to : ", err);
                 switch(returnedRow.table){
-                                    case table: if(customization && customization.values){
-                                                    var formatted_result = {};
-                                                    customization.values.forEach(function(key){
+                    case table: if(customization && customization.values){
+                                    var formatted_result = {};
+                                    customization.values.forEach(function(key){
 
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
 
 
-                                                        else formatted_result[key] = returnedRow.row[key] || 0;
-                                                    })
-                                                    result = formatted_result;
-                                                }else result = returnedRow.row;
-                                         if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
-                                                break;
-                                    default :
-                                                var child_table = _.filter(child_tables, {
-                                                        table_name : returnedRow.table
-                                                    })[0],
-                                                    formatted_child_result={},
-                                                    allow_fetch = true;
-                                                /*  Logic for Conditional Fetching of Results starts here
-                                                    Check 2 : Check for any condition that has been received in the Request
-                                                */
-                                                if(child_table === undefined) return;
-                                                for( var key in child_table.condition){
+                                        else formatted_result[key] = returnedRow.row[key] || 0;
+                                    })
+                                    result = formatted_result;
+                                }else result = returnedRow.row;
+                         if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
+                                break;
+                    default : var child_table = _.filter(child_tables, {
+                                    table_name : returnedRow.table
+                                })[0],
+                                formatted_child_result={},
+                                allow_fetch = true;
+                            /*  Logic for Conditional Fetching of Results starts here
+                                Check 2 : Check for any condition that has been received in the Request
+                            */
+                            if(child_table === undefined) return;
+                            for( var key in child_table.condition){
 
-                                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
-                                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
-                                                            if(!check_passed) allow_fetch = false;
-                                                         })
-                                                    }
-
-                                                }
-
-                                                if(!allow_fetch)
-                                                {
-                                                    if(result[child_table.alias || returnedRow.table] === undefined) return result[child_table.alias || returnedRow.table] = null;
-                                                    return;
-                                                }
-
-                                                if(child_table && child_table.values){
-                                                    formatted_child_result = {};
-                                                    child_table.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                        else formatted_child_result[key] = returnedRow.row[key] || 0;
-                                                    })
-                                                }else {
-                                                    formatted_child_result = returnedRow.row;
-                                                }
-
-                                                if(result[child_table && child_table.alias || returnedRow.table]){
-                                                    result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
-                                                }else{
-                                                    result[child_table.alias || returnedRow.table] = [formatted_child_result];
-                                                }
-                                                break;
+                                if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                     conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+                                        if(!check_passed) allow_fetch = false;
+                                     })
                                 }
+
+                            }
+
+                            if(!allow_fetch)
+                            {
+                                if(result[child_table.alias || returnedRow.table] === undefined) return result[child_table.alias || returnedRow.table] = null;
+                                return;
+                            }
+
+                            if(child_table && child_table.values){
+                                formatted_child_result = {};
+                                child_table.values.forEach(function(key){
+                                if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                })
+                            }else {
+                                formatted_child_result = returnedRow.row;
+                            }
+
+                            if(result[child_table && child_table.alias || returnedRow.table]){
+                                result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                            }else{
+                                result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                            }
+                            break;
+                }
             });
             callback(null, result);
 
