@@ -35,8 +35,8 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                 "month": moment().format("MM"),
                 "days": [],
                 "response_times": {},
-                "curr_week_avg": 0.0,
-                "last_week_avg": 0.0
+                "curr_week_avg": 1.1,
+                "last_week_avg": 1.1
             }
        }
    },
