@@ -75,7 +75,7 @@ exports.fetchUser = function(user_id, callback){
                                                               (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
             },
             is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
-            _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"] : 0,
+            parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0,
             total_unread_notification_count: 0
         });
 
@@ -166,7 +166,7 @@ exports.editUser = function(user_id, data, callback){
                             uaValue: contact.country_code + " " + contact.phone_number
                         }, {
                             uaKey: "isNotification",
-                            uaValue: (data.is_notification && parseInt(data.is_notification)) || 0
+                            uaValue: data.is_notification || 0
                         }]
                     }], function(err){
 
