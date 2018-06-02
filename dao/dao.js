@@ -637,8 +637,20 @@ exports.updateDataWithChild = function(table, primary_key, data, child_tables, c
                     primary_key.forEach(function(single_primary_key){
                          parent_details[single_primary_key] = data[single_primary_key]
                     })
-                    if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined){
-                      exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+
+                    if(table_details.data && table_details.data.constructor === Array){
+
+                        async.each(table_details.data, function(entry, callback){
+                            exports.putData(parent_details, table_details.table_name, entry, callback)
+                        }, function(err){
+                            if(err) return callback(err);
+                            callback(null);
+                        })
+                    }else if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
+                        exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+                    }
+                    else if(table_details.create_if_absent || table_details.create){
+                        exports.putData(parent_details, table_details.table_name, table_details.data, callback);
                     }
                     else callback(null);
 
@@ -713,14 +725,14 @@ exports.updateChildIndexIterator = function(table, primary_key, index, condition
                 parent_details[single_primary_key] = result[single_primary_key]
             });
 
-            if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
-                exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
-            }
-            else if(table_details.create_if_absent || table_details.create){
-                exports.putData(parent_details, table_details.table_name, table_details.data, callback);
-            }
-            else callback(null);
 
+                if(result[table_details.table_name] && result[table_details.table_name][0]!== undefined && !table_details.create){
+                    exports.putData(parent_details, table_details.table_name, Object.assign(result[table_details.table_name][0], table_details.data), callback)
+                }
+                else if(table_details.create_if_absent || table_details.create){
+                    exports.putData(parent_details, table_details.table_name, table_details.data, callback);
+                }
+                else callback(null);
          }, function(err){
 
              callback(err);
