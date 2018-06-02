@@ -175,8 +175,11 @@
     },
     "/user/edit": {
       "post": {
-        "tags": ["User Profile"],
-        "description": "Api to edit Details Associated with a User",
+        "summary": "uploads an image",
+        "description": "Testing File Upload via the swagger docs",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [{
           "name": "Authorization",
           "required": true,
@@ -204,7 +207,7 @@
           },
           {
             "name": "is_notification",
-            "description" : "Support for this key will be available over time",
+            "description" : "notification settings associated with user",
             "required": true,
             "in": "formData",
             "type": "string"
@@ -232,12 +235,14 @@
           },
           {
             "name": "avatar",
-            "description" : "This Key is Not Yet Supported",
+            "description" : "Profile Image to be associated with the user",
+            "required": false,
             "in": "formData",
-            "type": "string"
+            "type": "file"
           }
         ],
         "responses": {}
+
       }
     },
     "/domains": {
