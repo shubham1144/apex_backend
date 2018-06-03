@@ -7,17 +7,20 @@ var dao = require('./../dao/dao.js'),
     shortid = require('shortid');
 
 
-function formatNotificationStatistics(details){
+function formatNotificationStatistics(day_stats_key, details){
 
-     var stats = {
-        month : moment().subtract(7, 'day').format("MM"),
+     var stats = Object.assign(details,{
+        month : moment().utc().subtract(7, 'day').format("MM"),
         days : []
+     })
+     for(var i=6; i>=0; i--){
+        if(stats['days'].indexOf(moment().utc().subtract(i, 'day').format("YYYY-MM-DD") !==-1)){
+            stats[day_stats_key][moment().utc().subtract(i, 'day').format("YYYY-MM-DD")] = 0;
+            stats['days'].push(moment().utc().subtract(i, 'day').format("YYYY-MM-DD"))
+        }
+
      }
-     for(var i=1; i<=7; i++){
-        if(stats['days'].indexOf(moment().subtract(i, 'day').format("YYYY-MM-DD") !==-1))
-            stats['days'].push(moment().subtract(i, 'day').format("YYYY-MM-DD"))
-     }
-     return Object.assign(stats, details);
+     return stats;
 
 }
 /**
@@ -37,15 +40,16 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
        default_values : {
             'forms' : [],
             'notifications' : 0,
-            'enq_count_stats' : formatNotificationStatistics({
+            'enq_count_stats' : formatNotificationStatistics("enquiries", {
+
                 "enquiries" : {},
                 "curr_week_total" : 0,
                 "last_week_total" : 0
             }),
-            'enq_res_time_stats' : formatNotificationStatistics({
+            'enq_res_time_stats' : formatNotificationStatistics("response_times", {
               "response_times": {},
-              "curr_week_avg": 0.0,
-              "last_week_avg": 0.0
+              "curr_week_avg": 1.1,
+              "last_week_avg": 1.1
             })
        }
    },
@@ -68,19 +72,35 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
           alias : 'notifications',
           custom_function : function(result_row, item){
 
-            if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
 
-            if(moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'week'))
-            result_row["enq_count_stats"]["curr_week_total"]++;
+            if(item["eStatus"] && item["eStatus"] === 'Unread') customized_keys["total_unread_notification_count"]++;
 
-            if(!result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")])
-            result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")] = 1;
-            else result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]++;
+            /*Enquiry Count Stats START*/
+                if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >=14) return;
+                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6)
+                    result_row["enq_count_stats"]["curr_week_total"]++;
+                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=13){
+                    result_row["enq_count_stats"]["last_week_total"]++;
+                }
+
+                if(result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]!==undefined)
+                result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]++;
+            /*Enquiry Count Stats END*/
 
 
-            if(item["eStatus"] === 'Unread'){
-            customized_keys["total_unread_notification_count"]++;
-            }
+            /*Response Time Stats START*/
+                if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >=14) return;
+                //update the average associated with the last (Inclusive)1-7(Exclusive) days
+                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6){
+
+                    //Current day average
+                    //Current week average : Average of all days involved
+                }
+                //update the average associated with the last (Inclusive)7-14(Exclusive) days
+                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=13){
+                    //Last week average : Average of all days involved
+                }
+            /*Response Time Stats END*/
 
           },
           parent_counter : {

@@ -527,7 +527,7 @@ exports.getMultipleTableIterator = function(table, primary_key, customization, c
         //If a request is made to fetch the child table count OR Child table condition key count, then we need to iterate the child table with the primary key and fetch the count..
         if(customization.parent_index_filter){
 
-            dao.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, important_primary_result){
+            exports.getOneIndexIterator(customization.parent_index_filter.table_name, customization.parent_index_filter.index, customization.parent_index_filter.value, [], null, function(err, important_primary_result){
                 if(err) return callback(err);
                 if(Object.keys(important_primary_result).length < 1){
                     return callback({
