@@ -58,10 +58,28 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
           table_name : dao.TABLE_RECORD.ENQUIRY,
           alias : 'notifications',
           custom_function : function(result_row, item){
+
+
+          if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
+
+          result_row["enq_count_stats"]["days"]  = []
+
+
+
+
+
+
+
+            //@todo: Step 1 : Push last 7 days in the array involved
+
+
+
+            //@todo Stp 2 : later
+
             //@todo : work on the stats as per the Required Format associated with output
-            if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
-            if(result_row["enq_count_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
-                result_row["enq_count_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
+
+//            if(result_row["enq_count_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
+//                result_row["enq_count_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
             if(moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'week'))
                 result_row["enq_count_stats"]["curr_week_total"]++;
 
@@ -76,6 +94,57 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
             if(item["eStatus"] === 'Unread'){
                 customized_keys["total_unread_notification_count"]++;
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           },
           parent_counter : {
