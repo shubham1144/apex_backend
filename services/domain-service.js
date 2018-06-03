@@ -26,59 +26,60 @@ function formatNotificationStatistics(day_stats_key, details){
 /**
     * Function to fetch A list of domains accessible for user registered on the platform
 */
-exports.fetchDomains = function(user_id, page, domain_id, callback){
+exports.fetchDomains = function(user_id, page, callback){
 
-  var filter = domain_id ? {
-       dID : parseInt(domain_id)
-   } : {};
-   var customized_keys = {
-        "total_unread_notification_count" : 0
-   };
-   dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, filter, {
-       page : page || constant.PAGINATION.DEFAULT_PAGE,
-       values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms'],
-       default_values : {
-            'forms' : [],
-            'notifications' : 0,
-            'enq_count_stats' : formatNotificationStatistics("enquiries", {
+  async.auto({
+    fetch_domains : function(callback){
 
-                "enquiries" : {},
-                "curr_week_total" : 0,
-                "last_week_total" : 0
-            }),
-            'enq_res_time_stats' : formatNotificationStatistics("response_times", {
-              "response_times": {},
-              "curr_week_avg": 1.1,
-              "last_week_avg": 1.1
-            })
-       }
-   },
-   [{
-       table_name : dao.TABLE_RECORD.FORM,
-       alias : 'forms',
-       join_fetch : true,
-       condition : {
-           'users' : {
-               '$contains' : user_id
+       var customized_keys = {
+            "total_unread_notification_count" : 0
+       };
+       dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, {}, {
+           page : page || constant.PAGINATION.DEFAULT_PAGE,
+           values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms', 'statistics'],
+           default_values : {
+                'statistics' : {},
+                'forms' : [],
+                'notifications' : 0,
+                'enq_count_stats' : formatNotificationStatistics("enquiries", {
+                    "enquiries" : {},
+                    "curr_week_total" : 0,
+                    "last_week_total" : 0
+                }),
+                'enq_res_time_stats' : formatNotificationStatistics("response_times", {
+                  "response_times": {},
+                  "curr_week_avg": 1.1,
+                  "last_week_avg": 1.1
+                })
            }
        },
-       values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications'],
-       default_values : {
-            'no_of_unread_notifications' : 0
-       }
-   },
-   {
-          table_name : dao.TABLE_RECORD.ENQUIRY,
-          alias : 'notifications',
-          custom_function : function(result_row, item){
-
+       [{
+           table_name : dao.TABLE_RECORD.FORM,
+           alias : 'forms',
+           join_fetch : true,
+           condition : {
+               'users' : {
+                   '$contains' : user_id
+               }
+           },
+           values : [['dfID', 'id'], ['dfName', 'name'], 'no_of_unread_notifications'],
+           default_values : {
+                'no_of_unread_notifications' : 0
+           }
+       },
+       {
+             table_name : dao.TABLE_RECORD.ENQUIRY,
+             alias : 'notifications',
+             custom_function : function(result_row, item){
 
             if(item["eStatus"] && item["eStatus"] === 'Unread') customized_keys["total_unread_notification_count"]++;
 
             /*Enquiry Count Stats START*/
                 if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >=14) return;
-                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6)
+                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6){
                     result_row["enq_count_stats"]["curr_week_total"]++;
+                    result_row['statistics'][item['eID']] = moment.utc(item['eCreatedAt']);
+                }
                 else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=13){
                     result_row["enq_count_stats"]["last_week_total"]++;
                 }
@@ -87,48 +88,72 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
                 result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]++;
             /*Enquiry Count Stats END*/
 
+             },
+             parent_counter : {
+               'forms' : {
+                   alias : 'no_of_unread_notifications',
+                   bind_key : ['dfID', 'id'],
+                   condition : {
+                       'eStatus' : 'Unread'
+                   }
+               }
+             },
+             count_fetch : true
+       },
+       {
+        table_name : dao.TABLE_RECORD.CALL_LOG,
+        custom_function : function(result_row, item){
 
-            /*Response Time Stats START*/
-                if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >=14) return;
-                //update the average associated with the last (Inclusive)1-7(Exclusive) days
-                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6){
+        /*Response Time Stats START*/
+            //                        if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >=14) return;
+            //                        //update the average associated with the last (Inclusive)1-7(Exclusive) days
+            //                        else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=6){
+            //
+            //                            //Current day average
+            //                            //Current week average : Average of all days involved
+            //                        }
+            //                        //update the average associated with the last (Inclusive)7-14(Exclusive) days
+            //                        else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=13){
+            //                            //Last week average : Average of all days involved
+//                        }
+                    /*Response Time Stats END*/
+            console.log("The statistics involved are : ", result_row['statistics'])
+            console.log(item.eID, moment.utc().diff(item.clCreatedAt, 'minutes'))
 
-                    //Current day average
-                    //Current week average : Average of all days involved
-                }
-                //update the average associated with the last (Inclusive)7-14(Exclusive) days
-                else if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') <=13){
-                    //Last week average : Average of all days involved
-                }
-            /*Response Time Stats END*/
-
-          },
-          parent_counter : {
-            'forms' : {
-                alias : 'no_of_unread_notifications',
-                bind_key : ['dfID', 'id'],
-                condition : {
-                    'eStatus' : 'Unread'
-                }
-            }
-          },
-          count_fetch : true
-    }
-   ],
-   function(err, result, requested_count_details){
-
-        if(err) {
-            console.error(message.error.default_error_prefix, err);
-            return callback({
-                code : err.code || message.code.custom_bad_request,
-                message : err.message || message.error.internal_server_error
-            })
         }
-         callback(null, Object.assign(requested_count_details || {}, customized_keys, {
-            companies : result
-         }));
+       }
+       ],
+       function(err, result, requested_count_details){
 
-   })
+            if(err) {
+                console.error(message.error.default_error_prefix, err);
+                return callback({
+                    code : err.code || message.code.custom_bad_request,
+                    message : err.message || message.error.internal_server_error
+                })
+            }
+             callback(null, Object.assign(requested_count_details || {}, customized_keys, {
+                companies : result
+             }));
+
+
+       })
+
+    },
+    fetch_notification_stats : function(callback){
+
+    },
+    format_result : ['fetch_domains', 'fetch_notification_stats', function(results, callback){
+
+    }]
+  }, function(err, result){
+        console.log("The details associated with the operation are", err, result)
+  })
+
+
+
+
+
 
 };
 
