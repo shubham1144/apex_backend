@@ -7,6 +7,19 @@ var dao = require('./../dao/dao.js'),
     shortid = require('shortid');
 
 
+function formatNotificationStatistics(details){
+
+     var stats = {
+        month : moment().subtract(7, 'day').format("MM"),
+        days : []
+     }
+     for(var i=1; i<=7; i++){
+        if(stats['days'].indexOf(moment().subtract(i, 'day').format("YYYY-MM-DD") !==-1))
+            stats['days'].push(moment().subtract(i, 'day').format("YYYY-MM-DD"))
+     }
+     return Object.assign(stats, details);
+
+}
 /**
     * Function to fetch A list of domains accessible for user registered on the platform
 */
@@ -24,20 +37,16 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
        default_values : {
             'forms' : [],
             'notifications' : 0,
-            'enq_count_stats' : {
-                "month" : moment().format("MM"),
-                "days" : [],
+            'enq_count_stats' : formatNotificationStatistics({
                 "enquiries" : {},
                 "curr_week_total" : 0,
                 "last_week_total" : 0
-            },
-            'enq_res_time_stats' : {
-                "month": moment().format("MM"),
-                "days": [],
-                "response_times": {},
-                "curr_week_avg": 0.0,
-                "last_week_avg": 0.0
-            }
+            }),
+            'enq_res_time_stats' : formatNotificationStatistics({
+              "response_times": {},
+              "curr_week_avg": 0.0,
+              "last_week_avg": 0.0
+            })
        }
    },
    [{
@@ -59,92 +68,19 @@ exports.fetchDomains = function(user_id, page, domain_id, callback){
           alias : 'notifications',
           custom_function : function(result_row, item){
 
+            if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
 
-          if(!moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'month')) return;
-
-          result_row["enq_count_stats"]["days"]  = []
-
-
-
-
-
-
-
-            //@todo: Step 1 : Push last 7 days in the array involved
-
-
-
-            //@todo Stp 2 : later
-
-            //@todo : work on the stats as per the Required Format associated with output
-
-//            if(result_row["enq_count_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
-//                result_row["enq_count_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
             if(moment(moment.utc(item['eCreatedAt'])).isSame(moment.utc(), 'week'))
-                result_row["enq_count_stats"]["curr_week_total"]++;
+            result_row["enq_count_stats"]["curr_week_total"]++;
 
             if(!result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")])
-                result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")] = 1;
+            result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")] = 1;
             else result_row["enq_count_stats"]["enquiries"][moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")]++;
 
 
-            if(result_row["enq_res_time_stats"]["days"].indexOf(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD")) === -1)
-              result_row["enq_res_time_stats"]["days"].push(moment.utc(item['eCreatedAt']).format("YYYY-MM-DD"));
-
             if(item["eStatus"] === 'Unread'){
-                customized_keys["total_unread_notification_count"]++;
+            customized_keys["total_unread_notification_count"]++;
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
           },
           parent_counter : {
