@@ -164,7 +164,16 @@ exports.fetchNotificationStatusCodes = function(type, callback){
 exports.fetchNotification = function(notification_id, callback){
 
     dao.getOneIndexIterator(dao.TABLE_RECORD.ENQUIRY, "eID", notification_id || null,
-    [{
+    [
+    {
+        table_name : dao.TABLE_RECORD.DOMAIN,
+        values : [['dDisplayName', 'domain_name'], ['dID', 'domain_id']]
+    },
+    {
+        table_name : dao.TABLE_RECORD.FORM,
+        values : [['dfName', 'form_name'],  ['dfID', 'form_id']]
+    },
+    {
         table_name : dao.TABLE_RECORD.CALL_LOG,
         alias : 'call_logs',
         values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'],
@@ -173,8 +182,8 @@ exports.fetchNotification = function(notification_id, callback){
     }],
     {
         values : [
-            ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'], ['dID', 'domain_id'], 'domain_name',
-            ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
+            ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
+            ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ],
         default_values: {

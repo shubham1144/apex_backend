@@ -344,69 +344,79 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
         child_tables.forEach(function(child_table_details){
             child_tables_to_fetch.push(child_table_details.table_name)
         });
-
         store.tableIterator(table, primary_key, {
             includedTables: child_tables_to_fetch
         }, function(err, iterator){
 
             if(err) return callback(err);
-            var result = {};
+            var result = {}, main_table_encountered= false;
             iterator.forEach(function(err, returnedRow){
                 if(err) return console.log("Error occured due to : ", err);
                 switch(returnedRow.table){
-                    case table: if(customization && customization.values){
+                    case table:     main_table_encountered = true;
+                                    if(customization && customization.values){
                                     var formatted_result = {};
                                     customization.values.forEach(function(key){
 
                                     if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
 
-
-                                        else formatted_result[key] = returnedRow.row[key] || 0;
                                     })
-                                    result = formatted_result;
-                                }else result = returnedRow.row;
+                                    result = Object.assign(result, formatted_result);
+                                }else result =  Object.assign(result, returnedRow.row);
                          if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
                                 break;
-                    default : var child_table = _.filter(child_tables, {
-                                    table_name : returnedRow.table
-                                })[0],
-                                formatted_child_result={},
-                                allow_fetch = true;
-                            /*  Logic for Conditional Fetching of Results starts here
-                                Check 2 : Check for any condition that has been received in the Request
-                            */
-                            if(child_table === undefined) return;
-                            for( var key in child_table.condition){
+                    default :
+                            if(!main_table_encountered){
 
-                                if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
-                                     conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
-                                        if(!check_passed) allow_fetch = false;
-                                     })
+                                var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
+                                if(parent_table === undefined) return;
+                                parent_table.values.forEach(function(key){
+                                    if(typeof key === 'object') result[key[1]] = returnedRow.row[key[0]] || 0;
+                                    else result[key] = returnedRow.row[key] || 0;
+                                })
+
+                            }else{
+                                var child_table = _.filter(child_tables, {
+                                        table_name : returnedRow.table
+                                    })[0],
+                                    formatted_child_result={},
+                                    allow_fetch = true;
+                                /*  Logic for Conditional Fetching of Results starts here
+                                    Check 2 : Check for any condition that has been received in the Request
+                                */
+                                if(child_table === undefined) return;
+                                for( var key in child_table.condition){
+
+                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+                                         conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
+                                            if(!check_passed) allow_fetch = false;
+                                         })
+                                    }
+
                                 }
 
-                            }
+                                if(!allow_fetch)
+                                {
+                                    if(result[child_table.alias || returnedRow.table] === undefined) return result[child_table.alias || returnedRow.table] = null;
+                                    return;
+                                }
 
-                            if(!allow_fetch)
-                            {
-                                if(result[child_table.alias || returnedRow.table] === undefined) return result[child_table.alias || returnedRow.table] = null;
-                                return;
-                            }
+                                if(child_table && child_table.values){
+                                    formatted_child_result = {};
+                                    child_table.values.forEach(function(key){
+                                        if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
+                                    })
+                                }else {
+                                    formatted_child_result = returnedRow.row;
+                                }
 
-                            if(child_table && child_table.values){
-                                formatted_child_result = {};
-                                child_table.values.forEach(function(key){
-                                if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                    else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
-//                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
-                                })
-                            }else {
-                                formatted_child_result = returnedRow.row;
-                            }
-
-                            if(result[child_table && child_table.alias || returnedRow.table]){
-                                result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
-                            }else{
-                                result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                if(result[child_table && child_table.alias || returnedRow.table]){
+                                    result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+                                }else{
+                                    result[child_table.alias || returnedRow.table] = [formatted_child_result];
+                                }
                             }
                             break;
                 }
@@ -426,7 +436,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
         if(child_tables && child_tables.length > 0){
-
+            console.log("Child tables have been received for the Index Iterations", child_tables)
             store.indexIterator(table, index, {
                             fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){
