@@ -1,5 +1,6 @@
 var express = require('express'),
     router = express.Router(),
+    token = require('./../helpers/token.js'),
     util = require('./../helpers/util.js');
 
 /**
