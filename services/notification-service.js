@@ -75,7 +75,9 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
             } : null,
             values : [
                 ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
-                ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
+                ['eCreatedAt', 'created_at', function(column){
+                     return util.formatDate(column)
+                 }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
                 ['eIsDeleted', 'is_deleted'], 'call_logs'
             ],
             default_values: {
@@ -86,6 +88,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
             custom_function : function(result_row, item){
 
                 result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
+                //result_row.created_at = util.formatDate(result_row.created_at);
 
             },
             custom_count_fetch : [{
@@ -122,8 +125,12 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
                 {
                     table_name : dao.TABLE_RECORD.CALL_LOG,
                     alias : 'call_logs',
-                    values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'],
-                                ['clUpdatedAt', 'updated_at'], ['clStatus', 'status', STATUS_CODE.CALL_LOG], ['clNote', 'note']
+                    values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
+                        return util.formatDate(column)
+                    }],
+                    ['clUpdatedAt', 'updated_at', function(column){
+                        return util.formatDate(column)
+                    }], ['clStatus', 'status', STATUS_CODE.CALL_LOG], ['clNote', 'note']
                     ]
                 }
         ],
@@ -176,14 +183,20 @@ exports.fetchNotification = function(notification_id, callback){
     {
         table_name : dao.TABLE_RECORD.CALL_LOG,
         alias : 'call_logs',
-        values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'],
-                    ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
+        values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
+                   return util.formatDate(column)
+                 }], ['clUpdatedAt', 'updated_at', function(column){
+                  return util.formatDate(column)
+                }],
+                ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
         ]
     }],
     {
         values : [
             ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
-            ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
+            ['eCreatedAt', 'created_at', function(column){
+                return util.formatDate(column)
+            }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ],
         default_values: {

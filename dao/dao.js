@@ -137,9 +137,10 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || ((customization.default_values!==undefined && (customization.default_values[key[1]] !== undefined || customization.default_values[key[1]] == 0))? customization.default_values[key[1]] : null);
+                                                    if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
+                                                        formatted_result[key[1]] = key[2](returnedRow.row[key[0]]);
+                                                    }else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || ((customization.default_values!==undefined && (customization.default_values[key[1]] !== undefined || customization.default_values[key[1]] == 0))? customization.default_values[key[1]] : null);
                                                     else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
-
 
                                                 });
                                                 result.push(Object.assign(formatted_result, parent_table_details));
@@ -226,8 +227,11 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 if(child_table && child_table.values){
                                                     formatted_child_result = {};
                                                     child_table.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
-                                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
+                                                    if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
+                                                         formatted_child_result[key[1]] = key[2](returnedRow.row[key[0]]);
+                                                    }
+                                                    else if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                    else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
                                                     })
                                                 }else {
                                                     formatted_child_result = returnedRow.row;
@@ -357,9 +361,11 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                     if(customization && customization.values){
                                     var formatted_result = {};
                                     customization.values.forEach(function(key){
-
-                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                    else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
+                                        if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
+                                            formatted_result[key[1]] = key[2](returnedRow.row[key[0]]);
+                                        }
+                                        else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                        else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
 
                                     })
                                     result = Object.assign(result, formatted_result);
@@ -405,7 +411,10 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                 if(child_table && child_table.values){
                                     formatted_child_result = {};
                                     child_table.values.forEach(function(key){
-                                        if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                        if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
+                                            formatted_child_result[key[1]] = key[2](returnedRow.row[key[0]]);
+                                        }
+                                        else if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
                                         else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
                                     })
                                 }else {
@@ -436,7 +445,6 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
 exports.getOneIndexIterator = function(table, index, condition, child_tables, customization, callback){
 
         if(child_tables && child_tables.length > 0){
-            console.log("Child tables have been received for the Index Iterations", child_tables)
             store.indexIterator(table, index, {
                             fieldRange: new nosqldb.Types.FieldRange(index, condition, true, condition, true)
                        }, function(err, iterator){

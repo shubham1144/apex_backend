@@ -1,3 +1,5 @@
+var moment = require('moment');
+
 /*Formats the Error Response Being Sent Out to the Client to a specific Standard being Followed in the platform*/
 exports.formatErrorResponse = function(code, err_message, callback){
 
@@ -79,3 +81,6 @@ exports.sortBySequence = function(sort_sequence, key, data){
 
 }
 
+exports.formatDate = function(utc_date){
+    return moment(utc_date).utc().format('YYYY-MM-DD HH:mm:ss')
+}
