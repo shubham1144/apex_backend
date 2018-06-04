@@ -137,7 +137,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(customization && customization.values){
                                                 var formatted_result = {};
                                                 customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || ((customization.default_values!==undefined && (customization.default_values[key[1]] !== undefined || customization.default_values[key[1]] == 0))? customization.default_values[key[1]] : null);
                                                     else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
 
 

@@ -79,7 +79,9 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
                 ['eIsDeleted', 'is_deleted'], 'call_logs'
             ],
             default_values: {
-                'call_logs' : []
+                'call_logs' : [],
+                'is_archived' : 0,
+                'is_deleted' : 1
             },
             custom_function : function(result_row, item){
 
@@ -176,7 +178,9 @@ exports.fetchNotification = function(notification_id, callback){
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ],
         default_values: {
-            'call_logs' : []
+            'call_logs' : [],
+            'is_archived' : 0,
+            'is_deleted' : 1
         },
         custom_function : function(result_row, item){
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
