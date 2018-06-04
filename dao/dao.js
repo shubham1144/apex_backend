@@ -98,9 +98,9 @@ function runAllMigrations(){
 }
 
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
-            // console.log("Fetching data associated with domain using child table as : ", child_tables)
+//            return console.log("Testing the working of the dao layer")
             //Create a common function to handle Table Iterator for listing
-            store.tableIterator(table, primary_key, conditions, function(err, iterator){
+            store.tableIterator(table, primary_key,conditions, function(err, iterator){
 
                         if(err) return callback(err);
                         var result = [],
@@ -396,7 +396,8 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                 formatted_child_result = {};
                                 child_table.values.forEach(function(key){
                                 if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
+                                    else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
+//                                    else formatted_child_result[key] = returnedRow.row[key] || 0;
                                 })
                             }else {
                                 formatted_child_result = returnedRow.row;

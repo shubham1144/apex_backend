@@ -78,6 +78,9 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
                 ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
                 ['eIsDeleted', 'is_deleted'], 'call_logs'
             ],
+            default_values: {
+                'call_logs' : []
+            },
             custom_function : function(result_row, item){
 
                 result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
@@ -172,6 +175,9 @@ exports.fetchNotification = function(notification_id, callback){
             ['dfID', 'form_id'], 'form_name', ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ],
+        default_values: {
+            'call_logs' : []
+        },
         custom_function : function(result_row, item){
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
         }
