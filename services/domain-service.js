@@ -183,7 +183,7 @@ exports.fetchDomains = function(user_id, page, callback){
     notification_response_stats : ['fetch_domains', function(results, callback){
 
         async.each(results.fetch_domains.companies, notification_stats.generate, function(err){
-            callback(err, results.fetch_domains.companies)
+            callback(err, results.fetch_domains)
         })
 
     }]
