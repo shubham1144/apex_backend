@@ -229,9 +229,13 @@ exports.fetchNotification = function(notification_id, callback){
 exports.addNotification = function(data, callback){
 
     dao.putData({
-    }, dao.TABLE_RECORD.ENQUIRY, {
+    }, dao.TABLE_RECORD.ENQUIRY, Object.assign({
             //Currently, the data is mocked till the functionality is available
-        "pID":"B19VQme1X","sID":"ryviBmx1m","dID":"S1EZJJ1x7","dCreatedByUID":"S1XGA00J7","dfID":"SJgVWJJklm",
+            "pID":"B19VQme1X",
+            "sID":"ryviBmx1m",
+            "dID":"S1EZJJ1x7",
+            "dCreatedByUID":"S1XGA00J7",
+            "dfID":"SJgVWJJklm",
             eID : shortid.generate(),
             ePhone : '8975567457',
             eEmail : 'testuser10@tentwenty.me',
@@ -252,7 +256,7 @@ exports.addNotification = function(data, callback){
             eUpdatedAt : moment.utc().format(),
             eIsArchived : false,
             eIsDeleted : false
-    }, function(err, result){
+    }, data), function(err, result){
 
         if(err) {
             console.error(message.error.default_error_prefix, err);

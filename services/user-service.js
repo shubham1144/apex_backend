@@ -15,6 +15,7 @@ var express = require('express'),
     util = require('./../helpers/util.js'),
     message = require('./../helpers/message.json'),
     emailer = require('./../helpers/email.js'),
+    _ = require('lodash'),
     constants = require('./../helpers/constant.js');
 
 var PASSWORD_LENGTH = {
