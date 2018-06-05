@@ -5,7 +5,7 @@
 var nosqldb = require('nosqldb-oraclejs'),
     fs = require('fs'),
     async = require('async'),
-    environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'local',
+    environment = process.env.NODE_ENV && process.env.NODE_ENV!== undefined? process.env.NODE_ENV :  'development',
     config = require('./../config/config.js'),
     message = require('./../helpers/message.json'),
     util = require('./../helpers/util.js'),
