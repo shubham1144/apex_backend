@@ -197,6 +197,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
                                                 if(child_table.custom_function) child_table.custom_function(result[result.length - 1], returnedRow.row);
 
+                                                if(child_table.unlink) return;
                                                 /*Functiont for Custom Statistics ends here*/
                                                 if(child_table.count_fetch){
 

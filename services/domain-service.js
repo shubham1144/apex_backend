@@ -168,7 +168,8 @@ exports.fetchDomains = function(user_id, page, callback){
        },
        {
         table_name : dao.TABLE_RECORD.CALL_LOG,
-        custom_function : notification_stats.process_call_logs
+        custom_function : notification_stats.process_call_logs,
+        unlink : true
        }
        ],
        function(err, result, requested_count_details){
