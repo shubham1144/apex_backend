@@ -26,8 +26,8 @@ notification_stats = {
                 response_time_stat[moment(stat['created_at']).utc().format("YYYY-MM-DD")] = stat.response_time;
             }
             else response_time_stat[moment(stat['created_at']).utc().format("YYYY-MM-DD")]=
-                (response_time_stat[moment(stat['created_at']).utc().format("YYYY-MM-DD")] + stat.response_time)/
-                response_time_counter[moment(stat['created_at']).utc().format("YYYY-MM-DD")];
+                parseFloat(((response_time_stat[moment(stat['created_at']).utc().format("YYYY-MM-DD")] + stat.response_time)/
+                response_time_counter[moment(stat['created_at']).utc().format("YYYY-MM-DD")]).toFixed(2));
 
             callback(null);
 
