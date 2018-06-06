@@ -5,7 +5,7 @@ var notification_service = require('./../services/notification-service.js'),
 /*API Interface to fetch data associated with notification that are linked to domain accessible to the requesting user via the subscription*/
 exports.fetchNotifications = function(req, res){
 
-    notification_service.fetchNotifications(req.query.domain_id, req.query.form_id, req.query.page, req.query.keywords, req.query.archieve, req.query.status,
+    notification_service.fetchNotifications(req.query.domain_id, req.query.form_id, req.query.page, req.query.keywords, req.query.archive, req.query.status,
     function(err, result){
 
         if(err) {

@@ -310,7 +310,7 @@
             "in": "query"
           },
           {
-            "name" : "archieve",
+            "name" : "archive",
             "type": "string",
             "description" : "0 - Not Archived OR 1 - Archived",
             "required": false,

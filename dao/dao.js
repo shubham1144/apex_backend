@@ -365,7 +365,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                         if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
                                             formatted_result[key[1]] = key[2](returnedRow.row[key[0]]);
                                         }
-                                        else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                        else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
                                         else formatted_result[key] = returnedRow.row[key] || ((customization.default_values[key] == 0 || !customization.default_values[key] !== undefined)? customization.default_values[key] : null);
 
                                     })

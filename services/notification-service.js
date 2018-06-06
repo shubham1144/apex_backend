@@ -30,14 +30,14 @@ var STATUS_CODE = {
     * Function to fetch a list of notifications associated with the Platform
     *@todo  Allow to fetch only notification that are accessible to the user
 */
-exports.fetchNotifications = function(domain_id, form_id, page, keywords, archieve, status, callback){
+exports.fetchNotifications = function(domain_id, form_id, page, keywords, archive, status, callback){
 
         var condition_filter = {};
 
-        if(archieve){
+        if(archive){
             condition_filter = Object.assign(condition_filter, {
                 'eIsArchived' : {
-                    '$equals' : archieve === '1' ? true : false
+                    '$equals' : archive === '1' ? true : false
                 }
             })
         }
@@ -88,7 +88,6 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
             custom_function : function(result_row, item){
 
                 result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
-                //result_row.created_at = util.formatDate(result_row.created_at);
 
             },
             custom_count_fetch : [{
@@ -124,14 +123,33 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archie
                 },
                 {
                     table_name : dao.TABLE_RECORD.CALL_LOG,
-                    alias : 'call_logs',
-                    values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
-                        return util.formatDate(column)
-                    }],
-                    ['clUpdatedAt', 'updated_at', function(column){
-                        return util.formatDate(column)
-                    }], ['clStatus', 'status', STATUS_CODE.CALL_LOG], ['clNote', 'note']
-                    ]
+                    unlink: true,
+                    custom_function : function(result_row, item){
+
+                        if(!result_row['call_logs'][0]){
+                             result_row['call_logs'] = [{
+                                  'id' : item['clID'],
+                                  'status' : item['clStatus'],
+                                  'note' : item['clNote'],
+                                  'created_at' : util.formatDate(item['clCreatedAt']),
+                                  'updated_at' : util.formatDate(item['clUpdatedAt']),
+                                  'user_details' : item['clUserDetails']
+                            }]
+                        }
+
+                        if(result_row['call_logs'][0] && moment(result_row['call_logs'][0]['updated_at']) < moment(item['clUpdatedAt'])){
+                            result_row['call_logs'] = [{
+                              'id' : item['clID'],
+                              'status' : STATUS_CODE.CALL_LOG[item['clStatus']],
+                              'note' : item['clNote'],
+                              'created_at' : util.formatDate(item['clCreatedAt']),
+                              'updated_at' : util.formatDate(item['clUpdatedAt']),
+                              'user_details' : item['clUserDetails']
+                            }]
+                        }
+
+                    }
+
                 }
         ],
         function(err, result, requested_count_details){
