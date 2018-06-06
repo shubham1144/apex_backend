@@ -83,8 +83,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
             default_values: {
                 'call_logs' : [],
                 'is_archived' : 0,
-                'is_deleted' : 1,
-                'first_name' : null
+                'is_deleted' : 1
             },
             custom_function : function(result_row, item){
 
@@ -225,7 +224,6 @@ exports.fetchNotification = function(notification_id, callback){
         },
         custom_function : function(result_row, item){
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
-            console.log("The First Name associated with the result is : ", result_row);
         }
     }, function(err, result){
 
