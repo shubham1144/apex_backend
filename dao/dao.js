@@ -119,7 +119,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(customization.search_keyword && customization.search_keyword.value){
                                                 main_table_encountered = false;
                                                 customization.search_keyword.filter_keys.forEach(function(key){
-                                                    if(returnedRow.row[key] && returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                        if(returnedRow.row[key] && returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
                                                         main_table_encountered = true;
                                                     }
                                                 })
@@ -130,7 +130,6 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
                                                     conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
                                                         if(check_passed) main_table_encountered = true;
-
                                                     })
                                                 }
                                             }
@@ -281,6 +280,17 @@ function conditionValidator(conditions, value, callback){
                                     validated = false;
                                 }
                                 break;
+            case '$jsonArraySearch' : var search_json_array = JSON.parse(value), string_detected = false;
+                                    _.forEach(search_json_array, function(custom_field){
+                                        if(string_detected) return;
+                                        if(custom_field[conditions[condition]['search_key']].indexOf(conditions[condition]['search_value']) !== -1)
+                                        {
+                                            console.log("The keyword has been find in ", custom_field[conditions[condition]['search_key']])
+                                            string_detected = true;
+                                        }
+                                    })
+                                    validated = string_detected;
+                                    break;
 
         }
     }

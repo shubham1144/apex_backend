@@ -100,7 +100,14 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
             }],
             search_keyword : {
                 value : keywords || null,
-                filter_keys : ['ePhone', 'eEmail', 'eFirstName']
+                filter_keys : ['ePhone', 'eEmail', 'eFirstName', {
+                    'eFormLinkedDetails' : {
+                         '$jsonArraySearch' : {
+                             'search_key' : 'value',
+                             'search_value' : keywords
+                         }
+                     }}
+                 ]
             },
             condition : condition_filter,
             sort_by : {
