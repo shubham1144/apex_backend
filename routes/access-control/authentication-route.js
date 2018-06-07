@@ -8,7 +8,7 @@ var moment = require('moment'),
     * Function to be used to refresh a token that has neared expiry.
 */
 module.exports = function(req, res, next){
-    return next();
+
     token_helper.verifyToken(req.headers['authorization'].split(" ")[1], function(err, decoded_token){
 
         if(err) {
