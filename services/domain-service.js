@@ -57,11 +57,11 @@ notification_stats = {
     process_call_logs :function(result_row, item){
 
         if(moment().utc().diff(moment.utc(item['clCreatedAt']), 'days') >= stats_threshold_days) return;
-        if(result_row['statistics'][item.eID]['response_time']!== undefined){
+        if(result_row['statistics'][item.eID] && result_row['statistics'][item.eID]['response_time']!== undefined){
         if( moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes')< result_row['statistics'][item.eID]['response_time']){
             result_row['statistics'][item.eID]['response_time'] = moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes')
         }
-        }else{
+        }else if(result_row['statistics'][item.eID]){
             result_row['statistics'][item.eID]['response_time'] = moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes');
         }
 

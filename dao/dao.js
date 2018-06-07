@@ -100,7 +100,9 @@ function runAllMigrations(){
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
 //            return console.log("Testing the working of the dao layer")
             //Create a common function to handle Table Iterator for listing
-            store.tableIterator(table, primary_key,conditions, function(err, iterator){
+            store.tableIterator(table, primary_key, Object.assign(conditions, {
+                direction: nosqldb.Types.Direction.ORDERED
+            }), function(err, iterator){
 
                         if(err) return callback(err);
                         var result = [],
@@ -152,10 +154,11 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 Check 1 : If parent Table has not been encountered, then return from child tables
                                                 The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
                                             */
-                                            if(!main_table_encountered && result.length < 1){
-
-                                                var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
+                                            if(!main_table_encountered) return;
+                                            if(_.filter(child_tables, { table_name : returnedRow.table, parent : true })[0]){
+                                                var parent_table = _.filter(child_tables, { table_name : returnedRow.table, parent : true })[0];
                                                 if(parent_table === undefined) return;
+//                                                console.log("The parent table received is : ", parent_table_details, returnedRow.row)
                                                 parent_table.values.forEach(function(key){
 
                                                     if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
@@ -164,7 +167,6 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 })
 
                                             }else{
-
                                                 //Process The Data associated with Child Tables
                                                 var child_table = _.filter(child_tables, {
                                                     table_name : returnedRow.table

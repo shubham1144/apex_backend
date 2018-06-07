@@ -41,7 +41,6 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                 }
             })
         }
-
         if(status){
 
             var status_filter = [],
@@ -101,7 +100,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
             }],
             search_keyword : {
                 value : keywords || null,
-                filter_keys : ['ePhone', 'eEmail']
+                filter_keys : ['ePhone', 'eEmail', 'eFirstName']
             },
             condition : condition_filter,
             sort_by : {
@@ -115,10 +114,12 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
         }, [
                 {
                     table_name : dao.TABLE_RECORD.DOMAIN,
+                    parent : true,
                     values : [['dDisplayName', 'domain_name'], ['dID', 'domain_id']]
                 },
                 {
                     table_name : dao.TABLE_RECORD.FORM,
+                    parent : true,
                     values : [['dfName', 'form_name'],  ['dfID', 'form_id']]
                 },
                 {
