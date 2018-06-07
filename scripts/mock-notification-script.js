@@ -20,21 +20,22 @@ setTimeout(function(){
 
             async.eachOf(results.fetch_domain_forms, function(domain, key, callback){
 
-                async.times(15, function(n, next) {
+                async.times(20, function(n, next) {
                    var notification_data = Object.assign(domain, {
                        ePhone : '8975567457',
                        eEmail : 'testuser' + n + '@tentwenty.me',
+                       eFirstName : 'Idris',
                        eFormAllDetails : "",
                        eFormLinkedDetails : JSON.stringify(
                            [{
                                "type": "text",
                                "key": "last_name",
-                               "value": "Test LastName"
+                               "value": "Hashmi"
                            },
                            {
                                "type": "text",
                                "key": "company",
-                               "value": "Test Company"
+                               "value": "Invesense"
                            },
                            {
                                "type": "text",
@@ -46,7 +47,7 @@ setTimeout(function(){
                                "value": "Mock Keyword 02 Content"
                            }]
                        ),
-                       eStatus : 'Unread'
+                       eStatus : 'Read'
                    })
                    notification_service.addNotification(notification_data, next)
                 }, function(err) {
@@ -62,9 +63,9 @@ setTimeout(function(){
 
             dao.getMultipleTableIterator(dao.TABLE_RECORD.ENQUIRY, {}, {}, [], function(err, result){
                 async.each(result, function(notification, callback){
-                    notification_service.addCallLog("rJfFCcb1X", notification['eID'], {
-                        note : "Test Call Log",
-                        status : 0
+                    notification_service.addCallLog("H1ZFVFqIlm", notification['eID'], {
+                        note : "Test Call Log Called Person",
+                        status : 2
                     }, callback)
                 }, function(err){
                     callback(err)

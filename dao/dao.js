@@ -119,7 +119,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(customization.search_keyword && customization.search_keyword.value){
                                                 main_table_encountered = false;
                                                 customization.search_keyword.filter_keys.forEach(function(key){
-                                                    if(returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                    if(returnedRow.row[key] && returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
                                                         main_table_encountered = true;
                                                     }
                                                 })
