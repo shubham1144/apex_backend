@@ -154,13 +154,7 @@
       "post": {
         "tags": ["Web - User Profile"],
         "description": "Api for Registering Users in the System(In Progress)",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header"
-          },
-          {
+        "parameters": [{
             "name": "User Details",
             "required": true,
             "schema" : {

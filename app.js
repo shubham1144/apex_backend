@@ -42,6 +42,7 @@ app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, optio
 //Configuration for JWT Stateless Oauth Authentication
 app.use(jwt({ secret: constant.JWT.SECRET})
 .unless({path: ['/', { url : '/test_token', methods : ['GET']},
+                     { url : '/user', methods : ['POST']},
                      { url : '/forgot_password', methods : ['PUT']},
                      { url : '/login', methods : ['POST']},
                      { url : '/login/logout', methods : ['POST']},

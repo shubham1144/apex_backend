@@ -34,13 +34,7 @@ store.on('open', function () {
 
   console.log("Local Database Connection has been established successfully");
   console.log('Store opened.');
-
   //runAllMigrations();
-  store.put('Users', {
-    uID : "rJfFCcb1X"
-  }, function(err){
-
-  })
 
 }).on('close', function() {
 
