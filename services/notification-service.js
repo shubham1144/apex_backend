@@ -50,7 +50,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
 
                 if(_.invert(STATUS_CODE.NOTIFICATION)[key] !== undefined) status_filter.push(_.invert(STATUS_CODE.NOTIFICATION)[key]);
 
-            })
+            });
             condition_filter = Object.assign(condition_filter, {
                 'eStatus' : {
                     '$equalsAny' : status_filter

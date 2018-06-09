@@ -37,14 +37,14 @@ notification_stats = {
             _.forEach(response_time_stat, function(day_response_time, day){
 
                 if(moment().utc().diff(moment(day).utc(), 'days') <= ((stats_threshold_days/2)-1)){
-                    domain_item['enq_res_time_stats']['response_times'][day] = day_response_time;
+                    domain_item['enq_res_time_stats']['response_times'][day] = parseFloat(day_response_time.toFixed(2));
                         current_week_sum+=day_response_time;
                 }
                 else if(moment().utc().diff(moment(day).utc(), 'days') <= (stats_threshold_days-1)){
                     last_week_sum+=day_response_time;
                 }
 
-            })
+            });
             domain_item['enq_res_time_stats']['curr_week_avg'] = parseFloat((current_week_sum/(stats_threshold_days/2)).toFixed(2));
             domain_item['enq_res_time_stats']['last_week_avg'] = parseFloat((last_week_sum/(stats_threshold_days/2)).toFixed(2));
 
@@ -58,11 +58,11 @@ notification_stats = {
 
         if(moment().utc().diff(moment.utc(item['clCreatedAt']), 'days') >= stats_threshold_days) return;
         if(result_row['statistics'][item.eID] && result_row['statistics'][item.eID]['response_time']!== undefined){
-        if( moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes')< result_row['statistics'][item.eID]['response_time']){
-            result_row['statistics'][item.eID]['response_time'] = moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes')
-        }
+            if( moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes')< result_row['statistics'][item.eID]['response_time']){
+                result_row['statistics'][item.eID]['response_time'] = (moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'seconds'))/60;
+            }
         }else if(result_row['statistics'][item.eID]){
-            result_row['statistics'][item.eID]['response_time'] = moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'minutes');
+            result_row['statistics'][item.eID]['response_time'] = (moment(item.clCreatedAt).utc().diff(result_row['statistics'][item.eID]['created_at'], 'seconds'))/60;
         }
 
     }
@@ -73,7 +73,7 @@ function formatNotificationStatistics(day_stats_key, details){
      var stats = Object.assign(details,{
         month : moment().utc().subtract((stats_threshold_days/2), 'day').format("MM"),
         days : []
-     })
+     });
      for(var i=(stats_threshold_days/2)-1; i>=0; i--){
         if(stats['days'].indexOf(moment().utc().subtract(i, 'day').format("YYYY-MM-DD") !==-1)){
             stats[day_stats_key][moment().utc().subtract(i, 'day').format("YYYY-MM-DD")] = 0;
@@ -137,7 +137,9 @@ exports.fetchDomains = function(user_id, page, callback){
              custom_function : function(result_row, item){
 
                if(item["eStatus"] && item["eStatus"] === 'Unread') customized_keys["total_unread_notification_count"]++;
-
+                if(!result_row['statistics'] || result_row['statistics'] === undefined){
+                    result_row['statistics'] = {}
+                }
                /*Enquiry Count Stats START*/
                if(moment().utc().diff(moment.utc(item['eCreatedAt']), 'days') >= stats_threshold_days) return;
                else if(moment().utc().diff(moment(item['eCreatedAt']).utc(), 'days') <= (stats_threshold_days/2)){

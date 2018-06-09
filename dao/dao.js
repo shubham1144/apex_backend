@@ -98,7 +98,7 @@ function runAllMigrations(){
 }
 
 function tableIterator(table, primary_key, conditions, child_tables, customization, callback){
-//            return console.log("Testing the working of the dao layer")
+
             //Create a common function to handle Table Iterator for listing
             store.tableIterator(table, primary_key, Object.assign(conditions, {
                 direction: nosqldb.Types.Direction.ORDERED
@@ -116,16 +116,26 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             switch(returnedRow.table){
 
                                 case table: main_table_encountered = true;
+
                                             if(customization.search_keyword && customization.search_keyword.value){
                                                 main_table_encountered = false;
                                                 customization.search_keyword.filter_keys.forEach(function(key){
-                                                        if(returnedRow.row[key] && returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
+                                                    if(typeof key === 'string' && returnedRow.row[key] && returnedRow.row[key].toLowerCase().indexOf(customization.search_keyword.value.toLowerCase()) !== -1){
                                                         main_table_encountered = true;
+                                                    }else if(typeof key === 'object'){
+                                                        for(var column in key){
+                                                            conditionValidator(key[column], returnedRow.row[column], function(validated){
+                                                                if(validated){
+                                                                    main_table_encountered = true;
+                                                                }
+                                                            })
+                                                        }
                                                     }
                                                 })
                                             }
+                                            if(!main_table_encountered) return;
 
-                                            for( var key in customization.condition){
+                                            for(var key in customization.condition){
                                                 main_table_encountered = false;
                                                 if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
                                                     conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
@@ -258,7 +268,9 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
 
                     })
+
 }
+
 
 /**
     * Function to Validate Conditions associated with the Query being Executed
@@ -285,10 +297,9 @@ function conditionValidator(conditions, value, callback){
                                         if(string_detected) return;
                                         if(custom_field[conditions[condition]['search_key']].indexOf(conditions[condition]['search_value']) !== -1)
                                         {
-                                            console.log("The keyword has been find in ", custom_field[conditions[condition]['search_key']])
                                             string_detected = true;
                                         }
-                                    })
+                                    });
                                     validated = string_detected;
                                     break;
 
