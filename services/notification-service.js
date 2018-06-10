@@ -225,7 +225,10 @@ exports.fetchNotification = function(notification_id, callback){
             ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
             ['eCreatedAt', 'created_at', function(column){
                 return util.formatDate(column)
-            }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
+            }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
+                if(column) return 1;
+                return 0;
+             }],
             ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
         ],
         default_values: {
