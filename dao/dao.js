@@ -134,30 +134,34 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 })
                                             }
                                             if(!main_table_encountered) return;
-
-                                            for(var key in customization.condition){
-                                                main_table_encountered = false;
-                                                if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
-                                                    conditionValidator(customization.condition[key], returnedRow.row[key], function(check_passed){
-                                                        if(check_passed) main_table_encountered = true;
+                                            async.forEachOf(customization.condition, function(key_value, key, callback){
+                                                 if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
+                                                    conditionValidator(key_value, returnedRow.row[key], function(check_passed){
+                                                        if(check_passed) return callback(null);
+                                                        callback("Check Failed");
                                                     })
+                                                }else callback(null);
+
+                                            }, function(err){
+                                                if(err) {
+                                                    main_table_encountered = false;
+                                                    return;
                                                 }
-                                            }
+                                                if(customization && customization.values){
+                                                    var formatted_result = {};
+                                                    customization.values.forEach(function(key){
+                                                        if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
+                                                            formatted_result[key[1]] = key[2](returnedRow.row[key[0]]);
+                                                        }else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || ((customization.default_values!==undefined && (customization.default_values[key[1]] !== undefined || customization.default_values[key[1]] == 0))? customization.default_values[key[1]] : null);
+                                                        else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
 
-                                            if(!main_table_encountered) return;
-                                            if(customization && customization.values){
-                                                var formatted_result = {};
-                                                customization.values.forEach(function(key){
-                                                    if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
-                                                        formatted_result[key[1]] = key[2](returnedRow.row[key[0]]);
-                                                    }else if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || ((customization.default_values!==undefined && (customization.default_values[key[1]] !== undefined || customization.default_values[key[1]] == 0))? customization.default_values[key[1]] : null);
-                                                    else  formatted_result[key] = returnedRow.row[key] || ((customization.default_values!==undefined && (customization.default_values[key] !== undefined || customization.default_values[key] == 0))? customization.default_values[key] : null);
+                                                    });
+                                                    result.push(Object.assign(formatted_result, parent_table_details));
+                                                }else result.push(Object.assign(returnedRow.row, parent_table_details));
+                                                if(customization.custom_function) customization.custom_function(result[result.length - 1], returnedRow.row);
 
-                                                });
-                                                result.push(Object.assign(formatted_result, parent_table_details));
-                                            }else result.push(Object.assign(returnedRow.row, parent_table_details));
-                                            if(customization.custom_function) customization.custom_function(result[result.length - 1], returnedRow.row);
-                                            break;
+                                            })
+                                             break;
                                 default:    /*
                                                 If the table involved is not a child table, then it can be parent table
                                                 Check 1 : If parent Table has not been encountered, then return from child tables
@@ -167,7 +171,6 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(_.filter(child_tables, { table_name : returnedRow.table, parent : true })[0]){
                                                 var parent_table = _.filter(child_tables, { table_name : returnedRow.table, parent : true })[0];
                                                 if(parent_table === undefined) return;
-//                                                console.log("The parent table received is : ", parent_table_details, returnedRow.row)
                                                 parent_table.values.forEach(function(key){
 
                                                     if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
