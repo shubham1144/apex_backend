@@ -15,8 +15,8 @@ exports.formatSuccessResponse = function(data, callback){
     callback({
         success : true,
         data : Object.assign(data, {
-            success : 1
-        })
+                    success : 1
+                 })
     })
 };
 
@@ -24,9 +24,9 @@ exports.formatSuccessResponseStandard = function(res_locals, data, callback){
 
      callback(Object.assign({
             success : true,
-            data : Object.assign(data, {
-                success : 1
-            })
+            data : Object.assign({
+                 success : 1
+             }, data)
         }, res_locals.token && {
             token : res_locals.token
         }))

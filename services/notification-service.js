@@ -318,7 +318,40 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
         })
     }
     async.auto({
-        fetch_calling_user_details : function(callback){
+        call_log_pre_check : function(callback){
+
+            dao.getOneIndexIterator(dao.TABLE_RECORD.CALL_LOG, "eID", notification_id || null,
+                [], {
+                   sort_by : {
+                       key : 'clUpdatedAt',
+                       order : 'desc'
+                   }
+            }, function(err, result){
+
+                if(err) return callback(err);
+                //If the time difference is less than 10 minutes than do not allow to register the call log
+                if(result['clStatus'] === 'Engaged' && moment().utc().diff(result.clUpdatedAt, 'seconds') <= 600){
+                    return callback({
+                        is_previously_engaged : true,
+                        success : 0,
+                        time_to_call : parseFloat (((600 - moment().utc().diff(result.clUpdatedAt, 'seconds'))/60).toFixed(2)),
+                        call_log : {
+                            id: result.clID,
+                            status: STATUS_CODE.CALL_LOG['Engaged'],
+                            created_at: util.formatDate(result.clCreatedAt),
+                            updated_at: util.formatDate(result.clUpdatedAt),
+                            user_details: result.clUserDetails
+                        }
+
+                    })
+                }else callback(null, {
+                    is_previously_engaged : false
+                })
+
+            });
+
+        },
+        fetch_calling_user_details : ['call_log_pre_check', function(results, callback){
 
             userService.fetchUser(user_id, function(err, result){
                 if(err) return callback(err);
@@ -331,24 +364,30 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
                 callback(null, user_details)
            })
 
-        },
+        }],
         create_call_log : ['fetch_calling_user_details', function(results, callback){
 
-            var call_log_id = shortid.generate();
+            var call_log_id = shortid.generate(), call_log_data = {
+              clID : call_log_id,
+              clStatus : data.status && (_.invert(STATUS_CODE.CALL_LOG))[data.status] || "NotCalled",
+              clCreatedAt : moment.utc().format(),
+              clUpdatedAt : moment.utc().format(),
+              clUserDetails : results.fetch_calling_user_details || {},
+              clNote : data.note || null
+            }, response_send_data = {
+                id: call_log_id,
+                status: parseInt(data.status),
+                created_at: util.formatDate(call_log_data.clCreatedAt),
+                updated_at: util.formatDate(call_log_data.clUpdatedAt),
+                user_details: call_log_data.clUserDetails
+            };
             dao.updateChildIndexIterator(dao.TABLE_RECORD.ENQUIRY,
             ['pID', 'sID', 'dID', 'dCreatedByUID', 'dfID', 'eID'], 'eID',
             notification_id || null,
             [ {
                  table_name : dao.TABLE_RECORD.CALL_LOG,
                  create : true,
-                 data : {
-                     clID : call_log_id,
-                     clStatus : data.status && (_.invert(STATUS_CODE.CALL_LOG))[data.status] || "NotCalled",
-                     clCreatedAt : moment.utc().format(),
-                     clUpdatedAt : moment.utc().format(),
-                     clUserDetails : results.fetch_calling_user_details || {},
-                     clNote : data.note || null
-                 }
+                 data : call_log_data
              }],
             function(err){
 
@@ -361,7 +400,10 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
                     }
                     return callback(err)
                 }
-                callback(err, call_log_id);
+                callback(err, {
+                    "call_log" : response_send_data,
+                    "is_previously_engaged": false
+                });
 
             })
 
@@ -369,16 +411,16 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
     }, function(err, results){
 
         if(err) {
+            if(err.is_previously_engaged){
+                return callback(null, err)
+            }
             console.error(message.error.default_error_prefix, err);
             return callback({
             code : err.code || message.code.custom_bad_request,
             message : err.message || message.error.internal_server_error
             })
         }
-        callback(null, {
-            msg: message.success.notification.call_log_captured,
-            id : results.create_call_log
-        });
+        callback(null, results.create_call_log);
 
     });
 
