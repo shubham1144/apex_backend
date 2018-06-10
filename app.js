@@ -4,6 +4,7 @@ var createError = require('http-errors'),
     cookieParser = require('cookie-parser'),
     logger = require('morgan'),
     jwt = require('express-jwt'),
+    util = require('./helpers/util.js'),
     constant = require('./helpers/constant.js');
 
 var swaggerUi = require('swagger-ui-express');
@@ -62,7 +63,9 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
 
   if (err.name === 'UnauthorizedError') {
-    return res.status(401).send('invalid token...');
+    return util.formatErrorResponse(401, { msg : "Invalid token" }, function(err){
+      res.status(401).send(err);
+    })
   }
   // set locals, only providing error in development
   res.locals.message = err.message;
