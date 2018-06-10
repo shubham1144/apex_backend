@@ -64,7 +64,7 @@ router.post('/login', function(req, res) {
             })
         }
 
-        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(err.code.custom_bad_request, message.error.login.device_type_missing, function(err){
+        if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_type_missing, function(err){
              res.send(err);
          })
         dao.getOneIndexIterator('Users', 'uEmail', req.body.email, null, null, function(err, result){
