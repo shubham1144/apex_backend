@@ -32,7 +32,9 @@ var STATUS_CODE = {
 */
 exports.fetchNotifications = function(domain_id, form_id, page, keywords, archive, status, callback){
 
-        var condition_filter = {};
+        var customized_keys = {
+            "archive_count" : 0
+       }, condition_filter = {};
         condition_filter = Object.assign(condition_filter, {
             'eIsArchived' : {
                 '$equals' : archive && archive === '1' ? true : false
@@ -85,16 +87,15 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                 'is_archived' : 0,
                 'is_deleted' : 0
             },
+            filter_less_function : function(item){
+                if(item['eIsArchived']) customized_keys['archive_count']++;
+            },
             custom_function : function(result_row, item){
 
                 result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
 
             },
             custom_count_fetch : [{
-                key : 'is_archived',
-                criteria : 1,
-                alias : 'archive_count'
-            }, {
                 key : 'status',
                 criteria : STATUS_CODE.NOTIFICATION.Unread,
                 alias : 'total_unread_notification_count'
@@ -170,7 +171,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                     message : err.message || message.error.internal_server_error
                 })
              }
-            callback(null, Object.assign(requested_count_details || {}, {
+            callback(null, Object.assign(requested_count_details || {}, customized_keys, {
                 notifications : result
             }));
 
@@ -238,6 +239,7 @@ exports.fetchNotification = function(notification_id, callback){
             'is_deleted' : 0
         },
         custom_function : function(result_row, item){
+
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
         }
     }, function(err, result){
