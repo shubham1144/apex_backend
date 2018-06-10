@@ -110,13 +110,18 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             parent_table_details = {},
                             main_table_encountered = false;
 
+                        iterator.on('done', function(){
+                            //Paginate Here With Customized Counts being Fetched
+                            fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, customization.sort_by || null, function(err, paginated_result, requested_count_details){
+                                callback(null, paginated_result, requested_count_details);
+                            })
+                        })
                         iterator.forEach(function(err, returnedRow){
 
                             if(err) return console.log("Error occured due to : ", err);
                             switch(returnedRow.table){
 
                                 case table: main_table_encountered = true;
-
                                             if(customization.search_keyword && customization.search_keyword.value){
                                                 main_table_encountered = false;
                                                 customization.search_keyword.filter_keys.forEach(function(key){
@@ -264,10 +269,6 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
                         })
 
-                        //Paginate Here With Customized Counts being Fetched
-                        fetchPagination(result, customization.page || 1, customization.custom_count_fetch || null, customization.sort_by || null, function(err, paginated_result, requested_count_details){
-                            callback(null, paginated_result, requested_count_details);
-                        })
 
 
                     })
