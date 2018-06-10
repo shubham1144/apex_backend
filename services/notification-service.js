@@ -82,7 +82,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
             default_values: {
                 'call_logs' : [],
                 'is_archived' : 0,
-                'is_deleted' : 1
+                'is_deleted' : 0
             },
             custom_function : function(result_row, item){
 
