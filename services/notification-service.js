@@ -33,14 +33,12 @@ var STATUS_CODE = {
 exports.fetchNotifications = function(domain_id, form_id, page, keywords, archive, status, callback){
 
         var condition_filter = {};
+        condition_filter = Object.assign(condition_filter, {
+            'eIsArchived' : {
+                '$equals' : archive && archive === '1' ? true : false
+            }
+        })
 
-        if(archive){
-            condition_filter = Object.assign(condition_filter, {
-                'eIsArchived' : {
-                    '$equals' : archive === '1' ? true : false
-                }
-            })
-        }
         if(status){
 
             var status_filter = [],
@@ -229,7 +227,10 @@ exports.fetchNotification = function(notification_id, callback){
                 if(column) return 1;
                 return 0;
              }],
-            ['eIsDeleted', 'is_deleted'], 'custom_fields', 'call_logs'
+            ['eIsDeleted', 'is_deleted', function(column){
+               if(column) return 1;
+               return 0;
+            }], 'custom_fields', 'call_logs'
         ],
         default_values: {
             'call_logs' : [],
