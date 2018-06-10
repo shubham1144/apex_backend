@@ -298,7 +298,7 @@ function conditionValidator(conditions, value, callback){
             case '$jsonArraySearch' : var search_json_array = JSON.parse(value), string_detected = false;
                                     _.forEach(search_json_array, function(custom_field){
                                         if(string_detected) return;
-                                        if(custom_field[conditions[condition]['search_key']].indexOf(conditions[condition]['search_value']) !== -1)
+                                        if((custom_field[conditions[condition]['search_key']]).toLowerCase().indexOf(conditions[condition]['search_value'].toLowerCase()) !== -1)
                                         {
                                             string_detected = true;
                                         }
