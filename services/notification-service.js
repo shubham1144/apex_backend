@@ -76,13 +76,16 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                 ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
                 ['eCreatedAt', 'created_at', function(column){
                      return util.formatDate(column)
-                 }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived'],
+                 }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
+                    if(column) return 1;
+                    return 0;
+                 }],
                 ['eIsDeleted', 'is_deleted'], 'call_logs'
             ],
             default_values: {
                 'call_logs' : [],
                 'is_archived' : 0,
-                'is_deleted' : 1
+                'is_deleted' : 0
             },
             custom_function : function(result_row, item){
 
@@ -91,7 +94,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
             },
             custom_count_fetch : [{
                 key : 'is_archived',
-                criteria : true,
+                criteria : 1,
                 alias : 'archive_count'
             }, {
                 key : 'status',
@@ -228,7 +231,7 @@ exports.fetchNotification = function(notification_id, callback){
         default_values: {
             'call_logs' : [],
             'is_archived' : 0,
-            'is_deleted' : 1
+            'is_deleted' : 0
         },
         custom_function : function(result_row, item){
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
