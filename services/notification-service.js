@@ -211,13 +211,29 @@ exports.fetchNotification = function(notification_id, callback){
     {
         table_name : dao.TABLE_RECORD.CALL_LOG,
         alias : 'call_logs',
-        values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
+        default_values: {
+            type : 'call_log'
+        },
+        values : [  'type', ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
                    return util.formatDate(column)
                  }], ['clUpdatedAt', 'updated_at', function(column){
                   return util.formatDate(column)
                 }],
                 ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
         ]
+    },
+    {
+            table_name : dao.TABLE_RECORD.ENQUIRY_NOTE,
+            alias : 'notes',
+            default_values: {
+                type : 'note'
+            },
+            values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
+                       return util.formatDate(column)
+                     }], ['nUpdatedAt', 'updated_at', function(column){
+                      return util.formatDate(column)
+                    }], ['nNote', 'note']
+            ]
     }],
     {
         values : [
@@ -235,12 +251,14 @@ exports.fetchNotification = function(notification_id, callback){
         ],
         default_values: {
             'call_logs' : [],
+            'notes' : [],
             'is_archived' : 0,
             'is_deleted' : 0
         },
         custom_function : function(result_row, item){
 
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
+
         }
     }, function(err, result){
 
@@ -251,6 +269,9 @@ exports.fetchNotification = function(notification_id, callback){
                 message : err.message || message.error.internal_server_error
             })
         }
+        result.history = _.orderBy(_.concat(result['call_logs'], result['notes']), ['updated_at'], ['desc']);
+        delete result['notes'];
+        //delete result['call_logs'];//Depreacte the Key, once a discussion is done with the App team
         callback(null, result);
 
     });

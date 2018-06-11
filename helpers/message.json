@@ -13,6 +13,9 @@
       "notification" : {
         "call_log_captured" : "Call Log has been generated Successfully",
         "call_log_updated" : "Call Log has been Updated Successfully"
+      },
+      "domain" : {
+        "single_domain_tip" : "Did you know that it's proven that a response call within 5 minutes increases the chance turning a prospect into a client"
       }
   },
   "error": {
