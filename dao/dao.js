@@ -514,37 +514,29 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                     iterator.forEach(function(err, returnedRow){
                     if(err) return console.log("Error occured due to : ", err);
                     switch(returnedRow.table){
-                                        case table: if(customization && customization.values){
-                                                        var formatted_result = {};
-                                                        customization.values.forEach(function(key){
-                                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                                            else formatted_result[key] = returnedRow.row[key] || 0;
-                                                        })
-                                                        result = formatted_result;
-                                                    }else result = returnedRow.row;
-                                                    if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
-                                                    break;
-                                        default :
-                                                    var child_table = _.filter(child_tables, {
-                                                        table_name : returnedRow.table
-                                                    })[0], formatted_child_result={};
-                                                    if(child_table && child_table.values){
-                                                        var formatted_child_result = {};
-                                                        child_table.values.forEach(function(key){
-                                                            if(typeof key === 'object') formatted_child_result[key[1]] = returnedRow.row[key[0]] || 0;
-                                                            else formatted_child_result[key] = returnedRow.row[key] || 0;
-                                                        })
-                                                    }else {
-                                                        formatted_child_result = returnedRow.row;
-                                                    }
+                        case table:
+                                    if(customization && Object.keys(result).length > 0 && customization.sort_by && !customization.values){
+                                        if(customization.sort_by.order && typeof customization.sort_by.order === 'string'){
+                                            switch(customization.sort_by.order){
+                                              case 'desc' :
+                                                if(result[customization.sort_by.key] > returnedRow.row[customization.sort_by.key]) return;
+                                                break;
+                                            }
+                                        }
 
-                                                    if(result[child_table && child_table.alias || returnedRow.table]){
-                                                        result[child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
-                                                    }else{
-                                                        result[child_table.alias || returnedRow.table] = [formatted_child_result];
-                                                    }
-                                                    break;
                                     }
+                                    if(customization && customization.values){
+                                        var formatted_result = {};
+                                        customization.values.forEach(function(key){
+                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                            else formatted_result[key] = returnedRow.row[key] || 0;
+                                        })
+                                        result = formatted_result;
+                                    }else result = returnedRow.row;
+
+                                    if(customization && customization.custom_function) customization.custom_function(result, returnedRow.row);
+                                    break;
+                    }
                     })
                     callback(null, result);
                 })
