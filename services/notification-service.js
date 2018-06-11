@@ -247,7 +247,7 @@ exports.fetchNotification = function(notification_id, callback){
             ['eIsDeleted', 'is_deleted', function(column){
                if(column) return 1;
                return 0;
-            }], 'custom_fields', 'call_logs'
+            }], 'custom_fields', 'call_logs', 'notes'
         ],
         default_values: {
             'call_logs' : [],
