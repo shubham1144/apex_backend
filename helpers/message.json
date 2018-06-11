@@ -19,6 +19,7 @@
       }
   },
   "error": {
+      "token_expired_invalid" : "Your session has been expired. Please login again",
       "default_error_prefix" : "Error occured due to : ",
       "bad_request" : "Bad Request",
       "internal_server_error" : "Internal Server Error",

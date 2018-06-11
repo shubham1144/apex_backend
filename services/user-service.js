@@ -43,50 +43,91 @@ function formatUserValidateEmailTemplate(details){
 
 }
 
+exports.fetchUserUnreadNotificationCount = function(user_id, callback){
 
+    var total_unread_notification_count = 0;
+    dao.getMultipleTableIterator(dao.TABLE_RECORD.FORM, {}, {
+        condition : {
+            'users' : {
+                '$contains' : user_id
+            }
+        }
+    }, [{
+        table_name : dao.TABLE_RECORD.ENQUIRY,
+        custom_function : function(result_row, item){
+            if(item["eStatus"] && item["eStatus"] === 'Unread') total_unread_notification_count++;
+        },
+        unlink : true
+    }], function(err){
+
+        if(err) return callback(err);
+        callback(null, {
+            total_unread_notification_count : total_unread_notification_count
+        });
+
+    })
+
+}
 /**
     * Function to fetch Details associated with a User associated with the Platform
 */
 exports.fetchUser = function(user_id, callback){
 
-    dao.getOneTableIterator(dao.TABLE_RECORD.USER, {
-            'uID' : user_id
-            }, [{
-            table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
-            values : ['uaKey', 'uaValue']
-    }], {
-        values : [['uID', 'user_id'], ['uLastName', 'last_name'], ['uFirstName', 'first_name'], ['uEmail', 'email']]
+    async.parallel({
+        fetch_user_details : function(callback){
+
+            dao.getOneTableIterator(dao.TABLE_RECORD.USER, {
+                    'uID' : user_id
+                    }, [{
+                    table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
+                    values : ['uaKey', 'uaValue']
+            }], {
+                values : [['uID', 'user_id'], ['uLastName', 'last_name'], ['uFirstName', 'first_name'], ['uEmail', 'email']]
+            }, function(err, result){
+
+                if(err) return callback(err)
+
+                if(!result || Object.keys(result).length < 1) return callback({
+                    code : message.code.not_found,
+                    message : message.error.user.not_found
+                })
+                Object.assign(result, {
+                    avatar: config[environment].host + '/files/avatars/' + result.user_id + '.jpg?' + moment().unix(),
+                    contact : {
+                        phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                                       (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
+                        country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                                                                      (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
+                    },
+                    is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
+                    parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0
+                });
+
+                delete result[dao.TABLE_RECORD.USER_ATTRIBUTE];
+                callback(null, result)
+
+            });
+
+        },
+        fetch_unread_notifications : function(callback){
+
+            exports.fetchUserUnreadNotificationCount(user_id, callback);
+
+        }
     }, function(err, result){
 
-        if(err) return callback({
+         console.error(message.error.default_error_prefix, err);
+         if(err) return callback({
             code : err.code || message.code.custom_bad_request,
             message : err.message || message.error.internal_server_error
-        })
+         })
+          util.formatSuccessResponse({
+            user : Object.assign(result.fetch_unread_notifications, result.fetch_user_details)
+         }, function(result){
+             callback(null, result);
+         })
 
-        if(!result || Object.keys(result).length < 1) return callback({
-            code : message.code.not_found,
-            message : message.error.user.not_found
-        })
-        Object.assign(result, {
-            avatar: config[environment].host + '/files/avatars/' + result.user_id + '.jpg?' + moment().unix(),
-            contact : {
-                phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
-                               (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
-                country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
-                                                              (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
-            },
-            is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
-            parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0,
-            //@todo : Remove the hardcodings
-            total_unread_notification_count: 0
-        });
-
-        delete result[dao.TABLE_RECORD.USER_ATTRIBUTE];
-        callback(null, {
-            user : result
-        })
-
-    });
+    })
 
 };
 
@@ -274,11 +315,13 @@ exports.addUser = function(data, callback){
 
               },
               send_user_created_email : ['create_user', function(results, callback){
+
                   if(!results.create_user.created) return callback({
                       code : message.code.custom_bad_request,
                       message : message.error.user.email_exists
                   })
                   emailer.sendEmail(formatUserValidateEmailTemplate(results.create_user), callback);
+
               }]
           }, function(err){
 

@@ -11,7 +11,8 @@ var express = require('express'),
     async = require('async'),
     emailer = require('./../../helpers/email.js'),
     shortid = require('shortid'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    user_service = require('./../../services/user-service.js');
 var device_types = ['android', 'ios'];
 
 
@@ -105,24 +106,7 @@ router.post('/login', function(req, res) {
                     },
                     fetch_unread_notifications : function(callback){
 
-                        var total_unread_notification_count = 0;
-                        dao.getMultipleTableIterator(dao.TABLE_RECORD.FORM, {}, {
-                        condition : {
-                           'users' : {
-                               '$contains' : result.uID
-                           }
-                        }
-                        }, [{
-                         table_name : dao.TABLE_RECORD.ENQUIRY,
-                         custom_function : function(result_row, item){
-                            if(item["eStatus"] && item["eStatus"] === 'Unread') total_unread_notification_count++;
-                         },
-                         unlink : true
-                       }], function(err){
-                            callback(null, {
-                                total_unread_notification_count : total_unread_notification_count
-                            });
-                        })
+                        user_service.fetchUserUnreadNotificationCount(result.uID, callback);
 
                     }
                 }, function(err, result){

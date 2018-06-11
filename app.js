@@ -5,6 +5,7 @@ var createError = require('http-errors'),
     logger = require('morgan'),
     jwt = require('express-jwt'),
     util = require('./helpers/util.js'),
+    message = require('./helpers/message.json'),
     constant = require('./helpers/constant.js');
 
 var swaggerUi = require('swagger-ui-express');
@@ -63,7 +64,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
 
   if (err.name === 'UnauthorizedError') {
-    return util.formatErrorResponse(401, { msg : "Your session has been expired. Please login again" }, function(err){
+    return util.formatErrorResponse(401, { msg : message.error.token_expired_invalid }, function(err){
       res.status(401).send(err);
     })
   }

@@ -15,7 +15,7 @@ module.exports = function(req, res, next){
             console.error(message.error.default_error_prefix, err);
             return next({
                 code : message.code.unauthorized,
-                message : "Invalid OAuth Token Passed"
+                message : message.error.token_expired_invalid
             });
         }
         var seconds_to_expiry = decoded_token.exp - moment().unix();
