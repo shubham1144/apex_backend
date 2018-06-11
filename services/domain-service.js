@@ -101,7 +101,12 @@ exports.fetchDomains = function(user_id, page, callback){
 
        dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, {}, {
            page : page || constant.PAGINATION.DEFAULT_PAGE,
-           values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms', 'statistics'],
+           sort_by : {
+              key : 'dCreatedAtDate',
+              order : 'desc'
+           },
+           values : [['dID', 'id'], ['dDisplayName', 'title'], 'notifications', 'enq_count_stats', 'enq_res_time_stats', 'forms', 'statistics',
+           'dCreatedAtDate'],
            default_values : {
                 'statistics' : {},
                 'forms' : [],
