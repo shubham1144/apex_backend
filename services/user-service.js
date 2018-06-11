@@ -121,11 +121,7 @@ exports.fetchUser = function(user_id, callback){
             code : err.code || message.code.custom_bad_request,
             message : err.message || message.error.internal_server_error
          })
-          util.formatSuccessResponse({
-            user : Object.assign(result.fetch_unread_notifications, result.fetch_user_details)
-         }, function(result){
-             callback(null, result);
-         })
+         callback(null, {  user : Object.assign(result.fetch_unread_notifications, result.fetch_user_details) });
 
     })
 
