@@ -15,5 +15,7 @@ router.post('/notifications/:notification_id/call_logs', notification_controller
 
 router.put('/notifications/:notification_id/call_logs', notification_controller.updateCallLog);
 
+router.post('/notifications/:notification_id/notes', notification_controller.addNotes);
+
 
 module.exports = router;

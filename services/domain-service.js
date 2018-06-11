@@ -95,7 +95,8 @@ exports.fetchDomains = function(user_id, page, callback){
     fetch_domains : function(callback){
 
        var customized_keys = {
-            "total_unread_notification_count" : 0
+            "total_unread_notification_count" : 0,
+            "tip" : null
        };
 
        dao.getMultipleTableIterator(dao.TABLE_RECORD.DOMAIN, {}, {
@@ -175,11 +176,12 @@ exports.fetchDomains = function(user_id, page, callback){
        }
        ],
        function(err, result, requested_count_details){
-
+            if(result.length == 1){
+                customized_keys.tip = message.success.domain.single_domain_tip
+            }
              callback(err, Object.assign(requested_count_details || {}, customized_keys, {
                 companies : result
              }));
-
        })
 
     },

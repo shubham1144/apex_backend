@@ -211,13 +211,29 @@ exports.fetchNotification = function(notification_id, callback){
     {
         table_name : dao.TABLE_RECORD.CALL_LOG,
         alias : 'call_logs',
-        values : [  ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
+        default_values: {
+            type : 'call_log'
+        },
+        values : [  'type', ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
                    return util.formatDate(column)
                  }], ['clUpdatedAt', 'updated_at', function(column){
                   return util.formatDate(column)
                 }],
                 ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
         ]
+    },
+    {
+            table_name : dao.TABLE_RECORD.ENQUIRY_NOTE,
+            alias : 'notes',
+            default_values: {
+                type : 'note'
+            },
+            values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
+                       return util.formatDate(column)
+                     }], ['nUpdatedAt', 'updated_at', function(column){
+                      return util.formatDate(column)
+                    }], ['nNote', 'note']
+            ]
     }],
     {
         values : [
@@ -235,12 +251,14 @@ exports.fetchNotification = function(notification_id, callback){
         ],
         default_values: {
             'call_logs' : [],
+            'notes' : [],
             'is_archived' : 0,
             'is_deleted' : 0
         },
         custom_function : function(result_row, item){
 
             result_row['custom_fields'] = util.jsonParseSync(item["eFormLinkedDetails"])? util.jsonParseSync(item["eFormLinkedDetails"]) : [];
+
         }
     }, function(err, result){
 
@@ -251,6 +269,9 @@ exports.fetchNotification = function(notification_id, callback){
                 message : err.message || message.error.internal_server_error
             })
         }
+        result.history = _.orderBy(_.concat(result['call_logs'], result['notes']), ['updated_at'], ['desc']);
+        delete result['notes'];
+        //delete result['call_logs'];//Depreacte the Key, once a discussion is done with the App team
         callback(null, result);
 
     });
@@ -482,6 +503,88 @@ exports.updateCallLog = function(notification_id, data, callback){
                 });
 
         })
+    });
+
+};
+
+/**
+*   Function to add notes to be associated with a notification
+*/
+exports.addNotificationNote = function(user_id, notification_id, data, callback){
+
+    if(!notification_id || notification_id === undefined){
+        callback({
+            code : message.code.bad_request,
+            message : message.error.notification.missing_id
+        })
+    }
+    async.auto({
+        fetch_user_details : function(callback){
+
+            userService.fetchUser(user_id, function(err, result){
+                if(err) return callback(err);
+                var user_details = {
+                    first_name : result.user.first_name || null,
+                    last_name : result.user.last_name || null,
+                    user_id : result.user.user_id,
+                    user_contact : result.user.contact.country_code + " " + result.user.contact.phone_number
+                }
+                callback(null, user_details)
+           })
+
+        },
+        create_note : ['fetch_user_details', function(results, callback){
+
+            var note_log_id = shortid.generate(), note_data = {
+              nID : note_log_id,
+              nCreatedAt : moment.utc().format(),
+              nUpdatedAt : moment.utc().format(),
+              nUserDetails : results.fetch_user_details || {},
+              nNote : data.note || null
+            }, response_send_data = {
+                id: note_log_id,
+                note : note_data.nNote || null,
+                created_at: util.formatDate(note_data.nCreatedAt),
+                updated_at: util.formatDate(note_data.nUpdatedAt),
+                user_details: note_data.nUserDetails
+            };
+            dao.updateChildIndexIterator(dao.TABLE_RECORD.ENQUIRY,
+            ['pID', 'sID', 'dID', 'dCreatedByUID', 'dfID', 'eID'], 'eID',
+            notification_id || null,
+            [ {
+                 table_name : dao.TABLE_RECORD.ENQUIRY_NOTE,
+                 create : true,
+                 data : note_data
+             }],
+            function(err){
+
+                if(err){
+                    if(err.code && err.code == message.code.not_found){
+                        return callback({
+                            code : err.code,
+                            message : message.error.notification.not_found
+                        })
+                    }
+                    return callback(err)
+                }
+                callback(err, {
+                    "note" : response_send_data
+                });
+
+            })
+
+        }]
+    }, function(err, results){
+
+        if(err) {
+            console.error(message.error.default_error_prefix, err);
+            return callback({
+                code : err.code || message.code.custom_bad_request,
+                message : err.message || message.error.internal_server_error
+            })
+        }
+        callback(null, results.create_note);
+
     });
 
 };
