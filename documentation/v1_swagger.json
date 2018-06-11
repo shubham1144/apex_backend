@@ -402,6 +402,33 @@
         ],
         "responses": {}
       }
+    },
+    "/notifications/{notification_id}/notes": {
+      "post": {
+        "tags": ["Notification"],
+        "description": "Api to Record a Note Log Against a Notification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "in": "header"
+          },
+          {
+            "name": "notification_id",
+            "description": "Notification Id to ",
+            "required": true,
+            "in": "path"
+          },
+          {
+            "name": "note",
+            "description" : "The Note to be associated with The Notification",
+            "required": true,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {}
+      }
     }
   }
 }

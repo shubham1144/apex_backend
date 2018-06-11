@@ -59,6 +59,7 @@ exports.TABLE_RECORD = {
     'FORM' : 'Plans.Subscriptions.Domains.Forms',
     'ENQUIRY' : 'Plans.Subscriptions.Domains.Forms.Enquiry',
     'CALL_LOG' : 'Plans.Subscriptions.Domains.Forms.Enquiry.CallLogs',
+    'ENQUIRY_NOTE' : 'Plans.Subscriptions.Domains.Forms.Enquiry.Notes',
 
     'USER' : 'Users',
     'USER_ATTRIBUTE' : 'Users.UserAttributes'

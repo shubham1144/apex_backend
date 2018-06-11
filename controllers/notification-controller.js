@@ -110,3 +110,21 @@ exports.updateCallLog = function(req, res){
     });
 
 };
+
+/*API Interface to Add notes to be associated with a Notification*/
+exports.addNotes = function(req, res){
+
+     notification_service.addNotificationNote(req.user.user_id, req.params.notification_id, req.body, function(err, result){
+
+            if(err) {
+                return util.formatErrorResponse(err.code, err.message, function(err){
+                    res.send(err);
+                })
+            }
+            util.formatSuccessResponseStandard(res.locals, result, function(formatted_result){
+                 res.send(formatted_result);
+            })
+
+        });
+
+}
