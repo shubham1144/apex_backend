@@ -66,7 +66,7 @@ router.post('/login', function(req, res) {
 
         if(!_.includes(device_types, req.body.device_type)) return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.device_type_missing, function(err){
              res.send(err);
-         })
+        })
         dao.getOneIndexIterator('Users', 'uEmail', req.body.email, null, null, function(err, result){
 
             if(err){
@@ -82,25 +82,66 @@ router.post('/login', function(req, res) {
                 if(!validation_status) return util.formatErrorResponse(message.code.custom_bad_request, message.error.login.invalid_credentials, function(err){
                     res.send(err);
                 })
-                token.signAndGenerateToken({
-                    user_id : result.uID
-                }, function(err, token){
+                async.parallel({
+                    sign_token : function(callback){
 
-                    util.formatSuccessResponse({
+                        token.signAndGenerateToken({
+                            user_id : result.uID
+                        }, function(err, token){
+
+                            if(err) return callback(err);
+                            callback(null, {
+                                user_info: {
+                                    last_name: result.uLastName,
+                                    first_name: result.uFirstName,
+                                    user_id: result.uID,
+                                    avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg',
+                                },
+                                token: token
+                            });
+
+                        })
+
+                    },
+                    fetch_unread_notifications : function(callback){
+
+                        var total_unread_notification_count = 0;
+                        dao.getMultipleTableIterator(dao.TABLE_RECORD.FORM, {}, {
+                        condition : {
+                           'users' : {
+                               '$contains' : result.uID
+                           }
+                        }
+                        }, [{
+                         table_name : dao.TABLE_RECORD.ENQUIRY,
+                         custom_function : function(result_row, item){
+                            if(item["eStatus"] && item["eStatus"] === 'Unread') total_unread_notification_count++;
+                         },
+                         unlink : true
+                       }], function(err){
+                            callback(null, {
+                                total_unread_notification_count : total_unread_notification_count
+                            });
+                        })
+
+                    }
+                }, function(err, result){
+
+                     if(err) {
+                        console.error(message.error.default_error_prefix, err);
+                        return callback({
+                            code : err.code || message.code.custom_bad_request,
+                            message : err.message || message.error.internal_server_error
+                        })
+                     }
+                     util.formatSuccessResponse(Object.assign({
                         msg: message.success.login.success,
-                        total_unread_notification_count: 0,//HardCoded for Now, till work gets started on the notifications
-                        user_info: {
-                            last_name: result.uLastName,
-                            first_name: result.uFirstName,
-                            user_id: result.uID,
-                            avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg',
-                        },
-                        token: token
-                    }, function(result){
-                        res.json(result);
+                    }, result.fetch_unread_notifications, result.sign_token), function(result){
+                        res.send(result);
                     })
 
-                })
+
+                });
 
             })
 
