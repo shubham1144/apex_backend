@@ -180,7 +180,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             */
 
                                             if(_.filter(child_tables, { table_name : returnedRow.table, parent : true })[0]){
-
+                                                //Process The Data associated with Parent Tables
                                                 var parent_table = _.filter(child_tables, { table_name : returnedRow.table, parent : true })[0];
                                                 if(parent_table === undefined) return;
 
@@ -201,19 +201,17 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
                                                 })
 
-                                            }else{
-                                                if(!main_table_encountered) return;
+                                            }else if(main_table_encountered){
                                                 //Process The Data associated with Child Tables
                                                 var child_table = _.filter(child_tables, {
                                                     table_name : returnedRow.table
-                                                })[0], formatted_child_result={};
-                                                var allow_fetch = true;
+                                                })[0], formatted_child_result={}, allow_fetch = true;
                                                 /*  Logic for Conditional Fetching of Results starts here
                                                     Check 2 : Check for any condition that has been received in the Request
                                                 */
                                                 if(child_table === undefined) return;
 
-                                                for( var key in child_table.condition){
+                                                for(var key in child_table.condition){
                                                     if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
                                                          conditionValidator(child_table.condition[key], returnedRow.row[key], function(check_passed){
 
@@ -235,11 +233,13 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
                                                 if(child_table.custom_function) child_table.custom_function(result[result.length - 1], returnedRow.row);
 
+                                                //When unlink condition is recived..we are not concerned about fetching child table in the result..but more concerned to perform operations on the result set
                                                 if(child_table.unlink) return;
-                                                /*Functiont for Custom Statistics ends here*/
+
+                                                var result_length = result.length - 1;
+                                                /*Function for Custom Statistics ends here*/
                                                 if(child_table.count_fetch){
 
-                                                    var result_length = result.length - 1;
                                                     if(result[result_length][child_table && child_table.alias || returnedRow.table]){
                                                         result[result_length][child_table && child_table.alias || returnedRow.table]++;
                                                     }else{
@@ -275,10 +275,11 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 }else {
                                                     formatted_child_result = returnedRow.row;
                                                 }
-                                                if(result[result.length -1][child_table && child_table.alias || returnedRow.table]){
-                                                    result[result.length-1][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
+
+                                                if(result[result_length][child_table && child_table.alias || returnedRow.table]){
+                                                    result[result_length][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
                                                 }else{
-                                                    result[result.length -1][child_table.alias || returnedRow.table] = [formatted_child_result];
+                                                    result[result_length][child_table.alias || returnedRow.table] = [formatted_child_result];
                                                 }
 
                                             }

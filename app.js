@@ -63,7 +63,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
 
   if (err.name === 'UnauthorizedError') {
-    return util.formatErrorResponse(401, { msg : "Invalid token" }, function(err){
+    return util.formatErrorResponse(401, { msg : "Your session has been expired. Please login again" }, function(err){
       res.status(401).send(err);
     })
   }
