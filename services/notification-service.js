@@ -28,9 +28,8 @@ var STATUS_CODE = {
 
 /**
     * Function to fetch a list of notifications associated with the Platform
-    *@todo  Allow to fetch only notification that are accessible to the user
 */
-exports.fetchNotifications = function(domain_id, form_id, page, keywords, archive, status, callback){
+exports.fetchNotifications = function(user_id, domain_id, form_id, page, keywords, archive, status, callback){
 
         var customized_keys = {
             "archive_count" : 0
@@ -112,6 +111,7 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                  ]
             },
             condition : condition_filter,
+            has_parent_condition : true,
             sort_by : {
                 key : 'status',
                 order : [   STATUS_CODE.NOTIFICATION['Engaged'],
@@ -129,6 +129,11 @@ exports.fetchNotifications = function(domain_id, form_id, page, keywords, archiv
                 {
                     table_name : dao.TABLE_RECORD.FORM,
                     parent : true,
+                    condition :  {
+                       'users' : {
+                           '$contains' : user_id
+                       }
+                    },
                     values : [['dfName', 'form_name'],  ['dfID', 'form_id']]
                 },
                 {

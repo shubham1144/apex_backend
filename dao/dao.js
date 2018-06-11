@@ -102,13 +102,14 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
 
             //Create a common function to handle Table Iterator for listing
             store.tableIterator(table, primary_key, Object.assign(conditions, {
-                direction: nosqldb.Types.Direction.ORDERED
+                direction: nosqldb.Types.Direction.UNORDERED
             }), function(err, iterator){
 
                         if(err) return callback(err);
                         var result = [],
                             child_tables_to_process = {},
                             parent_table_details = {},
+                            parent_condition_filter = customization && customization.has_parent_condition ? true : false,
                             main_table_encountered = false;
 
                         iterator.on('done', function(){
@@ -122,7 +123,8 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             if(err) return console.log("Error occured due to : ", err);
                             switch(returnedRow.table){
 
-                                case table: main_table_encountered = true;
+                                case table: if(parent_condition_filter) return;
+                                            main_table_encountered = true;
                                             if(customization.filter_less_function) customization.filter_less_function(returnedRow.row);
 
                                             if(customization.search_keyword && customization.search_keyword.value){
@@ -144,6 +146,7 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                             if(!main_table_encountered) return;
                                             async.forEachOf(customization.condition, function(key_value, key, callback){
                                                  if(returnedRow.row[key]!= null && returnedRow.row[key] !== undefined){
+
                                                     conditionValidator(key_value, returnedRow.row[key], function(check_passed){
                                                         if(check_passed) return callback(null);
                                                         callback("Check Failed");
@@ -175,18 +178,31 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                 Check 1 : If parent Table has not been encountered, then return from child tables
                                                 The Below Check Makes sure that The parent table Condition Executes only Once, Till the Result is being fetched
                                             */
-                                            if(!main_table_encountered) return;
+
                                             if(_.filter(child_tables, { table_name : returnedRow.table, parent : true })[0]){
+
                                                 var parent_table = _.filter(child_tables, { table_name : returnedRow.table, parent : true })[0];
                                                 if(parent_table === undefined) return;
-                                                parent_table.values.forEach(function(key){
 
+                                                for( var key in parent_table.condition){
+
+                                                    if(returnedRow.row[key] && returnedRow.row[key] !== undefined){
+
+                                                        conditionValidator(parent_table.condition[key], returnedRow.row[key], function(check_passed){
+                                                             if(!check_passed) parent_condition_filter = true;
+                                                             else parent_condition_filter = false;
+                                                        })
+                                                    }
+
+                                                }
+                                                parent_table.values.forEach(function(key){
                                                     if(typeof key === 'object') parent_table_details[key[1]] = returnedRow.row[key[0]] || 0;
                                                     else parent_table_details[key] = returnedRow.row[key] || 0;
 
                                                 })
 
                                             }else{
+                                                if(!main_table_encountered) return;
                                                 //Process The Data associated with Child Tables
                                                 var child_table = _.filter(child_tables, {
                                                     table_name : returnedRow.table
