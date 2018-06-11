@@ -122,6 +122,8 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                             switch(returnedRow.table){
 
                                 case table: main_table_encountered = true;
+                                            if(customization.filter_less_function) customization.filter_less_function(returnedRow.row);
+
                                             if(customization.search_keyword && customization.search_keyword.value){
                                                 main_table_encountered = false;
                                                 customization.search_keyword.filter_keys.forEach(function(key){
