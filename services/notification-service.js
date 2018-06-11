@@ -448,9 +448,11 @@ exports.updateCallLog = function(notification_id, data, callback){
                  })
             }
         }
-        dao.updateChildIndexIterator(dao.TABLE_RECORD.ENQUIRY,
+        dao.updateDataIndexIterator(dao.TABLE_RECORD.ENQUIRY,
             ['pID', 'sID', 'dID', 'dCreatedByUID', 'dfID', 'eID'], 'eID',
-            notification_id || null,
+            notification_id || null, data.status? {
+                eStatus : data.status && (_.invert(STATUS_CODE.NOTIFICATION))[data.status]
+            }:{},
             [ {
                  table_name : dao.TABLE_RECORD.CALL_LOG,
                  condition : {
