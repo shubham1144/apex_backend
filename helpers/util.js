@@ -72,7 +72,7 @@ exports.sortBySequence = function(sort_sequence, key, data){
             */
 
             return data && data.sort(function(a, b){
-                if(!a[key] && b[key]) return 1;
+                //if(!a[key] && b[key]) return 1;
                 if(sort_sequence.indexOf(b[key]) === -1) return -1;
                 if(sort_sequence.indexOf(a[key]) === -1) return 1;
 
