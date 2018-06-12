@@ -275,12 +275,11 @@ function tableIterator(table, primary_key, conditions, child_tables, customizati
                                                     formatted_child_result = returnedRow.row;
                                                 }
 
-                                                if(result[result_length][child_table && child_table.alias || returnedRow.table]){
+                                                if(result[result_length][child_table && child_table.alias || returnedRow.table] && result[result_length][child_table && child_table.alias || returnedRow.table].length > 0){
                                                     result[result_length][child_table && child_table.alias || returnedRow.table].push(formatted_child_result)
                                                 }else{
                                                     result[result_length][child_table.alias || returnedRow.table] = [formatted_child_result];
                                                 }
-
                                             }
 
                                             break;
