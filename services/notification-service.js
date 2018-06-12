@@ -232,7 +232,7 @@ exports.fetchNotification = function(notification_id, callback){
             alias : 'notes',
             default_values: {
                 type : 'note',
-                status : null
+                status : 0
             },
             values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
                        return util.formatDate(column)
