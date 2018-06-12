@@ -37,13 +37,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'files')));
 //Configuration for Exposing Swagger Documentation for Api's based on versioning system
 app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, options));
 
 //Configuration for JWT Stateless Oauth Authentication
 app.use(jwt({ secret: constant.JWT.SECRET})
-.unless({path: ['/', { url : '/test_token', methods : ['GET']},
+.unless({path: ['/', /\/files*/, { url : '/test_token', methods : ['GET']},
                      { url : '/user', methods : ['POST']},
                      { url : '/forgot_password', methods : ['PUT']},
                      { url : '/login', methods : ['POST']},

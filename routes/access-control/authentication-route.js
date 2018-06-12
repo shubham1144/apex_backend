@@ -9,6 +9,7 @@ var moment = require('moment'),
 */
 module.exports = function(req, res, next){
 
+    if(!req.headers['authorization']) return next();
     token_helper.verifyToken(req.headers['authorization'].split(" ")[1], function(err, decoded_token){
 
         if(err) {
