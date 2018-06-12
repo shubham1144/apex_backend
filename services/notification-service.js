@@ -231,13 +231,14 @@ exports.fetchNotification = function(notification_id, callback){
             table_name : dao.TABLE_RECORD.ENQUIRY_NOTE,
             alias : 'notes',
             default_values: {
-                type : 'note'
+                type : 'note',
+                status : null
             },
             values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
                        return util.formatDate(column)
                      }], ['nUpdatedAt', 'updated_at', function(column){
                       return util.formatDate(column)
-                    }], ['nNote', 'note']
+                    }], ['nNote', 'note'], 'status'
             ]
     }],
     {
@@ -274,7 +275,8 @@ exports.fetchNotification = function(notification_id, callback){
                 message : err.message || message.error.internal_server_error
             })
         }
-        result.history = _.orderBy(_.concat(result['call_logs'], result['notes']), ['updated_at'], ['desc']);
+        result['history'] = _.orderBy(_.concat(result['call_logs'], result['notes']), ['updated_at'], ['desc']);
+        result['call_logs'] = _.orderBy(_.concat(result['call_logs'], result['notes']), ['updated_at'], ['desc']);
         delete result['notes'];
         //delete result['call_logs'];//Depreacte the Key, once a discussion is done with the App team
         callback(null, result);
