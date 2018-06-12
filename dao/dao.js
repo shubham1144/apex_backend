@@ -9,7 +9,7 @@ var nosqldb = require('nosqldb-oraclejs'),
     config = require('./../config/config.js'),
     message = require('./../helpers/message.json'),
     util = require('./../helpers/util.js'),
-    _ = require('lodash');
+    _ = require('lodash'),
     configuration = new nosqldb.Configuration();
 
 //nosqldb.Logger.logLevel = nosqldb.LOG_LEVELS.DEBUG;
@@ -35,7 +35,6 @@ store.on('open', function () {
   console.log("Local Database Connection has been established successfully");
   console.log('Store opened.');
   //runAllMigrations();
-
 }).on('close', function() {
 
   console.log('Store closed.');
