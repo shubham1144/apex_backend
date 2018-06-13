@@ -73,9 +73,7 @@ exports.fetchNotifications = function(user_id, domain_id, form_id, page, keyword
             } : null,
             values : [
                 ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
-                ['eCreatedAt', 'created_at', function(column){
-                     return util.formatDate(column)
-                 }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
+                ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
                     if(column) return 1;
                     return 0;
                  }],
@@ -219,12 +217,8 @@ exports.fetchNotification = function(notification_id, callback){
         default_values: {
             type : 'call_log'
         },
-        values : [  'type', ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at', function(column){
-                   return util.formatDate(column)
-                 }], ['clUpdatedAt', 'updated_at', function(column){
-                  return util.formatDate(column)
-                }],
-                ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
+        values : [  'type', ['clID', 'id'], ['clUserDetails', 'user_details'], ['clCreatedAt', 'created_at'], ['clUpdatedAt', 'updated_at'],
+                 ['clStatus', 'status',  STATUS_CODE.CALL_LOG], ['clNote', 'note']
         ]
     },
     {
@@ -233,19 +227,13 @@ exports.fetchNotification = function(notification_id, callback){
             default_values: {
                 type : 'note'
             },
-            values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
-                       return util.formatDate(column)
-                     }], ['nUpdatedAt', 'updated_at', function(column){
-                      return util.formatDate(column)
-                    }], ['nNote', 'note']
+            values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at'], ['nUpdatedAt', 'updated_at'], ['nNote', 'note']
             ]
     }],
     {
         values : [
             ['eID', 'id'], ['eFirstName', 'first_name'], ['ePhone', 'phone'], ['eEmail', 'email'],
-            ['eCreatedAt', 'created_at', function(column){
-                return util.formatDate(column)
-            }], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
+            ['eCreatedAt', 'created_at'], ['eStatus', 'status', STATUS_CODE.NOTIFICATION], ['eIsArchived', 'is_archived', function(column){
                 if(column) return 1;
                 return 0;
              }],
@@ -367,8 +355,8 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
                         call_log : {
                             id: result.clID,
                             status: STATUS_CODE.CALL_LOG['Engaged'],
-                            created_at: util.formatDate(result.clCreatedAt),
-                            updated_at: util.formatDate(result.clUpdatedAt),
+                            created_at: result.clCreatedAt,
+                            updated_at: result.clUpdatedAt,
                             user_details: result.clUserDetails
                         }
 
@@ -406,8 +394,8 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
             }, response_send_data = {
                 id: call_log_id,
                 status: parseInt(data.status) || STATUS_CODE.CALL_LOG["Engaged"],
-                created_at: util.formatDate(call_log_data.clCreatedAt),
-                updated_at: util.formatDate(call_log_data.clUpdatedAt),
+                created_at: call_log_data.clCreatedAt,
+                updated_at: call_log_data.clUpdatedAt,
                 user_details: call_log_data.clUserDetails,
                 note : call_log_data.clNote
             };
@@ -495,7 +483,7 @@ exports.updateCallLog = function(notification_id, data, callback){
                  },
                  data : {
                      clStatus : data.status && (_.invert(STATUS_CODE.CALL_LOG))[data.status] || "NotCalled",
-                     clUpdatedAt : moment.utc().format(),
+                     clUpdatedAt :  moment.utc().format(),
                      clNote : data.note || null
                  }
              }],
@@ -554,8 +542,8 @@ exports.addNotificationNote = function(user_id, notification_id, data, callback)
             }, response_send_data = {
                 id: note_log_id,
                 note : note_data.nNote || null,
-                created_at: util.formatDate(note_data.nCreatedAt),
-                updated_at: util.formatDate(note_data.nUpdatedAt),
+                created_at: note_data.nCreatedAt,
+                updated_at: note_data.nUpdatedAt,
                 user_details: note_data.nUserDetails
             };
             dao.updateChildIndexIterator(dao.TABLE_RECORD.ENQUIRY,
