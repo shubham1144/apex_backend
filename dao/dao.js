@@ -424,8 +424,8 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                 var parent_table = _.filter(child_tables, { table_name : returnedRow.table })[0];
                                 if(parent_table === undefined) return;
                                 parent_table.values.forEach(function(key){
-                                    if(typeof key === 'object') result[key[1]] = returnedRow.row[key[0]] || 0;
-                                    else result[key] = returnedRow.row[key] || 0;
+                                    if(typeof key === 'object') result[key[1]] = returnedRow.row[key[0]] || null;
+                                    else result[key] = returnedRow.row[key] || null;
                                 })
 
                             }else{
@@ -460,7 +460,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                         if(typeof key === 'object' && key[2] && typeof key[2]==='function'){
                                             formatted_child_result[key[1]] = key[2](returnedRow.row[key[0]]);
                                         }
-                                        else if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
+                                        else if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
                                         else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
                                     })
                                 }else {
@@ -544,8 +544,8 @@ exports.getOneIndexIterator = function(table, index, condition, child_tables, cu
                                     if(customization && customization.values){
                                         var formatted_result = {};
                                         customization.values.forEach(function(key){
-                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || 0;
-                                            else formatted_result[key] = returnedRow.row[key] || 0;
+                                    if(typeof key === 'object') formatted_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
+                                            else formatted_result[key] = returnedRow.row[key] || null;
                                         })
                                         result = formatted_result;
                                     }else result = returnedRow.row;

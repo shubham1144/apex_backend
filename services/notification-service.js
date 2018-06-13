@@ -405,14 +405,18 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
               clNote : data.note || null
             }, response_send_data = {
                 id: call_log_id,
-                status: parseInt(data.status),
+                status: parseInt(data.status) || STATUS_CODE.CALL_LOG["Engaged"],
                 created_at: util.formatDate(call_log_data.clCreatedAt),
                 updated_at: util.formatDate(call_log_data.clUpdatedAt),
-                user_details: call_log_data.clUserDetails
+                user_details: call_log_data.clUserDetails,
+                note : call_log_data.clNote
             };
-            dao.updateChildIndexIterator(dao.TABLE_RECORD.ENQUIRY,
+            dao.updateDataIndexIterator(dao.TABLE_RECORD.ENQUIRY,
             ['pID', 'sID', 'dID', 'dCreatedByUID', 'dfID', 'eID'], 'eID',
             notification_id || null,
+            {
+                eStatus : data.status && (_.invert(STATUS_CODE.NOTIFICATION))[data.status] || "Engaged"
+            },
             [ {
                  table_name : dao.TABLE_RECORD.CALL_LOG,
                  create : true,
