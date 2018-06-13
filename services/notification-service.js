@@ -231,14 +231,13 @@ exports.fetchNotification = function(notification_id, callback){
             table_name : dao.TABLE_RECORD.ENQUIRY_NOTE,
             alias : 'notes',
             default_values: {
-                type : 'note',
-                status : 0
+                type : 'note'
             },
             values : [  'type', ['nID', 'id'], ['nUserDetails', 'user_details'], ['nCreatedAt', 'created_at', function(column){
                        return util.formatDate(column)
                      }], ['nUpdatedAt', 'updated_at', function(column){
                       return util.formatDate(column)
-                    }], ['nNote', 'note'], 'status'
+                    }], ['nNote', 'note']
             ]
     }],
     {
@@ -399,7 +398,7 @@ exports.addCallLog =  function(user_id, notification_id, data, callback){
 
             var call_log_id = shortid.generate(), call_log_data = {
               clID : call_log_id,
-              clStatus : data.status && (_.invert(STATUS_CODE.CALL_LOG))[data.status] || "NotCalled",
+              clStatus : data.status && (_.invert(STATUS_CODE.CALL_LOG))[data.status] || "Engaged",
               clCreatedAt : moment.utc().format(),
               clUpdatedAt : moment.utc().format(),
               clUserDetails : results.fetch_calling_user_details || {},
