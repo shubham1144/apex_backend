@@ -144,8 +144,8 @@ exports.fetchNotifications = function(user_id, domain_id, form_id, page, keyword
                                   'id' : item['clID'],
                                   'status' : item['clStatus'],
                                   'note' : item['clNote'],
-                                  'created_at' : util.formatDate(item['clCreatedAt']),
-                                  'updated_at' : util.formatDate(item['clUpdatedAt']),
+                                  'created_at' : item['clCreatedAt'],
+                                  'updated_at' : item['clUpdatedAt'],
                                   'user_details' : item['clUserDetails']
                             }]
                         }
@@ -155,8 +155,8 @@ exports.fetchNotifications = function(user_id, domain_id, form_id, page, keyword
                               'id' : item['clID'],
                               'status' : STATUS_CODE.CALL_LOG[item['clStatus']],
                               'note' : item['clNote'],
-                              'created_at' : util.formatDate(item['clCreatedAt']),
-                              'updated_at' : util.formatDate(item['clUpdatedAt']),
+                              'created_at' : item['clCreatedAt'],
+                              'updated_at' : item['clUpdatedAt'],
                               'user_details' : item['clUserDetails']
                             }]
                         }
