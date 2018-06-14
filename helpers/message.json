@@ -8,7 +8,7 @@
         "token_refresh" : "Token Refresh Successful"
       },
       "user" : {
-        "account_generated" : "User Account Generated"
+        "account_generated" : "User Account Generated.Activation Link has been sent to registered Email"
       },
       "notification" : {
         "call_log_captured" : "Call Log has been generated Successfully",
