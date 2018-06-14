@@ -7,6 +7,8 @@ var createError = require('http-errors'),
     util = require('./helpers/util.js'),
     message = require('./helpers/message.json'),
     constant = require('./helpers/constant.js');
+var cors = require('cors');
+
 
 var swaggerUi = require('swagger-ui-express');
 const swaggerDocumentV1 = require('./documentation/v1_swagger.json');
@@ -36,6 +38,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors())
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'files')));
 //Configuration for Exposing Swagger Documentation for Api's based on versioning system
@@ -43,9 +46,10 @@ app.use('/v1/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentV1, optio
 
 //Configuration for JWT Stateless Oauth Authentication
 app.use(jwt({ secret: constant.JWT.SECRET})
-.unless({path: ['/', /\/files*/, { url : '/test_token', methods : ['GET']},
+.unless({path: ['/', /\/files*/, /\/activate_account*/, { url : '/test_token', methods : ['GET']},
                      { url : '/user', methods : ['POST']},
                      { url : '/forgot_password', methods : ['PUT']},
+                     { url : '/reset_password', methods : ['PUT']},
                      { url : '/login', methods : ['POST']},
                      { url : '/login/logout', methods : ['POST']},
                      { url : '/notifications', methods : ['POST']}]
