@@ -12,7 +12,8 @@ module.exports = {
             }
         },
         static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
-        host : "http://localhost:3000"
+        host : "http://localhost:3000",
+        web_host : "http://localhost:3001"
     },
     local_1020 : {
         db : {
@@ -26,7 +27,8 @@ module.exports = {
             }
                 },
         static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
-        host : "http://localhost:3000"
+        host : "http://localhost:3000",
+        web_host : "http://localhost:3001"
     },
     development : {
         db : {
@@ -40,7 +42,8 @@ module.exports = {
             }
         },
         static_file_path : "http://192.168.1.3/notify.me/files/avatars/",
-        host : "http://notify.me.1020dev.com"
+        host : "http://notify.me.1020dev.com",
+        web_host : "http://notify.me.1020dev.com"
     },
     production : {
 

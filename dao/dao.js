@@ -461,7 +461,7 @@ exports.getOneTableIterator = function(table, primary_key, child_tables, customi
                                             formatted_child_result[key[1]] = key[2](returnedRow.row[key[0]]);
                                         }
                                         else if(typeof key === 'object') formatted_child_result[key[1]] = (key[2] && key[2]!== undefined)? key[2][returnedRow.row[key[0]]] : returnedRow.row[key[0]] || null;
-                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined)? child_table.default_values[key] : null);
+                                        else formatted_child_result[key] = returnedRow.row[key] || ((child_table.default_values!==undefined && (child_table.default_values[key] == 0 || !child_table.default_values[key] !== undefined))? child_table.default_values[key] : null);
                                     })
                                 }else {
                                     formatted_child_result = returnedRow.row;

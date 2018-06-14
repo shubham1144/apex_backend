@@ -16,12 +16,13 @@ var express = require('express'),
     message = require('./../helpers/message.json'),
     emailer = require('./../helpers/email.js'),
     _ = require('lodash'),
+    fs = require('fs'),
     constants = require('./../helpers/constant.js');
 
 var PASSWORD_LENGTH = {
     MIN : '5',
     MAX : '128'
-}
+}, PROFILE_IMAGE_FOLDER_PATH = __dirname + '/../' + constants.USER.PROFILE_FOLDER;
 
 /**
     * Function to format the User Validation Email being sent out to the User Created
@@ -91,20 +92,23 @@ exports.fetchUser = function(user_id, callback){
                     code : message.code.not_found,
                     message : message.error.user.not_found
                 })
-                Object.assign(result, {
-                    avatar: config[environment].host + '/files/avatars/' + result.user_id + '.jpg?' + moment().unix(),
-                    contact : {
-                        phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
-                                       (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
-                        country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
-                                                                      (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
-                    },
-                    is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
-                    parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0
-                });
 
-                delete result[dao.TABLE_RECORD.USER_ATTRIBUTE];
-                callback(null, result)
+                fs.exists(PROFILE_IMAGE_FOLDER_PATH + result.user_id + '.jpg', function(exists) {
+
+                    Object.assign(result, {
+                        avatar: exists? config[environment].host + constants.USER.PROFILE_FOLDER + result.user_id + '.jpg?' + moment().unix() : null,//config[environment].host + '/files/avatars/' + result.user_id + '.jpg?' + moment().unix(),
+                        contact : {
+                            phone_number : _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                                           (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[1] || "" : null,
+                            country_code :  _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0] ?
+                                                                          (_.filter(result['Users.UserAttributes'], {  "uaKey": "contactNumber" })[0]['uaValue']).split(" ")[0] || null : null
+                        },
+                        is_notification: _.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0] ?
+                        parseInt(_.filter(result['Users.UserAttributes'] && result['Users.UserAttributes'], {  "uaKey": "isNotification" })[0]["uaValue"]) : 0
+                    });
+                     delete result[dao.TABLE_RECORD.USER_ATTRIBUTE];
+                    callback(null, result)
+                });
 
             });
 
@@ -237,7 +241,7 @@ exports.editUser = function(user_id, data, callback){
 */
 exports.addUser = function(data, callback){
 
-    var required_keys = ['uname', 'email', 'first_name', 'last_name', 'contact', 'user_type'];//'profile_avatar_img' - key to be added once the image display is functional
+    var required_keys = ['uname', 'email', 'password', 'confirm_password', 'first_name', 'last_name', 'contact', 'user_type'];//'profile_avatar_img' - key to be added once the image display is functional
     payload_validator.ValidatePayloadKeys(data, required_keys, function(err){
 
           if(err){
@@ -266,14 +270,24 @@ exports.addUser = function(data, callback){
                 })
               }
           }
+          var password = data.password, confirm_password = data.confirm_password;
+
+          if(password.length < PASSWORD_LENGTH.MIN || password.length > PASSWORD_LENGTH.MAX) return callback({
+              code : message.code.custom_bad_request,
+              message : message.error.user.unsupported_password
+          })
+          if(!confirm_password || confirm_password !== password) return callback({
+              code : message.code.custom_bad_request,
+              message : message.error.user.mismatch_password
+          })
+
           async.auto({
               create_user : function(callback){
 
-                  var user_password = shortid.generate(),
-                      user_activate_key = shortid.generate(),
+                  var user_activate_key = shortid.generate(),
                       contact = data.contact;
 
-                  bcrypt.hash(user_password, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
+                  bcrypt.hash(password, constants.BCRYPT.SALT_ROUNDS, function(err, hash) {
 
                          var user = {
                             uID : shortid.generate(),

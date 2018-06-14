@@ -16,6 +16,6 @@ module.exports = {
         DEFAULT_ROW_COUNT : 10
     },
     USER : {
-        PROFILE_FOLDER : 'files/avatars/'
+        PROFILE_FOLDER : '/files/avatars/'
     }
 };

@@ -12,8 +12,9 @@ var express = require('express'),
     emailer = require('./../../helpers/email.js'),
     shortid = require('shortid'),
     _ = require('lodash'),
+    constants = require('./../../helpers/constant.js'),
     user_service = require('./../../services/user-service.js');
-var device_types = ['android', 'ios'];
+var device_types = ['android', 'ios', 'webapp'];
 
 
 function formatUserForgotPasswordEmailTemplate(details){
@@ -91,14 +92,17 @@ router.post('/login', function(req, res) {
                         }, function(err, token){
 
                             if(err) return callback(err);
-                            callback(null, {
-                                user_info: {
-                                    last_name: result.uLastName,
-                                    first_name: result.uFirstName,
-                                    user_id: result.uID,
-                                    avatar: config[environment].host + '/files/avatars/' + result.uID + '.jpg',
-                                },
-                                token: token
+
+                            fs.exists(__dirname + '/../../' + constants.USER.PROFILE_FOLDER + result.uID + '.jpg', function(exists) {
+                                callback(null, {
+                                    user_info: {
+                                        last_name: result.uLastName,
+                                        first_name: result.uFirstName,
+                                        user_id: result.uID,
+                                        avatar: exists? config[environment].host + constants.USER.PROFILE_FOLDER + result.uID + '.jpg' : null,
+                                    },
+                                    token: token
+                                });
                             });
 
                         })
@@ -229,6 +233,51 @@ router.put('/forgot_password', function(req, res){
         })
 
     });
+
+});
+
+/**
+    * Activate the AccountAssociated with the user.
+*/
+router.get('/activate_account/:activation_key', function(req, res){
+    async.auto({
+        verify_key : function(callback){
+
+            dao.getOneIndexIterator(dao.TABLE_RECORD.USER_ATTRIBUTE, "uaValue", req.params.activation_key, [], null,
+            function(err, result){
+                    console.log("The data associated with activation key is : ", err,result);
+                    if(err) return callback(err);
+                    if(!result || Object.keys(result).length < 1)
+                    return res.send("Activation Key Used/Expired")
+
+                    callback(null, result);
+            })
+        },
+        activate_user : ['verify_key', function(results, callback){
+
+            dao.updateDataWithChild(dao.TABLE_RECORD.USER, ['uID'], Object.assign(results.verify_key, {
+                uIsValidated : true
+            }), [{
+                table_name : dao.TABLE_RECORD.USER_ATTRIBUTE,
+                data: {
+                  uaKey: "activationKey",
+                  uaValue: null
+                }
+            }], callback)
+
+        }]
+    },
+    function(err, result){
+
+      if(err) {
+        console.error(message.error.default_error_prefix, err);
+        return util.formatErrorResponse(err.code || message.code.custom_bad_request, err.message || message.error.internal_server_error, function(err){
+            res.send(err);
+        })
+      }
+      res.redirect(config[environment].web_host)
+
+    })
 
 });
 

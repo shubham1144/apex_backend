@@ -33,12 +33,17 @@
         "last_name": {
           "type": "string"
         },
+        "password": {
+          "type": "string"
+        },
+        "confirm_password": {
+          "type": "string"
+        },
         "user_type": {
           "type": "string"
         },
         "contact": {
           "$ref": "#/definitions/Contact"
-
 
         }
       }
