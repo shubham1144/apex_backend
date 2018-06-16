@@ -23,7 +23,7 @@ function formatUserForgotPasswordEmailTemplate(details){
         to : details.user && details.user.uEmail || [],
         subject : 'FORGOT PASSWORD',
         html : `<h3>FORGOT PASSWORD</h3><p></p><p>Dear ` + (details.user && details.user.uFirstName)  + " " + (details.user && details.user.uLastName) + `, </p><p></p><p>
-                 You've recently requested to reset your password for NOTIFY ME.
+                 You've recently requested to reset your password for APEX.
                  Click the button below to reset it:
                  </p><p></p><br><a href="`
                  +  config[environment].web_host

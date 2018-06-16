@@ -9,13 +9,6 @@
       },
       "user" : {
         "account_generated" : "User Account Generated.Activation Link has been sent to registered Email"
-      },
-      "notification" : {
-        "call_log_captured" : "Call Log has been generated Successfully",
-        "call_log_updated" : "Call Log has been Updated Successfully"
-      },
-      "domain" : {
-        "single_domain_tip" : "Did you know that it's proven that a response call within 5 minutes increases the chance turning a prospect into a client"
       }
   },
   "error": {
@@ -42,13 +35,6 @@
         "invalid_password" : "The current password is incorrect",
         "unsupported_password" : "Password must be between 5 to 128 characters",
         "mismatch_password" : "The two passwords provided do not match"
-      },
-      "notification" : {
-        "not_found" : "Notification Not Found",
-        "missing_id" : "notification_id not provided",
-        "missing_call_log_id" : "Please Provide call_log_id",
-        "missing_form_id" : "Form Id Not Found",
-        "missing_domain_id" : "Domain Id Not Found"
       }
   },
   "code" : {

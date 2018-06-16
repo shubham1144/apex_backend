@@ -21,11 +21,7 @@ var options = {
 var indexRouter = require('./routes/index'),
     authorizationRouter = require('./routes/access-control/authorization-route'),
     authenticationRouter = require('./routes/access-control/authentication-route'),
-    planRouter = require('./routes/plan-route'),
-    subscriptionRouter = require('./routes/subscription-route'),
-    domainRouter = require('./routes/domain-route'),
-    userRouter = require('./routes/user-route'),
-    notificationRouter = require('./routes/notification-route');
+    userRouter = require('./routes/user-route');
 /* Configuration of All the Routes associated with the Platform END*/
 
 var app = express();
@@ -51,11 +47,10 @@ app.use(jwt({ secret: constant.JWT.SECRET})
                      { url : '/forgot_password', methods : ['PUT']},
                      { url : '/reset_password', methods : ['PUT']},
                      { url : '/login', methods : ['POST']},
-                     { url : '/login/logout', methods : ['POST']},
-                     { url : '/notifications', methods : ['POST']}]
+                     { url : '/login/logout', methods : ['POST']}]
 }));
 
-app.all('*', indexRouter, authorizationRouter, authenticationRouter, domainRouter, userRouter, notificationRouter, planRouter, subscriptionRouter);
+app.all('*', indexRouter, authorizationRouter, authenticationRouter, userRouter);
 
 /* Error Handles Configuration START*/
 
@@ -85,7 +80,7 @@ app.use(function(err, req, res, next) {
 
 //Node.js Server Listening on a PORT
 app.listen(3000, function(port){
-    console.log("NOTIFY.ME NODE.JS Local Server Running on port : 3000");
+    console.log("APEX NODE.JS Local Server Running on port : 3000");
 });
 
 module.exports = app;

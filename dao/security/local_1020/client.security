@@ -1,8 +1,0 @@
-#Security property settings for communication with KVStore servers
-#Tue May 22 15:54:35 IST 2018
-oracle.kv.ssl.trustStore=client.trust
-oracle.kv.auth.username=admin
-oracle.kv.auth.pwdfile.file=admin.passwd
-oracle.kv.transport=ssl
-oracle.kv.ssl.protocols=TLSv1.2,TLSv1.1,TLSv1
-oracle.kv.ssl.hostnameVerifier=dnmatch(CN\=NoSQL)

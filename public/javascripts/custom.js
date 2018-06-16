@@ -1,4 +1,4 @@
-document.title = 'Notify ME | TenTwenty';
+document.title = 'APEX';
 
 const changeFavicon = link => {
   let $favicon = document.querySelector('link[rel="icon"]')
@@ -15,4 +15,3 @@ const changeFavicon = link => {
   }
 }
 
-changeFavicon("https://www.tentwenty.me/application/files/2214/9318/5980/favicon.png")

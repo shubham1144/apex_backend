@@ -9,8 +9,8 @@ var smtpConfig = {
     port: 465,
     secure: true, // use SSL
     auth: {
-        user: 'shubham@tentwenty.me',
-        pass: '53gyjEU6'
+        user: 'PROVIDE USERNAME HERE',
+        pass: 'PROVIDE PASSWORD HERE'
 
     }
 };

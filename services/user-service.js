@@ -31,8 +31,8 @@ function formatUserValidateEmailTemplate(details){
 
     return {
         to : 'shubham@tentwenty.me',//details.user && details.user.uEmail || [],
-        subject : 'NOTIFY ME - Account Activation',
-        html : `<p>Dear ` + details.user.uName + `,</p><p>Please click the following URL in order to activate your account for Notify ME:</p><p>`+
+        subject : 'APEX - Account Activation',
+        html : `<p>Dear ` + details.user.uName + `,</p><p>Please click the following URL in order to activate your account for APEX:</p><p>`+
                 '<a href="' + config[environment].host + '/activate_account/' + details.link +
                 '">' + config[environment].host + '/activate_account/' + details.link +
                 `</a></p><p>Thank you!</p><p>
@@ -115,7 +115,7 @@ exports.fetchUser = function(user_id, callback){
         },
         fetch_unread_notifications : function(callback){
 
-            exports.fetchUserUnreadNotificationCount(user_id, callback);
+            callback(null, {})
 
         }
     }, function(err, result){

@@ -48,7 +48,7 @@
     "/login": {
       "post": {
         "tags": ["Authentication"],
-        "description": "Login Api Associated with Notify ME",
+        "description": "Login Api Associated with Apex",
         "parameters": [{
           "name": "email",
           "required": true,
