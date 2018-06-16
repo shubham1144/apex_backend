@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Notify ME",
-    "description": "Api Documentation associated with Notify ME Application",
+    "title": "APEX",
+    "description": "Api Documentation associated with APEX Application",
     "version": "1.0"
   },
   "produces": ["application/json"],
@@ -33,17 +33,12 @@
         "last_name": {
           "type": "string"
         },
-        "password": {
-          "type": "string"
-        },
-        "confirm_password": {
-          "type": "string"
-        },
         "user_type": {
           "type": "string"
         },
         "contact": {
           "$ref": "#/definitions/Contact"
+
 
         }
       }
@@ -243,196 +238,6 @@
         ],
         "responses": {}
 
-      }
-    },
-    "/domains": {
-      "get": {
-        "tags": ["Domains"],
-        "description": "Api associated with Fetching List of Domains Visible to the Logged in User",
-        "parameters": [{
-          "name": "Authorization",
-          "required": true,
-          "in": "header"
-        },{
-          "name": "page",
-          "description" : "Default Page is 1 and Default Count of rows is 10",
-          "required": false,
-          "in": "query"
-        }],
-        "responses": {}
-      }
-    },
-    "/notifications/{notification_id}": {
-      "get": {
-        "tags": ["Notification"],
-        "description": "Api associated with Fetching Data associated with Notifications Linked to a Domain",
-        "parameters": [{
-          "name": "Authorization",
-          "required": true,
-          "in": "header"
-        },
-          {
-            "name": "notification_id",
-            "description": "The Notification Id",
-            "required": true,
-            "in": "path"
-          }],
-        "responses": {}
-      }
-    },
-    "/notifications": {
-      "get": {
-        "tags": ["Notification"],
-        "description": "Api associated with Fetching List of Notifications Associated with Domain",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header"
-          },
-          {
-            "name": "domain_id",
-            "description": "Domain",
-            "required": false,
-            "in": "query"
-          },
-          {
-            "name": "form_id",
-            "description": "Form",
-            "required": false,
-            "in": "query"
-          },
-          {
-            "name": "keywords",
-            "description": "Search Keyword",
-            "required": false,
-            "in": "query"
-          },
-          {
-            "name" : "archive",
-            "type": "string",
-            "description" : "0 - Not Archived OR 1 - Archived",
-            "required": false,
-            "in": "query"
-          },
-          {
-            "name": "page",
-            "description" : "Default Page is 1 and Default Count of rows is 10",
-            "required": false,
-            "in": "query"
-          },
-          {
-            "name" : "status",
-            "description" : "string of comma seperated notification status codes",
-            "example" : "0,1,2",
-            "type": "string",
-            "required": false,
-            "in": "query"
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/notifications/{notification_id}/call_logs": {
-      "post": {
-        "tags": ["Notification"],
-        "description": "Api to Register a Call Log Against a Notification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header"
-          },
-          {
-            "name": "notification_id",
-            "description": "Notification Id to ",
-            "required": true,
-            "in": "path"
-          },
-          {
-            "name": "status",
-            "description": "Default Value 'NotCalled'",
-            "example" : "0",
-            "required": false,
-            "type": "string",
-            "in": "formData"
-          },
-          {
-            "name": "note",
-            "description" : "The Note to be associated with The Call Log",
-            "required": false,
-            "type": "string",
-            "in": "formData"
-          }
-        ],
-        "responses": {}
-      },
-      "put": {
-        "tags": ["Notification"],
-        "description": "Api to Update a Existing Call Log Against a Notification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header"
-          },
-          {
-            "name": "notification_id",
-            "description": "Notification Id to ",
-            "required": true,
-            "in": "path"
-          },
-          {
-            "name": "call_log_id",
-            "description": "The Id of the Call Log to Update",
-            "example" : "0",
-            "required": true,
-            "type": "string",
-            "in": "formData"
-          },
-          {
-            "name": "status",
-            "example" : "0",
-            "required": true,
-            "type": "string",
-            "in": "formData"
-          },
-          {
-            "name": "note",
-            "description" : "The Note to be associated with The Call Log",
-            "required": true,
-            "type": "string",
-            "in": "formData"
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/notifications/{notification_id}/notes": {
-      "post": {
-        "tags": ["Notification"],
-        "description": "Api to Record a Note Log Against a Notification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header"
-          },
-          {
-            "name": "notification_id",
-            "description": "Notification Id to ",
-            "required": true,
-            "in": "path"
-          },
-          {
-            "name": "note",
-            "description" : "The Note to be associated with The Notification",
-            "required": true,
-            "type": "string",
-            "in": "formData"
-          }
-        ],
-        "responses": {}
       }
     }
   }

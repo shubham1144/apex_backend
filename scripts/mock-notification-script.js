@@ -55,6 +55,7 @@ setTimeout(function(){
                 });
 
             }, function(err){
+
                 callback(err);
             })
 
